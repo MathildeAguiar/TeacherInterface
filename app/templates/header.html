@@ -1,0 +1,15 @@
+{% from 'bootstrap/nav.html' import render_nav_item %}
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="navbar-nav mr-auto">
+        {# % include 'side_nav.html' % #}
+        <div class="container-fluid">
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample01" aria-controls="navbarsExample01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        </div>
+        {{ render_nav_item('index', 'Exerciseur') }}
+        {{ render_nav_item('table', 'Connexion') }}
+    </div>
+</nav>

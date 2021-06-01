@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Mathilde Aguiar, LORIA">
+    <meta name="generator" content="Hugo 0.83.1">
+    <title>Exerciseur</title>
+
+    <!-- Bootstrap core CSS -->
+    {{ bootstrap.load_css() }}
+
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+    </style>
+
+    
+    <!-- Custom styles for this template -->
+    <!-- <link href="{{ url_for('static', filename='stiky-footer.css')}}" rel="stylesheet"> -->
+    <!-- <link href="{{ url_for('static', filename='form-validation.css')}}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='navbar.css')}}" rel="stylesheet"> -->
+
+  </head>
+
+  <body class="bg-light">
+
+    <main> 
+        {% include 'header.html' %}
+    </main>
+
+        {% block content %}{% endblock %}
+
+        {{ bootstrap.load_js() }}
+
+  </body>
+
+
+ <!-- <footer class="my-5 pt-5 text-muted text-center text-small">
+  <p class="mb-1">&copy; 2017–2021 Mathilde Aguiar</p>
+  <ul class="list-inline">
+    <li class="list-inline-item"><a href="#">Privacy</a></li>
+    <li class="list-inline-item"><a href="#">Terms</a></li>
+    <li class="list-inline-item"><a href="#">Support</a></li>
+    <li class="list-inline-item"><img class="img-responsive card-img-bottom" src="{{url_for('static', filename='loria.png')}}" id=footer_loria"> </li> 
+  </ul>
+</footer> -->
+
+    <footer class="footer mt-auto bg-light text-small my-5 pt-5"> <!-- py-3 -->
+     <ul class="list-inline">
+        <li class="list-inline-item">
+            <div class="container">
+                <span class="text-muted">Place sticky footer content here.</span>
+            </div>
+        </li>
+        <li class="list-inline-item">
+            <div class="container">
+                <img src="{{url_for('static', filename='loria.png')}}" id=footer_loria style="width: 80;">
+
+            </div>
+        </li>
+     </ul>
+    </footer>
+
+</html>
