@@ -15,16 +15,17 @@
         <form class="needs-validation" method="POST" action="{{ url_for('table') }}" novalidate>
           <div class="row g-3">
             <div class="col-12">
-                {{ render_field(form.formContent) }}
-                {% if form.formContent.errors %}  
-              <div class="invalid-feedback">
-                Valid name is required. 
+                  {{ render_field(form.formContent) }}
+                  {% if form.formContent.errors %}  
+                <div class="invalid-feedback">
+                  Valid name is required. 
+                </div>
+                {% endif %}
               </div>
-              {% endif %}
-            </div>
-          <hr class="my-4">
+            </div> 
 
-        {{ render_field(form.submit) }}
+            {{ render_field(form.submit) }}
+          </div>
         </form>
       </div>
     </div>
