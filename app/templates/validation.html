@@ -1,0 +1,31 @@
+{% from 'bootstrap/form.html' import render_field %}
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <main> 
+      <div class="row g-5">
+        <div class="col-md-7 col-lg-8">
+          <form class="needs-validation" method="POST" action="{{ url_for('validation') }}" novalidate> <!--change by the result -->
+            <div class="row g-3">
+                <div class="py-5"> <!--text-center-->
+                    <h4>Sélectionner un nouveau texte à analyser :</h4>
+                  </div>
+              <div class="col-12">
+                    {{ render_field(form.txt) }}
+                </div> 
+  
+              {{ render_field(form.submit) }}
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <!-- si on a sélectionné le texte alors on voit ça apparaitre -->
+    <div class="container">
+
+    </div>
+   
+</div>
+{% endblock %}
