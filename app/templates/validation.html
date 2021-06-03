@@ -14,7 +14,7 @@
               <div class="col-12">
                     {{ render_field(form.txt) }}
                 </div> 
-  
+                 
               {{ render_field(form.submit) }}
             </div>
           </form>
@@ -24,6 +24,20 @@
 
     <!-- si on a sélectionné le texte alors on voit ça apparaitre -->
     <div class="container">
+      <div> <!-- Texte analysé (à aligner) -->
+        <h5>
+          Texte analysé :
+        </h5>
+        <!--    {% if analyzed == True %}
+        <h6>
+          {{ txt.name }}
+        </h6>
+        {% endif %}
+          here we will have the displayed text and infos after analysis-->
+      </div>
+      <div> <!-- Notions extraites -->
+
+      </div>
 
     </div>
    
