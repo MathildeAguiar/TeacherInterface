@@ -1,5 +1,5 @@
 {% from 'bootstrap/nav.html' import render_nav_item %}
-
+{% from 'bootstrap/utils.html' import render_icon %}
 
 <ul class="list-inline">
     <li class="list-inline-item">
@@ -10,8 +10,11 @@
             <div class="navbar-nav mr-auto">     
            
                  {{ render_nav_item('index', 'Exerciseur') }}
+                 <!-- un ul et un li plutot que de faire un render nav item direct -->
                  {{ render_nav_item('index', 'Français') }}
-                 {{ render_nav_item('table', 'Connexion') }}
+                 {{ render_icon("heart", size=25, color='black') }}
+                 {{ render_nav_item('connexion', 'Connexion') }}
+                 {{ render_nav_item('index', render_icon("bi bi-caret-down-fill")) }}
             
             </div>
         </nav>
