@@ -1,4 +1,5 @@
 {% from 'bootstrap/table.html' import render_table %}
+{% from 'bootstrap/pagination.html' import render_pagination %}
 {% extends 'base.html' %}
 
 {% block content %}
@@ -6,5 +7,6 @@
 {# renvoie sur index au lieu de suppr etc. #}
 
 {{ render_table(chaps) }}
+{{ render_pagination(pagination) }}
 
 {% endblock %}

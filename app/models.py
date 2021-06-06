@@ -4,7 +4,7 @@ from sqlalchemy import BigInteger, Column, DECIMAL, DateTime, Float, ForeignKey,
 from sqlalchemy.dialects.mysql import INTEGER, LONGTEXT, SMALLINT, TEXT, TINYINT, VARCHAR
 from .views import app
 import logging as lg
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy, request
 
 
 
@@ -163,6 +163,9 @@ def any_query(token):
 """
 def query_all_chaps():
     chaps = MetalChapter.query.order_by(MetalChapter.name).all()
+    #page = request.args.get('page', 1, type=int)
+    #pagination = MetalChapter.query.paginate(page, per_page=10)
+    #chaps = pagination.items
     return chaps
 
 def query_all_exos():

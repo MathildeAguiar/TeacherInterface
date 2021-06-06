@@ -29,7 +29,7 @@ bootstrap = Bootstrap(app)
 #############################################
 
 #les imports depuis model se font ici (et pas avant)
-from app.models import init_db, query_all_chaps
+from app.models import init_db, query_all_chaps, query_all_exos, query_all_gram, query_all_quests, MetalChapter
 
 
 #routes 
@@ -55,12 +55,16 @@ def index():
 
 @app.route('/table/', methods=["GET", "POST"])
 def table():
-
+    page = request.args.get('page', 1, type=int)
     chaps = query_all_chaps()
+    pagination = MetalChapter.query.paginate(page, per_page=10)
+    #chaps = pagination.items
+    #pagination = query_all_chaps()
 
     return render_template(
     'table.html',
-    chaps = chaps       
+    chaps = chaps,
+    pagination = pagination       
     )
 
 
@@ -70,6 +74,9 @@ def creation_exo():
     #chaps = MetalChapter.query.filter_by(MetalChapter.name).all()
     #notions = MetalGrammaticalElement.query.filter_by(MetalGrammaticalElement.name).all()
     #quests = MetalQuestion.query.filter_by(MetalQuestion.instructions).all()
+    #notions = query_all_gram()
+    #quests = query_all_quests()
+    #chaps = query_all_chaps()
     if form.validate_on_submit():
         return redirect(url_for('list_exo')) #change
     return render_template(
