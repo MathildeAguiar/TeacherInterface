@@ -29,6 +29,7 @@ class CreaExo(FlaskForm):
             ('chap1', 'chapitre 1'),
             ("chap2", "chapitre 2")
         ]
+        #choices=[chaps]
     )
 
     tps = RadioField(
@@ -42,19 +43,26 @@ class CreaExo(FlaskForm):
         choices=[                       #change with something dynamic (need the db)
             ('txt1', 'texte 1'),
             ("txt2", "texte 2")
-        ],
+        ], #choices=[notions]
         validators= [DataRequired(message="Veuillez choisir au moins un.e notion/texte")]
     )
-
+    """ dont like it
     txt2 = StringField(
         "Sélectionner un ou des textes/notions à inclure - test 2",
         validators= [DataRequired(message="Veuillez choisir au moins un.e notion/texte")]
     )
-
+    """
     quest = StringField(
         "Choisissez des questions",
         validators=[DataRequired(message="Veuillez choisir au moins une question")]
     )
+    """ to test
+    quest = SelectMultipleField(
+        "Choisissez des questions",
+        validators=[DataRequired(message="Veuillez choisir au moins une question")]
+        #choices=[quests]
+    )
+    """
 
     tags = StringField(
         "Mots-clés (facultatif)"      
