@@ -55,16 +55,18 @@ def index():
 
 @app.route('/table/', methods=["GET", "POST"])
 def table():
-    #init_db()
+
+    chaps = query_all_chaps()
+
     return render_template(
-    'table.html'       
+    'table.html',
+    chaps = chaps       
     )
 
 
 @app.route('/creation_exo/', methods=["GET", "POST"])
 def creation_exo():
     form = CreaExo()
-    #chaps = MetalChapter() I don't think that we have to create a new object 
     #chaps = MetalChapter.query.filter_by(MetalChapter.name).all()
     #notions = MetalGrammaticalElement.query.filter_by(MetalGrammaticalElement.name).all()
     #quests = MetalQuestion.query.filter_by(MetalQuestion.instructions).all()
