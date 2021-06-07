@@ -1,3 +1,4 @@
+{% from 'bootstrap/pagination.html' import render_pagination %}
 {% from 'bootstrap/table.html' import render_table %}
 {% extends 'base.html' %}
 
@@ -5,9 +6,9 @@
 {# pour l'instant ça affiche la liste des chapitres et non des exos #}
 {# renvoie sur index au lieu de suppr etc. #}
 
-{{ render_table(chaps, show_actions=True,
-    view_url=url_for('index', message_id=':primary_key'),
-    edit_url=url_for('index', message_id=':primary_key'),
-    delete_url=url_for('index', message_id=':primary_key')) }}
+{{ render_table(exos) }}
+
+{{ render_pagination(pagination) }}
+
 
 {% endblock %}

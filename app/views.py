@@ -22,7 +22,7 @@ bootstrap = Bootstrap(app)
 #############################################
 
 #les imports depuis model se font ici (et pas avant)
-from app.models import init_db, query_all_chaps, query_all_exos, query_all_gram, query_all_quests, MetalChapter
+from app.models import MetalExercise, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_quests, MetalChapter
 
 
 #routes 
@@ -49,8 +49,10 @@ def index():
 @app.route('/table/', methods=["GET", "POST"])
 def table():
     page = request.args.get('page', 1, type=int)
-    chaps = query_all_chaps()
-    pagination = MetalChapter.query.paginate(page, per_page=10)
+    #chaps = query_all_chaps()
+    #pagination = MetalChapter.query.paginate(page, per_page=10)
+    chaps = query_all_exos()
+    pagination = MetalExercise.query.paginate(page, per_page=5)
     #chaps = pagination.items
     #pagination = query_all_chaps()
 
@@ -82,23 +84,46 @@ def creation_exo():
 
 @app.route('/list_exo/', methods=["GET", "POST"])
 def list_exo():
-    #page = request.args.get('page', 1, type=int)
-    #pagination = models.MetalChapter.query.paginate(page, per_page=30)
+    
     #chaps = pagination.items
     #print(chaps)
     #change the names 
-    titles = [('id', '#'), ('text', 'Message'), ('author', 'Author'), ('category', 'Category'), ('draft', 'Draft'), ('create_time', 'Create Time')]
+    #titles = [('id', '#'), ('text', 'Message'), ('author', 'Author'), ('category', 'Category'), ('draft', 'Draft'), ('create_time', 'Create Time')]
+    
+    #we get the infos filled in the form 
+    form = CreaExo()
+    name = form.exoName.data
+    lvl = form.level.data #level.data[0] ! ici on aura potentiellement une liste et pas juste une valeur
+    chapId = form.chap.data #chap.data[0] ! ici on aura potentiellement une liste et pas juste une valeur
+    duration = form.tps.data
+    text = form.txt.data #txt.data[0] !! ici on aura potentiellement une liste et pas juste une valeur
+    quest = form.quest.data
+    tags = form.tags.data
+    #addition to the db
+    new_exo(name, lvl, chapId, duration, text, quest, tags)
+    #print check 
+    print(new_exo)
+
+    #pagination
+    page = request.args.get('page', 1, type=int)
+    pagination = MetalExercise.query.paginate(page, per_page=30)
+    exos = query_all_exos()
+    
     return render_template(
         'list_exo.html',
+        pagination = pagination,
+        exos = exos
         #chaps = chaps,
-        titles = titles
+        #titles = titles
     )
 
 @app.route('/validation/', methods=["GET", "POST"]) #<notion_name>
 def validation():
     form = TxtBrowser()
+    txtName = form.txt.data
 
-    #notions = Notion()
+
+
     #titles = [('id', '#'), ('text', 'Message'), ('author', 'Author'), ('category', 'Category'), ('draft', 'Draft'), ('create_time', 'Create Time')]
     
     #pagination (need SQLAlchemy)
@@ -108,8 +133,8 @@ def validation():
     #notions = MetalGrammaticalElement.query.filter_by(name=notion_name).all() #we need a way to get the name taped in the form
 
 
-    #if form.validate_on_submit():
-        #return redirect(url_for('va')) #change
+    if form.validate_on_submit():
+        return redirect(url_for('validation')) #change
         #if we validate this we stay on the same page and we have new things that appear 
         #how to link that ???
 
@@ -120,6 +145,7 @@ def validation():
         #notions = notions, 
         #titles = titles
         #pagination = pagination
+        txtName = txtName
     )
 
 @app.route('/connexion/', methods=["GET", "POST"])

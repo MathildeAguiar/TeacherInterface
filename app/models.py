@@ -1,7 +1,9 @@
 # coding: utf-8
 #from app import views
+from re import L
 from sqlalchemy import BigInteger, Column, DECIMAL, DateTime, Float, ForeignKey, Integer, SmallInteger, String, TIMESTAMP, Table, Text, text
 from sqlalchemy.dialects.mysql import INTEGER, LONGTEXT, SMALLINT, TEXT, TINYINT, VARCHAR
+from sqlalchemy.sql.functions import now
 from .views import app
 import logging as lg
 from flask_sqlalchemy import SQLAlchemy, request
@@ -52,12 +54,19 @@ class MetalExercise(db.Model):
 
     id = Column(INTEGER, primary_key=True)
     name = Column(VARCHAR(500), nullable=False)
-    #chapter_id = Column(INTEGER, nullable=False)
+    chapter_id = Column(INTEGER) #I removed this: nullable=False
     #user_id = Column(INTEGER, nullable=False)
     exercise_type = Column(VARCHAR(191), nullable=False, server_default=text("'training'"))
     question_duration = Column(SMALLINT, nullable=False, server_default=text("'30'"))
     created_at = Column(TIMESTAMP)
     updated_at = Column(TIMESTAMP)
+    #I added those fields 
+    texts_related = Column(VARCHAR(191)) #just a test for now 
+    questions = Column(INTEGER) #I fetch the questions Id instead of their string content 
+    level = Column(INTEGER) #Id of the level/class
+    #optional tags
+    tag = Column(VARCHAR(500))
+    
 
 #often reffered as notion 
 class MetalGrammaticalElement(db.Model):
@@ -127,13 +136,23 @@ def init_db():
 
     #random exercices
     for i in range(20):
+        """
         exo = MetalExercise(
             name='Test message {}'.format(i+1),
             exercise_type='Author {}'.format(i+1),
             #category='Category {}'.format(i+1),
             question_duration=50
             )
-
+        """
+        exo = MetalExercise()
+        exo.name = 'hello'
+        exo.question_duration = 0
+        exo.created_at = now() #is it the right fct ? 
+        exo.updated_at = now()
+        exo.chapter_id = 1
+        exo.questions = 1
+        exo.texts_related = 'text'
+        exo.level = 1
         db.session.add(exo)
 
     #random grammatical elements 
@@ -151,16 +170,7 @@ def init_db():
     lg.warning('Database initialized!')
 
 #définir les fct des queries 
-"""
-def query_chap(name):
-    #User.query.filter(User.email.endswith('@example.com')).all()
-    #MetalChapter.query.order_by()
-    q = MetalChapter.query.filter_by(name=name).all()
-    print("cest q", q)
-    return q
-    
-def any_query(token):
-"""
+
 def query_all_chaps():
     chaps = MetalChapter.query.order_by(MetalChapter.name).all()
     #page = request.args.get('page', 1, type=int)
@@ -179,3 +189,36 @@ def query_all_quests():
 def query_all_gram():
     gram = MetalGrammaticalElement.query.order_by(MetalGrammaticalElement.name).all()
     return gram 
+
+def new_exo(name, lvl, chapId, duration, text, quest, tags):
+
+    #fct to insert a new exercice in the db after clicking on "create" button
+    exo = MetalExercise()
+    exo.name = name
+    exo.question_duration = duration
+    exo.created_at = now() #is it the right fct ? 
+    exo.updated_at = now()
+    exo.chapter_id = chapId
+    exo.questions = quest
+    exo.texts_related = text
+    exo.level = lvl
+    exo.tags = tags
+
+    #the query itself 
+    db.session.add(exo)
+    db.session.commit()
+    lg.warning('Addition done !')
+
+    
+    """
+    id = Column(INTEGER, primary_key=True) #use
+    name = Column(VARCHAR(500), nullable=False) #use
+    #chapter_id = Column(INTEGER, nullable=False) #should
+    #user_id = Column(INTEGER, nullable=False) #not use
+    #not gonna use this for now 
+    exercise_type = Column(VARCHAR(191), nullable=False, server_default=text("'training'")) #not use
+    question_duration = Column(SMALLINT, nullable=False, server_default=text("'30'")) #True or False instead
+    created_at = Column(TIMESTAMP) #use
+    updated_at = Column(TIMESTAMP) #use 
+    """
+

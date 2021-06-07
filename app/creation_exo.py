@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
-from wtforms.fields.core import RadioField, SelectMultipleField
+from wtforms.fields.core import RadioField, SelectMultipleField, SelectField
 from wtforms.validators import DataRequired, Length
 
 class CreaExo(FlaskForm):
@@ -8,10 +8,11 @@ class CreaExo(FlaskForm):
 
     exoName = StringField(
         "Nom de l'exercice :",
-        [Length(min=1, message='the name should be longer')]
+        validators=[DataRequired(message="please type a name"),
+            Length(min=1, message='the name should be longer')]
     )
 
-    level = SelectMultipleField(
+    level = SelectField( #SelectMultipleField(
         "Niveaux",
         choices=[
             ('2nde', '2nde'),
@@ -24,7 +25,7 @@ class CreaExo(FlaskForm):
     )
 
     #I want to have dynamic choices 
-    chap = SelectMultipleField(
+    chap =  SelectField( #SelectMultipleField(
         "Sélectionner un ou des chapitres",
         
         choices=[                       #change with something dynamic (need the db)
@@ -36,11 +37,11 @@ class CreaExo(FlaskForm):
 
     tps = RadioField(
         "Temps limité ?",
-        choices= [('y', 'oui'), ('n', 'non')],
+        choices= [('y', 'oui'), (0, 'non')], #changer le 'y' et faire qq chose pour permettre de choisir la durée
         validators= [DataRequired(message="Veuillez choisir une option")]
     )
 
-    txt = SelectMultipleField(
+    txt = SelectField(  #SelectMultipleField(
         "Sélectionner un ou des textes/notions à inclure",
         choices=[                       #change with something dynamic (need the db)
             ('txt1', 'texte 1'),

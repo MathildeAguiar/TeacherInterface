@@ -29,20 +29,20 @@
  <!-- {# if analyzed == True #} -->
      
     <!-- si on a sélectionné le texte alors on voit ça apparaitre -->
+    
     <div class="container">
       <div class="row g-5"> <!-- Texte analysé (à aligner) -->
         <h5>
           Texte analysé :
         </h5>
-        <!--    
-        <h6 class="font-weight-bold font-italic">
-          {# txt.name #}
+        <!--   here we will have the displayed text and infos after analysis-->
+        <h6 class="font-weight-bold font-italic" id="text-analysed">
+          {{ txtName }}
         </h6>
-
-          here we will have the displayed text and infos after analysis-->
+           
       </div>
       <div class="row g-5"> <!-- Notions extraites -->
-        <h5>
+        <h5 id="extracted-notions">
           Notions extraites :
         </h5>
 
@@ -50,6 +50,7 @@
           <li class="list-inline-item">
               <div class="container">
                 <!-- where the notion pods should be -->
+                {#  if display== True  class=qq chose endif      #}
                 <a class="btn btn-success text-white">COI</a> <!-- border radius plz -->
   
               </div>
