@@ -5,14 +5,7 @@ from flask import Flask, render_template, url_for, redirect
 from .forms import ResearchForm
 from .creation_exo import CreaExo
 from .validation import TxtBrowser
-#from .models import MetalGrammaticalElement, MetalChapter, MetalQuestion
-#import models.MetalGrammaticalElement
-#from . import models
-###########################################################
-#from sqlalchemy import BigInteger, Column, DECIMAL, DateTime, Float, ForeignKey, Integer, SmallInteger, String, TIMESTAMP, Table, Text, text
-#from sqlalchemy.dialects.mysql import INTEGER, LONGTEXT, SMALLINT, TEXT, TINYINT, VARCHAR
-#import logging as lg
-###########################################################
+
 
 app = Flask(__name__)
 

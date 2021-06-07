@@ -169,13 +169,13 @@ def query_all_chaps():
     return chaps
 
 def query_all_exos():
-    exos = MetalExercise.query.order_by(MetalExercise.name)
+    exos = MetalExercise.query.order_by(MetalExercise.name).all()
     return exos
 
 def query_all_quests():
-    quests = MetalQuestion.query.order_by(MetalQuestion.instructions)
+    quests = MetalQuestion.query.order_by(MetalQuestion.instructions).all()
     return quests
 
 def query_all_gram():
-    gram = MetalGrammaticalElement.query.order_by(MetalGrammaticalElement.name)
+    gram = MetalGrammaticalElement.query.order_by(MetalGrammaticalElement.name).all()
     return gram 

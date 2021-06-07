@@ -26,6 +26,7 @@ class CreaExo(FlaskForm):
     #I want to have dynamic choices 
     chap = SelectMultipleField(
         "Sélectionner un ou des chapitres",
+        
         choices=[                       #change with something dynamic (need the db)
             ('chap1', 'chapitre 1'),
             ("chap2", "chapitre 2")
