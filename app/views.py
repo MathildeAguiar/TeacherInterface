@@ -1,4 +1,5 @@
 import os
+from flask_wtf import CSRFProtect
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import request, SQLAlchemy
 from flask import Flask, render_template, url_for, redirect
@@ -19,10 +20,14 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'ap
 #init Bootstrap
 bootstrap = Bootstrap(app)
 
+#security 
+csrf = CSRFProtect(app)
+
+
 #############################################
 
 #les imports depuis model se font ici (et pas avant)
-from app.models import MetalExercise, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_quests, MetalChapter
+from app.models import MetalExercise, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_quests, MetalChapter, MetalGrammaticalElement
 
 
 #routes 
@@ -121,13 +126,18 @@ def list_exo():
 def validation():
     form = TxtBrowser()
     txtName = form.txt.data
+    #for now we will just query all the notions since we don't have our anaylyser
+    notions = query_all_gram()
+    page = request.args.get('page', 1, type=int)
+    pagination = MetalGrammaticalElement.query.paginate(page, per_page=10)
+
+
 
 
 
     #titles = [('id', '#'), ('text', 'Message'), ('author', 'Author'), ('category', 'Category'), ('draft', 'Draft'), ('create_time', 'Create Time')]
     
     #pagination (need SQLAlchemy)
-    #page = request.args.get('page', 1, type=int)
     #pagination = models.MetalGrammaticalElement.query.paginate(page, per_page=30)
     #notions = pagination.items
     #notions = MetalGrammaticalElement.query.filter_by(name=notion_name).all() #we need a way to get the name taped in the form
@@ -142,9 +152,9 @@ def validation():
         'validation.html',
         form = form,
         #for the table 
-        #notions = notions, 
+        notions = notions, 
         #titles = titles
-        #pagination = pagination
+        pagination = pagination,
         txtName = txtName
     )
 

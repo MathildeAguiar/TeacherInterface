@@ -12,6 +12,7 @@
       <div class="row g-5">
         <div class="col-md-7 col-lg-8">
           <form class="needs-validation" method="POST" action="{{ url_for('validation') }}" novalidate> <!--change by the result -->
+            {{ form.csrf_token }}
             <div class="row g-3">
                 <div class="py-5"> <!--text-center-->
                     <h4>Sélectionner un nouveau texte à analyser :</h4>
@@ -74,7 +75,7 @@
         </ul> 
         
         <small class="font-italic">
-          Cliquer sur une notion pour l'afficher 
+          Cliquez sur une notion pour l'afficher 
         </small>
 
         <h6>
@@ -86,8 +87,8 @@
     <!-- table for validation of notions found  -->
     <!-- we want to paginate the table -->
     <div class="container">
-      {{ render_table(notions, show_actions=True) }}
-      {# render_pagination(pagination) #}
+      {{ render_table(notions, show_actions=True, edit_url= url_for('table', message_id=':primary_key') , delete_url= url_for('connexion', message_id=':primary_key') ) }}
+      {{ render_pagination(pagination) }}
     </div>
 
 
@@ -99,4 +100,7 @@
     </main>
      
 </div>
+
+{{ form.hidden_tag() }}
+
 {% endblock %}
