@@ -1,5 +1,5 @@
 # coding: utf-8
-#from app import views
+import datetime
 from re import L
 from sqlalchemy import BigInteger, Column, DECIMAL, DateTime, Float, ForeignKey, Integer, SmallInteger, String, TIMESTAMP, Table, Text, text
 from sqlalchemy.dialects.mysql import INTEGER, LONGTEXT, SMALLINT, TEXT, TINYINT, VARCHAR
@@ -107,7 +107,7 @@ class MetalQuestion(db.Model):
     updated_at = Column(TIMESTAMP)
 
 
-
+#database initialization
 def init_db():
     db.drop_all()
     db.create_all()
@@ -147,8 +147,8 @@ def init_db():
         exo = MetalExercise()
         exo.name = 'hello'
         exo.question_duration = 0
-        exo.created_at = now() #is it the right fct ? 
-        exo.updated_at = now()
+        exo.created_at = datetime.datetime.now() 
+        exo.updated_at = datetime.datetime.now() #now() is the sql one 
         exo.chapter_id = 1
         exo.questions = 1
         exo.texts_related = 'text'
@@ -171,33 +171,35 @@ def init_db():
 
 #définir les fct des queries 
 
+#get all the chapters and order them by their names 
 def query_all_chaps():
     chaps = MetalChapter.query.order_by(MetalChapter.name).all()
-    #page = request.args.get('page', 1, type=int)
-    #pagination = MetalChapter.query.paginate(page, per_page=10)
-    #chaps = pagination.items
     return chaps
 
+#get all the exercices and order them by their names 
 def query_all_exos():
     exos = MetalExercise.query.order_by(MetalExercise.name).all()
     return exos
 
+#get all the questions and order them by their names 
 def query_all_quests():
     quests = MetalQuestion.query.order_by(MetalQuestion.instructions).all()
     return quests
 
+#get all the grammatical elements and order them by their names 
 def query_all_gram():
     gram = MetalGrammaticalElement.query.order_by(MetalGrammaticalElement.name).all()
     return gram 
 
+#insert a newly created exercice in the database 
 def new_exo(name, lvl, chapId, duration, text, quest, tags):
 
     #fct to insert a new exercice in the db after clicking on "create" button
     exo = MetalExercise()
     exo.name = name
     exo.question_duration = duration
-    exo.created_at = now() #is it the right fct ? 
-    exo.updated_at = now()
+    exo.created_at = datetime.datetime.now()
+    exo.updated_at = datetime.datetime.now()
     exo.chapter_id = chapId
     exo.questions = quest
     exo.texts_related = text
@@ -222,3 +224,24 @@ def new_exo(name, lvl, chapId, duration, text, quest, tags):
     updated_at = Column(TIMESTAMP) #use 
     """
 
+
+#home query 
+def general_query(query):
+    #cas d'un nom d'exercise
+    tmp_chap = MetalChapter.query.filter_by(name=query).all()
+    print(tmp_chap)
+    tmp_exo = MetalExercise.query.filter_by(name=query).all()
+    print(tmp_exo)
+    tmp_quest = MetalQuestion.query.filter_by(instructions=query).all()
+    tmp_gramm = MetalGrammaticalElement.query.filter_by(name=query).all()
+
+    if tmp_chap is not None:
+        return tmp_chap
+    elif tmp_exo is not None:
+        return tmp_exo
+    elif tmp_quest is not None:
+        return tmp_quest
+    elif tmp_gramm is not None:
+        return tmp_gramm    
+    else:
+        return "Aucun résultat"

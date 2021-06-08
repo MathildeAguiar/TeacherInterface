@@ -13,9 +13,9 @@ app = Flask(__name__)
 #link config
 app.config.from_object('config')
 
+#more configuration for the db
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'app.db')
-
 
 #init Bootstrap
 bootstrap = Bootstrap(app)
@@ -23,20 +23,18 @@ bootstrap = Bootstrap(app)
 #security 
 csrf = CSRFProtect(app)
 
-
-#############################################
-
-#les imports depuis model se font ici (et pas avant)
-from app.models import MetalExercise, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_quests, MetalChapter, MetalGrammaticalElement
+#imports from models (must stay here)
+from app.models import MetalExercise, general_query, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_quests, MetalChapter, MetalGrammaticalElement
 
 
 #routes 
 
+#before the first request we init our db
 @app.before_first_request
 def before_first_request_func():
     init_db()
 
-
+#index page with the general search bar
 @app.route('/')
 
 @app.route('/form/', methods=["GET", "POST"])
@@ -51,15 +49,18 @@ def index():
     )
 
 
+#the general search bar's result page 
 @app.route('/table/', methods=["GET", "POST"])
 def table():
+    #form = ResearchForm()
+    #query = form.formContent.data
     page = request.args.get('page', 1, type=int)
     #chaps = query_all_chaps()
     #pagination = MetalChapter.query.paginate(page, per_page=10)
     chaps = query_all_exos()
+    #chaps = general_query(query)
     pagination = MetalExercise.query.paginate(page, per_page=5)
-    #chaps = pagination.items
-    #pagination = query_all_chaps()
+
 
     return render_template(
     'table.html',
@@ -67,7 +68,7 @@ def table():
     pagination = pagination       
     )
 
-
+#page to create a new exercice 
 @app.route('/creation_exo/', methods=["GET", "POST"])
 def creation_exo():
     form = CreaExo()
@@ -87,13 +88,13 @@ def creation_exo():
         #quests = quests
     )
 
+#result page from the exercice creation, displaying all the avaiable exercices
 @app.route('/list_exo/', methods=["GET", "POST"])
 def list_exo():
     
     #chaps = pagination.items
     #print(chaps)
     #change the names 
-    #titles = [('id', '#'), ('text', 'Message'), ('author', 'Author'), ('category', 'Category'), ('draft', 'Draft'), ('create_time', 'Create Time')]
     
     #we get the infos filled in the form 
     form = CreaExo()
@@ -118,11 +119,11 @@ def list_exo():
         'list_exo.html',
         pagination = pagination,
         exos = exos
-        #chaps = chaps,
-        #titles = titles
+        #chaps = chaps
     )
 
-@app.route('/validation/', methods=["GET", "POST"]) #<notion_name>
+#page where you have to confirm notions found by the analyser
+@app.route('/validation/', methods=["GET", "POST"]) 
 def validation():
     form = TxtBrowser()
     txtName = form.txt.data
@@ -130,18 +131,6 @@ def validation():
     notions = query_all_gram()
     page = request.args.get('page', 1, type=int)
     pagination = MetalGrammaticalElement.query.paginate(page, per_page=10)
-
-
-
-
-
-    #titles = [('id', '#'), ('text', 'Message'), ('author', 'Author'), ('category', 'Category'), ('draft', 'Draft'), ('create_time', 'Create Time')]
-    
-    #pagination (need SQLAlchemy)
-    #pagination = models.MetalGrammaticalElement.query.paginate(page, per_page=30)
-    #notions = pagination.items
-    #notions = MetalGrammaticalElement.query.filter_by(name=notion_name).all() #we need a way to get the name taped in the form
-
 
     if form.validate_on_submit():
         return redirect(url_for('validation')) #change
@@ -158,6 +147,7 @@ def validation():
         txtName = txtName
     )
 
+#connexion page 
 @app.route('/connexion/', methods=["GET", "POST"])
 def connexion():
    
