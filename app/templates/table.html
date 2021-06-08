@@ -5,9 +5,11 @@
 {% block content %}
 {# pour l'instant ça affiche la liste des chapitres et non des exos #}
 {# renvoie sur index au lieu de suppr etc. #}
-
-{{ render_table(chaps) }}
-{{ render_pagination(pagination) }}
-
+<div class="m-3">
+    <main> 
+        {{ render_table(chaps) }}
+        {{ render_pagination(pagination) }}
+    </main>
+</div>
 
 {% endblock %}

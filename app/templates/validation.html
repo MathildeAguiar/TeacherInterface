@@ -14,14 +14,15 @@
           <form class="needs-validation" method="POST" action="{{ url_for('validation') }}" novalidate> <!--change by the result -->
             {{ form.csrf_token }}
             <div class="row g-3">
-                <div class="py-5"> <!--text-center-->
+                <div class="py-5 mx-3"> <!--text-center-->
                     <h4>Sélectionner un nouveau texte à analyser :</h4>
                   </div>
               <div class="col-12">
                     {{ render_field(form.txt) }}
                 </div> 
-                 
-              {{ render_field(form.submit) }}
+              <div class="col-12">   
+                {{ render_field(form.submit) }}
+              </div>
             </div>
           </form>
         </div>
@@ -32,12 +33,12 @@
     <!-- si on a sélectionné le texte alors on voit ça apparaitre -->
     
     <div class="container">
-      <div class="row g-5"> <!-- Texte analysé (à aligner) -->
+      <div class="row g-5 my-3  "> <!-- Texte analysé (à aligner) -->
         <h5>
           Texte analysé :
         </h5>
         <!--   here we will have the displayed text and infos after analysis-->
-        <h6 class="font-weight-bold font-italic" id="text-analysed">
+        <h6 class="font-weight-bold font-italic mx-3" id="text-analysed">
           {{ txtName }}
         </h6>
            
@@ -46,10 +47,15 @@
         <h5 id="extracted-notions">
           Notions extraites :
         </h5>
+        <!--plutot que de faire une liste on utilise div d-inline
+        <div class="d-inline">
+          <a class="btn btn-success text-white">COI</a>
+  
+        </div> mouai bof -->
 
-        <ul class="list-inline">
+        <ul class="list-inline"> 
           <li class="list-inline-item">
-              <div class="container">
+              <div class="container pb-2">
                 <!-- where the notion pods should be -->
                 {#  if display== True  class=qq chose endif      #}
                 <a class="btn btn-success text-white">COI</a> <!-- border radius plz -->
@@ -58,7 +64,7 @@
           </li>
 
           <li class="list-inline-item">
-            <div class="container">
+            <div class="container pb-2">
               <!-- where the notion pods should be -->
               <a class="btn btn-danger text-white">COD</a> <!-- border radius plz -->
 
@@ -66,19 +72,21 @@
           </li>
 
           <li class="list-inline-item">
-            <div class="container">
+            <div class="container pb-2">
               <!-- where the notion pods should be -->
               <a class="btn btn-danger text-white">Pronoms</a> <!-- border radius plz -->
 
             </div>
           </li>
         </ul> 
-        
-        <small class="font-italic">
-          Cliquez sur une notion pour l'afficher 
-        </small>
 
-        <h6>
+        <div class="container row g-5">
+          <small class="font-italic">
+            Cliquez sur une notion pour l'afficher 
+          </small>
+        </div>
+
+        <h6 class="my-3">
           Veuillez confirmer que l'analyseur a trouvé les bonnes notions : 
         </h6>
       </div>

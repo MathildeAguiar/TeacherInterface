@@ -24,8 +24,10 @@
 
 /* When you mouse over the navigation links, change their color */
 .sidenav a:hover {
-  color: #10c0df;
+  /*color: #10c0df;*/
+  background-color: lavender;
 }
+
 
 /* Position and style the close button (top right corner) */
 .sidenav .closebtn {
