@@ -1,7 +1,8 @@
 import os
 from flask_wtf import CSRFProtect
 from flask_bootstrap import Bootstrap
-from flask_sqlalchemy import request, SQLAlchemy
+from flask_babel import Babel #test Babel
+from flask_sqlalchemy import request
 from flask import Flask, render_template, url_for, redirect
 from .forms import ResearchForm
 from .creation_exo import CreaExo
@@ -22,6 +23,10 @@ bootstrap = Bootstrap(app)
 
 #security 
 csrf = CSRFProtect(app)
+
+#test with Babel 
+
+babel = Babel(app)
 
 #imports from models (must stay here)
 from app.models import MetalExercise, general_query, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_quests, MetalChapter, MetalGrammaticalElement
