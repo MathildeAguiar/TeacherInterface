@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
-from wtforms.fields.core import RadioField, SelectMultipleField
+from wtforms.fields.core import RadioField, SelectMultipleField, SelectField
 from wtforms.validators import DataRequired, Length
 
 class CreaExo(FlaskForm):
@@ -8,10 +8,11 @@ class CreaExo(FlaskForm):
 
     exoName = StringField(
         "Nom de l'exercice :",
-        [Length(min=1, message='the name should be longer')]
+        validators=[DataRequired(message="please type a name"),
+            Length(min=1, message='the name should be longer')]
     )
 
-    level = SelectMultipleField(
+    level = SelectField( #SelectMultipleField(
         "Niveaux",
         choices=[
             ('2nde', '2nde'),
@@ -23,38 +24,48 @@ class CreaExo(FlaskForm):
 
     )
 
-    chap = SelectMultipleField(
+    #I want to have dynamic choices 
+    chap =  SelectField( #SelectMultipleField(
         "Sélectionner un ou des chapitres",
+        
         choices=[                       #change with something dynamic (need the db)
             ('chap1', 'chapitre 1'),
             ("chap2", "chapitre 2")
         ]
+        #choices=[chaps]
     )
 
     tps = RadioField(
         "Temps limité ?",
-        choices= [('y', 'oui'), ('n', 'non')],
+        choices= [('y', 'oui'), (0, 'non')], #changer le 'y' et faire qq chose pour permettre de choisir la durée
         validators= [DataRequired(message="Veuillez choisir une option")]
     )
 
-    txt = SelectMultipleField(
+    txt = SelectField(  #SelectMultipleField(
         "Sélectionner un ou des textes/notions à inclure",
         choices=[                       #change with something dynamic (need the db)
             ('txt1', 'texte 1'),
             ("txt2", "texte 2")
-        ],
+        ], #choices=[notions]
         validators= [DataRequired(message="Veuillez choisir au moins un.e notion/texte")]
     )
-
+    """ dont like it
     txt2 = StringField(
         "Sélectionner un ou des textes/notions à inclure - test 2",
         validators= [DataRequired(message="Veuillez choisir au moins un.e notion/texte")]
     )
-
+    """
     quest = StringField(
         "Choisissez des questions",
         validators=[DataRequired(message="Veuillez choisir au moins une question")]
     )
+    """ to test
+    quest = SelectMultipleField(
+        "Choisissez des questions",
+        validators=[DataRequired(message="Veuillez choisir au moins une question")]
+        #choices=[quests]
+    )
+    """
 
     tags = StringField(
         "Mots-clés (facultatif)"      

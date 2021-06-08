@@ -12,6 +12,7 @@
       <div class="row g-5">
         <div class="col-md-7 col-lg-8">
           <form class="needs-validation" method="POST" action="{{ url_for('validation') }}" novalidate> <!--change by the result -->
+            {{ form.csrf_token }}
             <div class="row g-3">
                 <div class="py-5"> <!--text-center-->
                     <h4>Sélectionner un nouveau texte à analyser :</h4>
@@ -29,20 +30,20 @@
  <!-- {# if analyzed == True #} -->
      
     <!-- si on a sélectionné le texte alors on voit ça apparaitre -->
+    
     <div class="container">
       <div class="row g-5"> <!-- Texte analysé (à aligner) -->
         <h5>
           Texte analysé :
         </h5>
-        <!--    
-        <h6 class="font-weight-bold font-italic">
-          {# txt.name #}
+        <!--   here we will have the displayed text and infos after analysis-->
+        <h6 class="font-weight-bold font-italic" id="text-analysed">
+          {{ txtName }}
         </h6>
-
-          here we will have the displayed text and infos after analysis-->
+           
       </div>
       <div class="row g-5"> <!-- Notions extraites -->
-        <h5>
+        <h5 id="extracted-notions">
           Notions extraites :
         </h5>
 
@@ -50,6 +51,7 @@
           <li class="list-inline-item">
               <div class="container">
                 <!-- where the notion pods should be -->
+                {#  if display== True  class=qq chose endif      #}
                 <a class="btn btn-success text-white">COI</a> <!-- border radius plz -->
   
               </div>
@@ -73,7 +75,7 @@
         </ul> 
         
         <small class="font-italic">
-          Cliquer sur une notion pour l'afficher 
+          Cliquez sur une notion pour l'afficher 
         </small>
 
         <h6>
@@ -85,8 +87,8 @@
     <!-- table for validation of notions found  -->
     <!-- we want to paginate the table -->
     <div class="container">
-      {{ render_table(notions, show_actions=True) }}
-      {# render_pagination(pagination) #}
+      {{ render_table(notions, show_actions=True, edit_url= url_for('table', message_id=':primary_key') , delete_url= url_for('connexion', message_id=':primary_key') ) }}
+      {{ render_pagination(pagination) }}
     </div>
 
 
@@ -98,4 +100,7 @@
     </main>
      
 </div>
+
+{{ form.hidden_tag() }}
+
 {% endblock %}
