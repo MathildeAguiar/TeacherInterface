@@ -3,6 +3,12 @@ from wtforms import StringField, SubmitField
 from wtforms.fields.core import RadioField, SelectMultipleField, SelectField
 from wtforms.validators import DataRequired, Length
 
+#champ dyn pattern
+#     myField3 = SelectField(u'Select Account', choices=[], coerce=int) 
+#acctchoices = [(c.id,c.name) for c in accounts5]             
+        # form.myField3.choices = acctchoices 
+
+
 class CreaExo(FlaskForm):
     #form to create an exercise
 
@@ -23,7 +29,7 @@ class CreaExo(FlaskForm):
         validators=[DataRequired(message="please select at least one")]
 
     )
-
+    """
     #I want to have dynamic choices 
     chap =  SelectField( #SelectMultipleField(
         "Sélectionner un ou des chapitres",
@@ -34,13 +40,18 @@ class CreaExo(FlaskForm):
         ]
         #choices=[chaps]
     )
+    """
+
+    chap =  SelectField(
+        "Sélectionner un ou des chapitres"
+    )
 
     tps = RadioField(
         "Temps limité ?",
         choices= [('y', 'oui'), (0, 'non')], #changer le 'y' et faire qq chose pour permettre de choisir la durée
         validators= [DataRequired(message="Veuillez choisir une option")]
     )
-
+    """
     txt = SelectField(  #SelectMultipleField(
         "Sélectionner un ou des textes/notions à inclure",
         choices=[                       #change with something dynamic (need the db)
@@ -49,6 +60,12 @@ class CreaExo(FlaskForm):
         ], #choices=[notions]
         validators= [DataRequired(message="Veuillez choisir au moins un.e notion/texte")]
     )
+    """
+    txt = SelectField(
+        "Sélectionner un ou des textes/notions à inclure",
+        validators= [DataRequired(message="Veuillez choisir au moins un.e notion/texte")]
+    )
+
     """ dont like it
     txt2 = StringField(
         "Sélectionner un ou des textes/notions à inclure - test 2",

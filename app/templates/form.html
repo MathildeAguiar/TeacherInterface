@@ -21,7 +21,7 @@
                   {{ render_field(form.formContent) }}
 
                   {% if form.formContent.errors %}
-                    <ul class="errors">
+                    <ul class="border border-danger">
                     {% for error in form.formContent.errors %}
                      <li>{{ error }}</li>
                     {% endfor %}

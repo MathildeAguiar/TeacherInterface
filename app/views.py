@@ -81,6 +81,18 @@ def table():
 @app.route('/creation_exo/', methods=["GET", "POST"])
 def creation_exo():
     form = CreaExo()
+    #query to get all the chapters avaiable
+    chaps = query_all_chaps()
+    print(chaps)
+    form.chap.choices = [(c.id,c.name) for c in chaps] #checker au debugger si on a bien ce que l'on veut mais sinon ok
+
+    #query for all notions (should have texts also) avaiable
+    notions = query_all_gram()
+    form.txt.choices = [(n.id, n.name) for n in notions]
+
+
+
+
     #chaps = MetalChapter.query.filter_by(MetalChapter.name).all()
     #notions = MetalGrammaticalElement.query.filter_by(MetalGrammaticalElement.name).all()
     #quests = MetalQuestion.query.filter_by(MetalQuestion.instructions).all()
@@ -93,7 +105,7 @@ def creation_exo():
         'creation_exo.html',
         form = form
         #notions = notions,
-        #chaps = chaps, 
+        #chaps = chaps 
         #quests = quests
     )
 
