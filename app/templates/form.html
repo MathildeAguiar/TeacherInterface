@@ -1,4 +1,4 @@
-{% from 'bootstrap/form.html' import render_field %}
+{% from 'bootstrap/form.html' import render_field, render_hidden_errors %}
 {% extends 'base.html' %}
 
 {% block content %}
@@ -16,12 +16,27 @@
           {{ form.csrf_token }}
           <div class="row g-3">
             <div class="col-12">
+                  {{ form.hidden_tag() }}
+                  {{ render_hidden_errors(form) }}
                   {{ render_field(form.formContent) }}
+
+                  {% if form.formContent.errors %}
+                    <ul class="errors">
+                    {% for error in form.formContent.errors %}
+                     <li>{{ error }}</li>
+                    {% endfor %}
+                    </ul>
+                  {% endif %}
+
+
+
                   {# % if form.formContent.errors % #}  
                 <!-- <div class="invalid-feedback">
                   Valid name is required. 
                 </div> -->
                 {# % endif % #}
+                {{ render_field(form.category) }}
+                {# render_field(form.cat_test) #}
               </div>
             </div> 
             

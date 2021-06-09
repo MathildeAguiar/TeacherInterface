@@ -47,23 +47,27 @@ def index():
     form = ResearchForm()
     if form.validate_on_submit():
         return redirect(url_for('table'))
+    else:
+        print("Validation Failed")
+        print(form.errors)
     return render_template(
         "form.html",
         form = form,
-        template="form-template"
+        #template="form-template"
     )
 
 
 #the general search bar's result page 
 @app.route('/table/', methods=["GET", "POST"])
 def table():
+    ##### à uncomment pour tester la query par categorie
     #form = ResearchForm()
     #query = form.formContent.data
+    #category = form.category.data
+    #res = general_query(query, category)
+
     page = request.args.get('page', 1, type=int)
-    #chaps = query_all_chaps()
-    #pagination = MetalChapter.query.paginate(page, per_page=10)
     chaps = query_all_exos()
-    #chaps = general_query(query)
     pagination = MetalExercise.query.paginate(page, per_page=5)
 
 

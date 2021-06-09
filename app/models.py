@@ -245,3 +245,60 @@ def general_query(query):
         return tmp_gramm    
     else:
         return "Aucun résultat"
+
+
+#home query 
+def general_query2(query, category):
+
+    res = list()
+
+    if category == 'None':
+        #we check all the possibilities 
+        tmp_chap = MetalChapter.query.filter_by(name=query).all()
+        print(tmp_chap)
+        tmp_exo = MetalExercise.query.filter_by(name=query).all()
+        print(tmp_exo)
+        tmp_quest = MetalQuestion.query.filter_by(instructions=query).all()
+        tmp_gramm = MetalGrammaticalElement.query.filter_by(name=query).all()
+
+        if tmp_chap!=[]:
+            res.append(tmp_chap) #might have to change the data form here 
+        
+        if tmp_exo !=[]:
+            res.append(tmp_exo)
+        
+        if tmp_gramm !=[]:
+            res.append(tmp_gramm)
+        
+        if tmp_quest!=[]:
+            res.append(tmp_quest)
+        else: return "Aucun résultat !" #might need to change the data form here too 
+    
+    if category == 'Chapitres':
+        tmp_chap = MetalChapter.query.filter_by(name=query).all()
+        print(tmp_chap)
+        res.append(tmp_chap)
+    
+    if category=='Exercices':
+        tmp_exo = MetalExercise.query.filter_by(name=query).all()
+        print(tmp_exo)
+        res.append(tmp_exo)
+    if category== 'Notions':
+        tmp_gramm = MetalGrammaticalElement.query.filter_by(name=query).all()
+        res.append(tmp_gramm)
+    if category=='Questions':
+        tmp_quest = MetalQuestion.query.filter_by(instructions=query).all()
+        res.append(tmp_quest)
+    else: return "Aucun résultat !"
+
+    return res
+
+
+#query for 'validation' page  TODO
+
+def query_validaiton(txtName):
+    if txtName!=[]:
+        return True
+    else: return "Aucun texte ne correspond à votre demande !"
+        
+    
