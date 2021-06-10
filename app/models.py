@@ -107,6 +107,16 @@ class MetalQuestion(db.Model):
     updated_at = Column(TIMESTAMP)
 
 
+class MetalText(db.Model):
+    __tablename__ = 'metal_texts'
+
+    id = Column(INTEGER, primary_key=True)
+    name = Column(VARCHAR(500), nullable=False)
+    corpus_id = Column(INTEGER, nullable=False)
+    created_at = Column(TIMESTAMP)
+    updated_at = Column(TIMESTAMP)
+
+
 #database initialization
 def init_db():
     db.drop_all()
@@ -165,6 +175,17 @@ def init_db():
             )
 
         db.session.add(gramElem)
+    
+    #random texts
+    for i in range(20):
+        text = MetalText(
+            name = 'test_txt',
+            corpus_id= i,
+            created_at = datetime.datetime.now(), 
+            updated_at = datetime.datetime.now()
+        )
+        db.session.add(text)
+
 
     db.session.commit()
     lg.warning('Database initialized!')
@@ -190,6 +211,7 @@ def query_all_quests():
 def query_all_gram():
     gram = MetalGrammaticalElement.query.order_by(MetalGrammaticalElement.name).all()
     return gram 
+
 
 #insert a newly created exercice in the database 
 def new_exo(name, lvl, chapId, duration, text, quest, tags):
@@ -298,7 +320,10 @@ def general_query2(query, category):
 
 def query_validaiton(txtName):
     if txtName!=[]:
-        return True
+        texts = MetalText.query.filter_by(name = txtName).all() 
+        if texts !=[]:
+            return texts
+        else: return "Aucun texte ne correspond à votre demande !"    
     else: return "Aucun texte ne correspond à votre demande !"
         
     

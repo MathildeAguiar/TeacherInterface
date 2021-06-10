@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, widgets
 from wtforms.fields.core import BooleanField, SelectMultipleField, SelectField
-from wtforms.validators import Length
+from wtforms.validators import Length, DataRequired
 
 l = ['None', 'Exercices', 'Chapitres', 'Questions']
 
@@ -15,7 +15,7 @@ class ResearchForm(FlaskForm):
 
     formContent = StringField(
         "Search ...",
-        validators=[Length(min=3, message='the query should be longer')]
+        validators=[DataRequired(message="Veuillez choisir au moins un.e notion/texte"), Length(min=3, message='the query should be longer')]
     )
 
     category = SelectField(
