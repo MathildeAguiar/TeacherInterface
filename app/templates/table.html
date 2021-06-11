@@ -5,10 +5,14 @@
 {% block content %}
 {# pour l'instant ça affiche la liste des chapitres et non des exos #}
 {# renvoie sur index au lieu de suppr etc. #}
-<div class="m-3">
+<div class="m-3"> <!-- add something to deal with the footer position-->
     <main> 
+        {% if chaps == 'Aucun résultat !' %}
+        {{ chaps }}
+        {% else %}
         {{ render_table(chaps) }}
         {{ render_pagination(pagination) }}
+        {% endif %}
     </main>
 </div>
 

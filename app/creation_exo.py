@@ -9,6 +9,7 @@ from wtforms.validators import DataRequired, Length
         # form.myField3.choices = acctchoices 
 
 
+
 class CreaExo(FlaskForm):
     #form to create an exercise
 

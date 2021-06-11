@@ -1,4 +1,4 @@
-{% from 'bootstrap/form.html' import render_field, render_hidden_errors %}
+{% from 'bootstrap/form.html' import render_field, render_hidden_errors, render_form_row %}
 {% extends 'base.html' %}
 
 {% block content %}
@@ -36,7 +36,11 @@
                 </div> -->
                 {# % endif % #}
                 {{ render_field(form.category) }}
-                {# render_field(form.cat_test) #}
+              <ul class="list-inline" style="list-style-type: none;">
+                {{ form.cat_test }}
+
+              </ul>
+                
               </div>
             </div> 
             

@@ -274,6 +274,8 @@ def general_query2(query, category):
 
     res = list()
 
+    #would like a "switch" Java like 
+
     if category == 'None':
         #we check all the possibilities 
         tmp_chap = MetalChapter.query.filter_by(name=query).all()
@@ -294,7 +296,7 @@ def general_query2(query, category):
         
         if tmp_quest!=[]:
             res.append(tmp_quest)
-        else: return "Aucun résultat !" #might need to change the data form here too 
+        elif len(res)==0: return "Aucun résultat !" #might need to change the data form here too 
     
     if category == 'Chapitres':
         tmp_chap = MetalChapter.query.filter_by(name=query).all()
@@ -311,9 +313,15 @@ def general_query2(query, category):
     if category=='Questions':
         tmp_quest = MetalQuestion.query.filter_by(instructions=query).all()
         res.append(tmp_quest)
-    else: return "Aucun résultat !"
+    
+    elif len(res)==0: return "Aucun résultat !"
 
-    return res
+    for o in res:
+        return o
+
+
+
+    
 
 
 #query for 'validation' page  TODO
