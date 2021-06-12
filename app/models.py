@@ -247,27 +247,6 @@ def new_exo(name, lvl, chapId, duration, text, quest, tags):
     """
 
 
-#home query 
-def general_query(query):
-    #cas d'un nom d'exercise
-    tmp_chap = MetalChapter.query.filter_by(name=query).all()
-    print(tmp_chap)
-    tmp_exo = MetalExercise.query.filter_by(name=query).all()
-    print(tmp_exo)
-    tmp_quest = MetalQuestion.query.filter_by(instructions=query).all()
-    tmp_gramm = MetalGrammaticalElement.query.filter_by(name=query).all()
-
-    if tmp_chap is not None:
-        return tmp_chap
-    elif tmp_exo is not None:
-        return tmp_exo
-    elif tmp_quest is not None:
-        return tmp_quest
-    elif tmp_gramm is not None:
-        return tmp_gramm    
-    else:
-        return "Aucun résultat"
-
 
 #home query 
 def general_query2(query, category):
@@ -327,7 +306,7 @@ def general_query2(query, category):
 #query for 'validation' page  TODO
 
 def query_validaiton(txtName):
-    if txtName!=[]:
+    if txtName is not None:
         texts = MetalText.query.filter_by(name = txtName).all() 
         if texts !=[]:
             return texts

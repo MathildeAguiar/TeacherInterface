@@ -29,7 +29,7 @@ csrf = CSRFProtect(app)
 babel = Babel(app)
 
 #imports from models (must stay here)
-from app.models import MetalExercise, general_query, general_query2, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_quests, MetalChapter, MetalGrammaticalElement, query_validaiton
+from app.models import MetalExercise, general_query2, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_quests, MetalChapter, MetalGrammaticalElement, query_validaiton
 
 
 #routes 
@@ -68,7 +68,7 @@ def table():
 
     page = request.args.get('page', 1, type=int)
     #chaps = query_all_exos()
-    pagination = MetalExercise.query.paginate(page, per_page=5)
+    pagination = MetalExercise.query.paginate(page, per_page=20)
 
 
     return render_template(
@@ -142,6 +142,7 @@ def validation():
     count = 0
     form = TxtBrowser()
     txtName = form.txt.data
+    print(txtName)
     res_query = query_validaiton(txtName)
 
     page = request.args.get('page', 1, type=int)
@@ -168,7 +169,7 @@ def validation():
         form = form,
         notions = notions, 
         pagination = pagination,
-        #txtName = txtName
+        txtName = txtName,
         res_query = res_query
     )
 

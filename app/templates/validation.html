@@ -38,9 +38,11 @@
           Texte analysé :
         </h5>
         <!--   here we will have the displayed text and infos after analysis-->
-        <h6 class="font-weight-bold font-italic mx-3" id="text-analysed">
-          {{ txtName }}
-        </h6>
+        {% if txtName is not none %}
+          <h6 class="font-weight-bold font-italic mx-3 my-1" id="text-analysed">
+            {{ txtName }}
+          </h6>
+        {% endif %}
            
       </div>
       <div class="row g-5"> <!-- Notions extraites -->

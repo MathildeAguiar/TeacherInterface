@@ -7,8 +7,10 @@
 {# renvoie sur index au lieu de suppr etc. #}
 <div class="m-3"> <!-- add something to deal with the footer position-->
     <main> 
-        {% if chaps == 'Aucun résultat !' %}
-        {{ chaps }}
+        {% if chaps == 'Aucun résultat !' %} <!-- should be using an id in case we have different languages -->
+        <div class="container text-center">
+            {{ chaps }}
+        </div>
         {% else %}
         {{ render_table(chaps) }}
         {{ render_pagination(pagination) }}
