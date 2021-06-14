@@ -3,7 +3,7 @@ from wtforms import StringField, SubmitField, widgets
 from wtforms.fields.core import BooleanField, SelectMultipleField, SelectField
 from wtforms.validators import Length, DataRequired
 
-l = ['None', 'Exercices', 'Chapitres', 'Questions']
+l = ['None', 'Exercices', 'Chapitres', 'Questions', 'Textes']
 
 class MultiCheckboxField(SelectMultipleField):
     #widget = widgets.TableWidget()
@@ -26,7 +26,7 @@ class ResearchForm(FlaskForm):
     
     cat_test = MultiCheckboxField(
         'test',
-        choices=[('hi', 'h'), ('honk', 'honk')]
+        choices=[('hi', 'hi'), ('test', 'test')]
     )
     
     #cat_test2 = BooleanField(label='test2' ,widget=widgets.CheckboxInput())

@@ -112,6 +112,7 @@ class MetalText(db.Model):
 
     id = Column(INTEGER, primary_key=True)
     name = Column(VARCHAR(500), nullable=False)
+    grammatical_element_id = Column(INTEGER, ForeignKey('metal_grammatical_elements.id'))
     corpus_id = Column(INTEGER, nullable=False)
     created_at = Column(TIMESTAMP)
     updated_at = Column(TIMESTAMP)
@@ -181,6 +182,7 @@ def init_db():
         text = MetalText(
             name = 'test_txt',
             corpus_id= i,
+            grammatical_element_id = 1,
             created_at = datetime.datetime.now(), 
             updated_at = datetime.datetime.now()
         )
@@ -252,7 +254,7 @@ def new_exo(name, lvl, chapId, duration, text, quest, tags):
 def general_query2(query, category):
 
     res = list()
-
+    
     #would like a "switch" Java like 
 
     if category == 'None':
@@ -263,6 +265,8 @@ def general_query2(query, category):
         print(tmp_exo)
         tmp_quest = MetalQuestion.query.filter_by(instructions=query).all()
         tmp_gramm = MetalGrammaticalElement.query.filter_by(name=query).all()
+        tmp_txt = MetalText.query.filter_by(name=query).all()
+
 
         if tmp_chap!=[]:
             res.append(tmp_chap) #might have to change the data form here 
@@ -275,6 +279,10 @@ def general_query2(query, category):
         
         if tmp_quest!=[]:
             res.append(tmp_quest)
+        
+        if tmp_txt!=[]:
+            res.append(tmp_txt)
+
         elif len(res)==0: return "Aucun résultat !" #might need to change the data form here too 
     
     if category == 'Chapitres':
@@ -292,6 +300,9 @@ def general_query2(query, category):
     if category=='Questions':
         tmp_quest = MetalQuestion.query.filter_by(instructions=query).all()
         res.append(tmp_quest)
+    if category == 'Textes':
+        tmp_txt = MetalText.query.filter_by(name=query).all()
+        res.append(tmp_txt)
     
     elif len(res)==0: return "Aucun résultat !"
 
@@ -306,11 +317,24 @@ def general_query2(query, category):
 #query for 'validation' page  TODO
 
 def query_validaiton(txtName):
-    if txtName is not None:
-        texts = MetalText.query.filter_by(name = txtName).all() 
-        if texts !=[]:
-            return texts
+    if txtName is not None: #or != 'None' ?
+        #notions = MetalGrammaticalElement.query.order_by(MetalGrammaticalElement.name).join(MetalText).filter_by(name = txtName).all()
+        notions = db.session.query(MetalText).select_from(MetalGrammaticalElement).join(MetalGrammaticalElement.id).filter(MetalText.name==txtName)
+        print(notions)
+       # texts = MetalText.query.filter_by(name = txtName).all() 
+        if notions !=[]: 
+            return notions 
         else: return "Aucun texte ne correspond à votre demande !"    
     else: return "Aucun texte ne correspond à votre demande !"
         
-    
+"""
+doc : q = session.query(Address).select_from(User).
+                join(User.addresses).
+                filter(User.name == 'ed')
+
+  -->  SELECT address.* FROM user
+    JOIN address ON user.id=address.user_id
+    WHERE user.name = :name_1
+
+
+"""

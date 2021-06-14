@@ -19,6 +19,7 @@
                   {{ form.hidden_tag() }}
                   {{ render_hidden_errors(form) }}
                   {{ render_field(form.formContent) }}
+                  <small class="font-italic"> Les caractères spéciaux % et _ sont disponibles </small>
 
                   {% if form.formContent.errors %}
                     <ul class="border border-danger">
