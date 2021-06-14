@@ -254,18 +254,22 @@ def new_exo(name, lvl, chapId, duration, text, quest, tags):
 def general_query2(query, category):
 
     res = list()
+
+    #I changed the format of the input so the query acts like a LIKE and the user gets more results 
+    search = "%{}%".format(query)
+    #I replaced all the previous "query" vars by "search" (with the new format)
     
     #would like a "switch" Java like 
 
-    if category == 'None':
+    if category == 'All':
         #we check all the possibilities 
-        tmp_chap = MetalChapter.query.filter_by(name=query).all()
+        tmp_chap = MetalChapter.query.filter(MetalChapter.name.like(search)).all()
         print(tmp_chap)
-        tmp_exo = MetalExercise.query.filter_by(name=query).all()
+        tmp_exo = MetalExercise.query.filter(MetalExercise.name.like(search)).all()
         print(tmp_exo)
-        tmp_quest = MetalQuestion.query.filter_by(instructions=query).all()
-        tmp_gramm = MetalGrammaticalElement.query.filter_by(name=query).all()
-        tmp_txt = MetalText.query.filter_by(name=query).all()
+        tmp_quest = MetalQuestion.query.filter(MetalQuestion.instructions.like(search)).all()
+        tmp_gramm = MetalGrammaticalElement.query.filter(MetalGrammaticalElement.name.like(search)).all()
+        tmp_txt = MetalText.query.filter(MetalText.name.like(search)).all()
 
 
         if tmp_chap!=[]:
@@ -286,22 +290,22 @@ def general_query2(query, category):
         elif len(res)==0: return "Aucun résultat !" #might need to change the data form here too 
     
     if category == 'Chapitres':
-        tmp_chap = MetalChapter.query.filter_by(name=query).all()
+        tmp_chap = MetalChapter.query.filter(MetalChapter.name.like(search)).all()
         print(tmp_chap)
         res.append(tmp_chap)
     
     if category=='Exercices':
-        tmp_exo = MetalExercise.query.filter_by(name=query).all()
+        tmp_exo = MetalExercise.query.filter(MetalExercise.name.like(search)).all()
         print(tmp_exo)
         res.append(tmp_exo)
     if category== 'Notions':
-        tmp_gramm = MetalGrammaticalElement.query.filter_by(name=query).all()
+        tmp_gramm = MetalGrammaticalElement.query.filter(MetalGrammaticalElement.name.like(search)).all()
         res.append(tmp_gramm)
     if category=='Questions':
-        tmp_quest = MetalQuestion.query.filter_by(instructions=query).all()
+        tmp_quest = MetalQuestion.query.filter(MetalQuestion.instructions.like(search)).all()
         res.append(tmp_quest)
     if category == 'Textes':
-        tmp_txt = MetalText.query.filter_by(name=query).all()
+        tmp_txt = MetalText.query.filter(MetalText.name.like(search)).all()
         res.append(tmp_txt)
     
     elif len(res)==0: return "Aucun résultat !"
