@@ -29,7 +29,7 @@ csrf = CSRFProtect(app)
 babel = Babel(app)
 
 #imports from models (must stay here)
-from app.models import MetalExercise, general_query2, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_quests, MetalChapter, MetalGrammaticalElement, query_validaiton
+from app.models import MetalExercise, general_query2, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_groups, query_all_quests, MetalChapter, MetalNotion, query_validaiton
 
 
 #routes 
@@ -91,6 +91,11 @@ def creation_exo():
     notions = query_all_gram()
     form.txt.choices = [(n.id, n.name) for n in notions]
 
+    lvls = query_all_groups()
+    form.level.choices = [(l.id, l.level) for l in lvls]
+
+    #form.tps.name = 'oui' looking for the right way to display propositions 
+
     #quests = query_all_quests()
     
     if form.validate_on_submit():
@@ -146,7 +151,7 @@ def validation():
     res_query = query_validaiton(txtName)
 
     page = request.args.get('page', 1, type=int)
-    pagination = MetalGrammaticalElement.query.paginate(page, per_page=10)
+    pagination = MetalNotion.query.paginate(page, per_page=10)
    
     #for now we will just query all the notions since we don't have our anaylyser
     

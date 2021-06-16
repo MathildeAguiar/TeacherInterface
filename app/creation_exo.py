@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
-from wtforms.fields.core import RadioField, SelectMultipleField, SelectField
+from wtforms.fields.core import BooleanField, Label, RadioField, SelectMultipleField, SelectField
 from wtforms.validators import DataRequired, Length
 
 #champ dyn pattern
@@ -8,7 +8,10 @@ from wtforms.validators import DataRequired, Length
 #acctchoices = [(c.id,c.name) for c in accounts5]             
         # form.myField3.choices = acctchoices 
 
-
+class TimeLimted():
+    label = "Temps limité ?"
+    oui = BooleanField('oui')
+    non = BooleanField('non')
 
 class CreaExo(FlaskForm):
     #form to create an exercise
@@ -21,15 +24,11 @@ class CreaExo(FlaskForm):
 
     level = SelectField( #SelectMultipleField(
         "Niveaux",
-        choices=[
-            ('2nde', '2nde'),
-            ('1e', '1ère'),
-            ('term', 'Terminale'), 
-            ('1A', '1A')
-        ],
         validators=[DataRequired(message="please select at least one")]
-
     )
+       
+
+
     """
     #I want to have dynamic choices 
     chap =  SelectField( #SelectMultipleField(
@@ -46,11 +45,17 @@ class CreaExo(FlaskForm):
     chap =  SelectField(
         "Sélectionner un ou des chapitres"
     )
-
+    """
     tps = RadioField(
         "Temps limité ?",
-        choices= [('y', 'oui'), (0, 'non')], #changer le 'y' et faire qq chose pour permettre de choisir la durée
+        choices= [(True, 'oui'), (False, 'non')], #changer le 'y' et faire qq chose pour permettre de choisir la durée
         validators= [DataRequired(message="Veuillez choisir une option")]
+    )
+    """
+    tps = BooleanField(
+
+        "Temps limité ?", 
+        validators=[DataRequired(message="Veuillez choisir une option")]
     )
     """
     txt = SelectField(  #SelectMultipleField(
@@ -67,12 +72,6 @@ class CreaExo(FlaskForm):
         validators= [DataRequired(message="Veuillez choisir au moins un.e notion/texte")]
     )
 
-    """ dont like it
-    txt2 = StringField(
-        "Sélectionner un ou des textes/notions à inclure - test 2",
-        validators= [DataRequired(message="Veuillez choisir au moins un.e notion/texte")]
-    )
-    """
     quest = StringField(
         "Choisissez des questions",
         validators=[DataRequired(message="Veuillez choisir au moins une question")]

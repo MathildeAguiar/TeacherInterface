@@ -29,6 +29,8 @@ class ResearchForm(FlaskForm):
         choices=[('hi', 'hi'), ('test', 'test')]
     )
     
+    #cat_test2 = BooleanField(label='Text') the label doesn't display itself
+    #cat_test3 = BooleanField(label='Chapitre')
     #cat_test2 = BooleanField(label='test2' ,widget=widgets.CheckboxInput())
         
     

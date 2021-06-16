@@ -1,12 +1,14 @@
 # coding: utf-8
 import datetime
 from re import L
+from types import FrameType
 from sqlalchemy import BigInteger, Column, DECIMAL, DateTime, Float, ForeignKey, Integer, SmallInteger, String, TIMESTAMP, Table, Text, text
 from sqlalchemy.dialects.mysql import INTEGER, LONGTEXT, SMALLINT, TEXT, TINYINT, VARCHAR
-from sqlalchemy.sql.functions import now
+from sqlalchemy.sql.sqltypes import BOOLEAN, Boolean, TIME
 from .views import app
 import logging as lg
 from flask_sqlalchemy import SQLAlchemy, request
+from random import choices, randint
 
 
 
@@ -14,18 +16,40 @@ from flask_sqlalchemy import SQLAlchemy, request
 db = SQLAlchemy(app)
 
 
-
-#collecting some interesting classes :
+#classes of our tables 
 
 class MetalChapter(db.Model):
     __tablename__ = 'metal_chapters'
 
     id = Column(INTEGER, primary_key=True)
     #grade_id = Column(INTEGER, nullable=False)
-    name = Column(VARCHAR(191), nullable=False)
-    slug = Column(VARCHAR(191), nullable=False)
-    course = Column(TEXT) #problem with longtext
-    request = Column(TEXT)
+    name = Column(VARCHAR(191), unique=True, nullable=False) #, unique=True
+    exercise_id = Column(Integer, ForeignKey('metal_exercises.id'), nullable=False)
+    group_id = Column(Integer, ForeignKey('metal_groups.id'))
+    tags = Column(TEXT)
+    slug = Column(VARCHAR(191))
+    course = Column(TEXT) 
+    created_at = Column(TIMESTAMP)
+    updated_at = Column(TIMESTAMP)
+
+class MetalUser(db.Model):
+    __tablename__ = 'metal_users'
+
+    id = Column(INTEGER, primary_key=True)
+    lastName = Column(VARCHAR(191), nullable=False)
+    firstName = Column(VARCHAR(191), nullable=False)
+    password = Column(VARCHAR(191), nullable=False)
+    group_id = Column(Integer, ForeignKey('metal_groups.id'))
+    type = Column(VARCHAR(191))
+
+
+class MetalGrade(db.Model):
+    __tablename__ = 'metal_grades'
+
+    id = Column(INTEGER, primary_key=True)
+    user_id = Column(INTEGER, ForeignKey('metal_users.id'), nullable=False)
+    exercise_id = Column(Integer, ForeignKey('metal_exercises.id'), nullable=False)
+    slug = Column(VARCHAR(191))
     created_at = Column(TIMESTAMP)
     updated_at = Column(TIMESTAMP)
 
@@ -34,17 +58,48 @@ class MetalCorpus(db.Model):
     __tablename__ = 'metal_corpuses'
 
     id = Column(INTEGER, primary_key=True)
-    user_id = Column(INTEGER, nullable=False)
-    name = Column(VARCHAR(500), nullable=False)
+    name = Column(VARCHAR(191), unique=True, nullable=False)
+    analysed_at = Column(TIMESTAMP)
+    notion_id = Column(ForeignKey('metal_notions.id'), nullable=False)
+    author = Column(VARCHAR(191))
+
+
+class MetalNotion(db.Model): #equivalent to grammatical element 
+    __tablename__ = 'metal_notions'
+
+    id = Column(INTEGER, primary_key=True)
+    name = Column(VARCHAR(191), unique=True, nullable=False)
+    created_at = Column(TIMESTAMP)
+    updated_at = Column(TIMESTAMP)
+    question_id = Column(ForeignKey('metal_questions.id'))
+
+
+class MetalNotionItem(db.Model): #equivalent to grammatical item 
+    __tablename__ = 'metal_notion_items'
+
+    id = Column(INTEGER, primary_key=True)
+    name = Column(VARCHAR(191), nullable=False)
+    notion_id = Column(INTEGER, ForeignKey('metal_notions.id'),  nullable=False)
     created_at = Column(TIMESTAMP)
     updated_at = Column(TIMESTAMP)
 
-class MetalExerciseQuestion(db.Model):
-    __tablename__ = 'metal_exercise_question'
 
-    id = Column(Integer, primary_key=True)
-    exercise_id = Column(INTEGER, nullable=False)
-    question_id = Column(INTEGER, nullable=False)
+class MetalGroup(db.Model):
+    __tablename__ = 'metal_groups'
+
+    id = Column(INTEGER, primary_key=True)
+    level = Column(VARCHAR(191), unique=True, nullable=False)
+
+#add question type ? 
+class MetalQuestion(db.Model):
+    __tablename__ = 'metal_questions'
+
+    id = Column(INTEGER, primary_key=True)
+    instructions = Column(TEXT, nullable=False)
+    answers = Column(VARCHAR(512), nullable=False)
+    grade = Column(INTEGER)
+    duration = Column(Integer)
+    slug = Column(VARCHAR(191))
     created_at = Column(TIMESTAMP)
     updated_at = Column(TIMESTAMP)
 
@@ -52,153 +107,157 @@ class MetalExercise(db.Model):
     __tablename__ = 'metal_exercises'
 
     id = Column(INTEGER, primary_key=True)
-    name = Column(VARCHAR(500), nullable=False)
-    chapter_id = Column(INTEGER) #I removed this: nullable=False
-    #user_id = Column(INTEGER, nullable=False)
-    exercise_type = Column(VARCHAR(191), nullable=False, server_default=text("'training'"))
-    question_duration = Column(SMALLINT, nullable=False, server_default=text("'30'"))
+    chapter_id = Column(ForeignKey('metal_chapters.id'), nullable=False)
+    question_id = Column(ForeignKey('metal_questions.id'), nullable=False)
+    name = Column(VARCHAR(191), unique=True, nullable=False)
+    type = Column(VARCHAR(191))
+    limited_time = Column(Boolean) #does boolean works here ? 
+    tags = Column(VARCHAR(191))
+    slug = Column(VARCHAR(191))
     created_at = Column(TIMESTAMP)
     updated_at = Column(TIMESTAMP)
-    #I added those fields 
-    texts_related = Column(VARCHAR(191)) #just a test for now 
-    questions = Column(INTEGER) #I fetch the questions Id instead of their string content 
-    level = Column(INTEGER) #Id of the level/class
-    #optional tags
-    tag = Column(VARCHAR(500))
-    
-
-#often reffered as notion 
-class MetalGrammaticalElement(db.Model):
-    __tablename__ = 'metal_grammatical_elements'
-
-    id = Column(INTEGER, primary_key=True)
-    slug = Column(VARCHAR(191), nullable=False)
-    name = Column(VARCHAR(191), nullable=False)
-    type = Column(VARCHAR(191), nullable=False)
-    #query = Column(TEXT, nullable=False)
-    take_children = Column(INTEGER, nullable=False, server_default=text("'0'")) #TINYINT(1)
-    created_at = Column(TIMESTAMP)
-    updated_at = Column(TIMESTAMP)
-
-class MetalQuestionType(db.Model):
-    __tablename__ = 'metal_question_types'
-
-    id = Column(INTEGER, primary_key=True)
-    name = Column(VARCHAR(191), nullable=False)
-    slug = Column(VARCHAR(191), nullable=False)
-    created_at = Column(TIMESTAMP)
-    updated_at = Column(TIMESTAMP)
+    group_lvl = Column(ForeignKey('metal_groups.level'))
+    text_related = Column(ForeignKey('metal_corpuses.name'))
+    #add a notion field ? 
 
 
-class MetalQuestion(db.Model):
-    __tablename__ = 'metal_questions'
+# database initialization 
 
-    id = Column(INTEGER, primary_key=True)
-    #chapter_id = Column(INTEGER, nullable=False)
-    #grammatical_element_id = Column(Integer, nullable=False)
-    #sentence_id = Column(INTEGER, nullable=False)
-    points = Column(INTEGER, nullable=False, server_default=text("'1'"))
-    instructions = Column(TEXT, nullable=False) #longtext
-    text = Column(TEXT, nullable=False) #longtext
-    feedback = Column(TEXT) #longtext
-    #question_type_id = Column(INTEGER, nullable=False)
-    created_at = Column(TIMESTAMP)
-    updated_at = Column(TIMESTAMP)
-
-
-class MetalText(db.Model):
-    __tablename__ = 'metal_texts'
-
-    id = Column(INTEGER, primary_key=True)
-    name = Column(VARCHAR(500), nullable=False)
-    grammatical_element_id = Column(INTEGER, ForeignKey('metal_grammatical_elements.id'))
-    corpus_id = Column(INTEGER, nullable=False)
-    created_at = Column(TIMESTAMP)
-    updated_at = Column(TIMESTAMP)
-
-
-#database initialization
 def init_db():
+    
     db.drop_all()
     db.create_all()
 
-    #random questions
-    for i in range(20):
-        q = MetalQuestion(
-            text='Test message {}'.format(i+1),
-            instructions='Author {}'.format(i+1),
-            #category='Category {}'.format(i+1),
-            points=4321*(i+1)
-            )
+    #population of the db 
 
-        db.session.add(q)
+    #random grades 
 
-    #random chapters
-    for i in range(20):
-        chap = MetalChapter(
-            name='Test message {}'.format(i+1),
-            slug='Author {}'.format(i+1),
-            #category='Category {}'.format(i+1),
-            #points=4321*(i+1)
-            )
+    for i in range(3): #usr 1
+        grade = MetalGrade()
+        grade.user_id = 1 
+        grade.slug = "exo 1"
+        grade.exercise_id = 1
+        grade.created_at = datetime.datetime.now()
+        grade.updated_at = datetime.datetime.now()
+        db.session.add(grade)
 
+    for i in range(3): #usr 2
+        grade = MetalGrade()
+        grade.slug = "exo 1"
+        grade.exercise_id = 1
+        grade.user_id = 2
+        grade.created_at = datetime.datetime.now()
+        grade.updated_at = datetime.datetime.now()
+        db.session.add(grade)
+
+
+    #random groups 
+
+    for i in range(2):
+        grp = MetalGroup()
+        grp.level = "3ème.{}".format(i+1)
+        db.session.add(grp)
+
+    for i in range(3):
+        grp = MetalGroup(level="4ème.{}".format(i+1))
+        db.session.add(grp)
+
+    #random users 
+    groups = ["3ème.1", "3ème.2", "4ème.2", "4ème.1"]
+    for i in range(5):
+        usr = MetalUser()
+        usr.lastName = "Dupont".format(i+1)
+        usr.firstName = "Pierre".format(i+1)
+        usr.group_id = groups[i-1]
+        usr.password = randint(1, 99)
+        db.session.add(usr)
+    
+    #random chaps:
+    chap_name = ['Les conjonctions de subordination', 'Pronoms personnels', 'Complément du verbe', 'Temps du subjonctif', "Temps de l'indicatif"]
+    for i in range(5):
+        chap = MetalChapter()
+        chap.name = chap_name[i]
+        #choices(chap_name).pop(0)
+        chap.slug = str(chap.name)
+        chap.updated_at = datetime.datetime.now()
+        chap.created_at = datetime.datetime.now()
+        chap.course = 'cours {}'.format(i)
+        chap.exercise_id = 1
+        chap.tags = 'un tag'
+        chap.group_id = randint(1, 3)
         db.session.add(chap)
+    
+    # random quests 
+    instruct = ['instr 1', 'instr 2', 'instr 3']
+    answers_possible = [ "'oui', 'non'", "'yes', 'no'", "1, 2, 3"]
+    for i in range(8):
+        quest = MetalQuestion()
+        quest.updated_at = datetime.datetime.now()
+        quest.created_at = datetime.datetime.now()
+        quest.answers = choices(answers_possible).pop(0)
+        quest.duration = randint(1, 60)
+        quest.instructions = choices(instruct).pop(0)
+        quest.grade = randint(0, 20)
+        db.session.add(quest)
 
-    #random exercices
-    for i in range(20):
-        """
-        exo = MetalExercise(
-            name='Test message {}'.format(i+1),
-            exercise_type='Author {}'.format(i+1),
-            #category='Category {}'.format(i+1),
-            question_duration=50
-            )
-        """
+    #random exo
+    for i in range(5):
         exo = MetalExercise()
-        exo.name = 'hello'
-        exo.question_duration = 0
-        exo.created_at = datetime.datetime.now() 
-        exo.updated_at = datetime.datetime.now() #now() is the sql one 
-        exo.chapter_id = 1
-        exo.questions = 1
-        exo.texts_related = 'text'
-        exo.level = 1
+        exo.updated_at = datetime.datetime.now()
+        exo.created_at = datetime.datetime.now()
+        exo.limited_time = choices([True, False]).pop(0)
+        exo.name = "name {}".format(i+1)
+        exo.slug = "this is an exo slug"
+        exo.tags = "exo's tags"
+        exo.chapter_id = randint(1, 4)
+        exo.question_id = randint(1,3)
         db.session.add(exo)
 
-    #random grammatical elements 
-    for i in range(20):
-        gramElem = MetalGrammaticalElement(
-            slug='Test message {}'.format(i+1),
-            name='Author {}'.format(i+1),
-            type='Category {}'.format(i+1),
-            #points=4321*(i+1)
-            )
 
-        db.session.add(gramElem)
-    
-    #random texts
-    for i in range(20):
-        text = MetalText(
-            name = 'test_txt',
-            corpus_id= i,
-            grammatical_element_id = 1,
-            created_at = datetime.datetime.now(), 
-            updated_at = datetime.datetime.now()
-        )
-        db.session.add(text)
+    #random corpus
+    texts = ['Vingt mille lieues sous les mers', 'Le Grand Meaulnes', 'Maupassant', 'Corpus test']
+    for i in range(4):
+        corp = MetalCorpus()
+        corp.name = texts[i]
+        #choices(['Vingt mille lieues sous les mers', 'Le Grand Meaulnes', 'Maupassant', 'Corpus test']).pop(0)
+        corp.notion_id = randint(1, 3)
+        corp.author = "author".format(i+1)
+        corp.analysed_at = datetime.datetime.now()
+        db.session.add(corp)
 
+
+    #random notion 
+    n = ['conjonction-subordination', 'groupe nominal', 'groupe-nominal-sujet', 'pronom relatif', 'indicatif-present', 'complement-d-agent']
+    for i in range(5):
+        notion = MetalNotion()
+        notion.name = n[i]
+        #choices(['conjonction-subordination', 'groupe nominal', 'groupe-nominal-sujet', 'pronom relatif', 'indicatif-present', 'complement-d-agent']).pop(0)
+        notion.question_id = randint(1, 3)
+        notion.updated_at = datetime.datetime.now()
+        notion.created_at = datetime.datetime.now()
+        db.session.add(notion)
+
+    #random notion item 
+    for i in range(5):
+        notion_item = MetalNotionItem()
+        notion_item.name = 'notion_itm'.format(i+1)
+        notion_item.notion_id = randint(1,4)
+        notion_item.updated_at = datetime.datetime.now()
+        notion_item.created_at = datetime.datetime.now()
+        db.session.add(notion_item)
 
     db.session.commit()
     lg.warning('Database initialized!')
 
-#définir les fct des queries 
+#fct queries 
+
 
 #get all the chapters and order them by their names 
 def query_all_chaps():
     chaps = MetalChapter.query.order_by(MetalChapter.name).all()
     return chaps
 
-#get all the exercices and order them by their names 
+#get all the exercises and order them by their names 
 def query_all_exos():
     exos = MetalExercise.query.order_by(MetalExercise.name).all()
     return exos
@@ -210,9 +269,12 @@ def query_all_quests():
 
 #get all the grammatical elements and order them by their names 
 def query_all_gram():
-    gram = MetalGrammaticalElement.query.order_by(MetalGrammaticalElement.name).all()
+    gram = MetalNotion.query.order_by(MetalNotion.name).all()
     return gram 
 
+def query_all_groups():
+    grp = MetalGroup.query.order_by(MetalGroup.level).all()
+    return grp
 
 #insert a newly created exercice in the database 
 def new_exo(name, lvl, chapId, duration, text, quest, tags):
@@ -220,32 +282,20 @@ def new_exo(name, lvl, chapId, duration, text, quest, tags):
     #fct to insert a new exercice in the db after clicking on "create" button
     exo = MetalExercise()
     exo.name = name
-    exo.question_duration = duration
+    exo.limited_time = duration
     exo.created_at = datetime.datetime.now()
     exo.updated_at = datetime.datetime.now()
     exo.chapter_id = chapId
-    exo.questions = quest
+    exo.question_id = quest
+    exo.group_lvl = lvl
     exo.texts_related = text
-    exo.level = lvl
+    #exo.level = lvl
     exo.tags = tags
 
     #the query itself 
     db.session.add(exo)
     db.session.commit()
     lg.warning('Addition done !')
-
-    
-    """
-    id = Column(INTEGER, primary_key=True) #use
-    name = Column(VARCHAR(500), nullable=False) #use
-    #chapter_id = Column(INTEGER, nullable=False) #should
-    #user_id = Column(INTEGER, nullable=False) #not use
-    #not gonna use this for now 
-    exercise_type = Column(VARCHAR(191), nullable=False, server_default=text("'training'")) #not use
-    question_duration = Column(SMALLINT, nullable=False, server_default=text("'30'")) #True or False instead
-    created_at = Column(TIMESTAMP) #use
-    updated_at = Column(TIMESTAMP) #use 
-    """
 
 
 
@@ -267,8 +317,8 @@ def general_query2(query, category):
         tmp_exo = MetalExercise.query.filter(MetalExercise.name.like(search)).all()
         print(tmp_exo)
         tmp_quest = MetalQuestion.query.filter(MetalQuestion.instructions.like(search)).all()
-        tmp_gramm = MetalGrammaticalElement.query.filter(MetalGrammaticalElement.name.like(search)).all()
-        tmp_txt = MetalText.query.filter(MetalText.name.like(search)).all()
+        tmp_gramm = MetalNotion.query.filter(MetalNotion.name.like(search)).all()
+        tmp_txt = MetalCorpus.query.filter(MetalCorpus.name.like(search)).all()
 
 
         if tmp_chap!=[]:
@@ -298,13 +348,13 @@ def general_query2(query, category):
         print(tmp_exo)
         res.append(tmp_exo)
     if category== 'Notions':
-        tmp_gramm = MetalGrammaticalElement.query.filter(MetalGrammaticalElement.name.like(search)).all()
+        tmp_gramm = MetalNotion.query.filter(MetalNotion.name.like(search)).all()
         res.append(tmp_gramm)
     if category=='Questions':
         tmp_quest = MetalQuestion.query.filter(MetalQuestion.instructions.like(search)).all()
         res.append(tmp_quest)
     if category == 'Textes':
-        tmp_txt = MetalText.query.filter(MetalText.name.like(search)).all()
+        tmp_txt = MetalCorpus.query.filter(MetalCorpus.name.like(search)).all()
         res.append(tmp_txt)
     
     elif len(res)==0: return "Aucun résultat !"
@@ -312,17 +362,12 @@ def general_query2(query, category):
     for o in res:
         return o
 
-
-
-    
-
-
 #query for 'validation' page  TODO
 
 def query_validaiton(txtName):
     if txtName is not None: #or != 'None' ?
         #notions = MetalGrammaticalElement.query.order_by(MetalGrammaticalElement.name).join(MetalText).filter_by(name = txtName).all()
-        notions = db.session.query(MetalText).select_from(MetalGrammaticalElement).join(MetalGrammaticalElement.id).filter(MetalText.name==txtName)
+        notions = db.session.query(MetalCorpus).select_from(MetalNotion).join(MetalNotion.id).filter(MetalCorpus.name==txtName)
         print(notions)
        # texts = MetalText.query.filter_by(name = txtName).all() 
         if notions !=[]: 
@@ -330,14 +375,3 @@ def query_validaiton(txtName):
         else: return "Aucun texte ne correspond à votre demande !"    
     else: return "Aucun texte ne correspond à votre demande !"
         
-"""
-doc : q = session.query(Address).select_from(User).
-                join(User.addresses).
-                filter(User.name == 'ed')
-
-  -->  SELECT address.* FROM user
-    JOIN address ON user.id=address.user_id
-    WHERE user.name = :name_1
-
-
-"""
