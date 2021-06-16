@@ -26,7 +26,6 @@ class MetalChapter(db.Model):
     slug = Column(VARCHAR(191), nullable=False)
     course = Column(TEXT) #problem with longtext
     request = Column(TEXT)
-    rank_chapter = Column(Integer)
     created_at = Column(TIMESTAMP)
     updated_at = Column(TIMESTAMP)
 
