@@ -26,7 +26,6 @@ class MetalChapter(db.Model):
     slug = Column(VARCHAR(191), nullable=False)
     course = Column(TEXT) #problem with longtext
     request = Column(TEXT)
-    rank_chapter = Column(Integer)
     created_at = Column(TIMESTAMP)
     updated_at = Column(TIMESTAMP)
 
@@ -107,6 +106,17 @@ class MetalQuestion(db.Model):
     updated_at = Column(TIMESTAMP)
 
 
+class MetalText(db.Model):
+    __tablename__ = 'metal_texts'
+
+    id = Column(INTEGER, primary_key=True)
+    name = Column(VARCHAR(500), nullable=False)
+    grammatical_element_id = Column(INTEGER, ForeignKey('metal_grammatical_elements.id'))
+    corpus_id = Column(INTEGER, nullable=False)
+    created_at = Column(TIMESTAMP)
+    updated_at = Column(TIMESTAMP)
+
+
 #database initialization
 def init_db():
     db.drop_all()
@@ -165,6 +175,18 @@ def init_db():
             )
 
         db.session.add(gramElem)
+    
+    #random texts
+    for i in range(20):
+        text = MetalText(
+            name = 'test_txt',
+            corpus_id= i,
+            grammatical_element_id = 1,
+            created_at = datetime.datetime.now(), 
+            updated_at = datetime.datetime.now()
+        )
+        db.session.add(text)
+
 
     db.session.commit()
     lg.warning('Database initialized!')
@@ -190,6 +212,7 @@ def query_all_quests():
 def query_all_gram():
     gram = MetalGrammaticalElement.query.order_by(MetalGrammaticalElement.name).all()
     return gram 
+
 
 #insert a newly created exercice in the database 
 def new_exo(name, lvl, chapId, duration, text, quest, tags):
@@ -225,23 +248,96 @@ def new_exo(name, lvl, chapId, duration, text, quest, tags):
     """
 
 
-#home query 
-def general_query(query):
-    #cas d'un nom d'exercise
-    tmp_chap = MetalChapter.query.filter_by(name=query).all()
-    print(tmp_chap)
-    tmp_exo = MetalExercise.query.filter_by(name=query).all()
-    print(tmp_exo)
-    tmp_quest = MetalQuestion.query.filter_by(instructions=query).all()
-    tmp_gramm = MetalGrammaticalElement.query.filter_by(name=query).all()
 
-    if tmp_chap is not None:
-        return tmp_chap
-    elif tmp_exo is not None:
-        return tmp_exo
-    elif tmp_quest is not None:
-        return tmp_quest
-    elif tmp_gramm is not None:
-        return tmp_gramm    
-    else:
-        return "Aucun résultat"
+#home query 
+def general_query2(query, category):
+
+    res = list()
+
+    #I changed the format of the input so the query acts like a LIKE and the user gets more results 
+    search = "%{}%".format(query)
+    #I replaced all the previous "query" vars by "search" (with the new format)
+    
+    #would like a "switch" Java like 
+
+    if category == 'All':
+        #we check all the possibilities 
+        tmp_chap = MetalChapter.query.filter(MetalChapter.name.like(search)).all()
+        print(tmp_chap)
+        tmp_exo = MetalExercise.query.filter(MetalExercise.name.like(search)).all()
+        print(tmp_exo)
+        tmp_quest = MetalQuestion.query.filter(MetalQuestion.instructions.like(search)).all()
+        tmp_gramm = MetalGrammaticalElement.query.filter(MetalGrammaticalElement.name.like(search)).all()
+        tmp_txt = MetalText.query.filter(MetalText.name.like(search)).all()
+
+
+        if tmp_chap!=[]:
+            res.append(tmp_chap) #might have to change the data form here 
+        
+        if tmp_exo !=[]:
+            res.append(tmp_exo)
+        
+        if tmp_gramm !=[]:
+            res.append(tmp_gramm)
+        
+        if tmp_quest!=[]:
+            res.append(tmp_quest)
+        
+        if tmp_txt!=[]:
+            res.append(tmp_txt)
+
+        elif len(res)==0: return "Aucun résultat !" #might need to change the data form here too 
+    
+    if category == 'Chapitres':
+        tmp_chap = MetalChapter.query.filter(MetalChapter.name.like(search)).all()
+        print(tmp_chap)
+        res.append(tmp_chap)
+    
+    if category=='Exercices':
+        tmp_exo = MetalExercise.query.filter(MetalExercise.name.like(search)).all()
+        print(tmp_exo)
+        res.append(tmp_exo)
+    if category== 'Notions':
+        tmp_gramm = MetalGrammaticalElement.query.filter(MetalGrammaticalElement.name.like(search)).all()
+        res.append(tmp_gramm)
+    if category=='Questions':
+        tmp_quest = MetalQuestion.query.filter(MetalQuestion.instructions.like(search)).all()
+        res.append(tmp_quest)
+    if category == 'Textes':
+        tmp_txt = MetalText.query.filter(MetalText.name.like(search)).all()
+        res.append(tmp_txt)
+    
+    elif len(res)==0: return "Aucun résultat !"
+
+    for o in res:
+        return o
+
+
+
+    
+
+
+#query for 'validation' page  TODO
+
+def query_validaiton(txtName):
+    if txtName is not None: #or != 'None' ?
+        #notions = MetalGrammaticalElement.query.order_by(MetalGrammaticalElement.name).join(MetalText).filter_by(name = txtName).all()
+        notions = db.session.query(MetalText).select_from(MetalGrammaticalElement).join(MetalGrammaticalElement.id).filter(MetalText.name==txtName)
+        print(notions)
+       # texts = MetalText.query.filter_by(name = txtName).all() 
+        if notions !=[]: 
+            return notions 
+        else: return "Aucun texte ne correspond à votre demande !"    
+    else: return "Aucun texte ne correspond à votre demande !"
+        
+"""
+doc : q = session.query(Address).select_from(User).
+                join(User.addresses).
+                filter(User.name == 'ed')
+
+  -->  SELECT address.* FROM user
+    JOIN address ON user.id=address.user_id
+    WHERE user.name = :name_1
+
+
+"""

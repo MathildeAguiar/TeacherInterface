@@ -1,7 +1,8 @@
 import os
 from flask_wtf import CSRFProtect
 from flask_bootstrap import Bootstrap
-from flask_sqlalchemy import request, SQLAlchemy
+from flask_babel import Babel #test Babel
+from flask_sqlalchemy import request
 from flask import Flask, render_template, url_for, redirect
 from .forms import ResearchForm
 from .creation_exo import CreaExo
@@ -23,8 +24,12 @@ bootstrap = Bootstrap(app)
 #security 
 csrf = CSRFProtect(app)
 
+#test with Babel 
+
+babel = Babel(app)
+
 #imports from models (must stay here)
-from app.models import MetalExercise, general_query, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_quests, MetalChapter, MetalGrammaticalElement
+from app.models import MetalExercise, general_query2, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_quests, MetalChapter, MetalGrammaticalElement, query_validaiton
 
 
 #routes 
@@ -42,29 +47,34 @@ def index():
     form = ResearchForm()
     if form.validate_on_submit():
         return redirect(url_for('table'))
+    else:
+        print("Validation Failed")
+        print(form.errors)
     return render_template(
         "form.html",
         form = form,
-        template="form-template"
+        #template="form-template"
     )
 
 
 #the general search bar's result page 
 @app.route('/table/', methods=["GET", "POST"])
 def table():
-    #form = ResearchForm()
-    #query = form.formContent.data
+    ##### à uncomment pour tester la query par categorie
+    form = ResearchForm()
+    query = form.formContent.data
+    category = form.category.data
+    res = general_query2(query, category)
+
     page = request.args.get('page', 1, type=int)
-    #chaps = query_all_chaps()
-    #pagination = MetalChapter.query.paginate(page, per_page=10)
-    chaps = query_all_exos()
-    #chaps = general_query(query)
-    pagination = MetalExercise.query.paginate(page, per_page=5)
+    #chaps = query_all_exos()
+    pagination = MetalExercise.query.paginate(page, per_page=20)
 
 
     return render_template(
     'table.html',
-    chaps = chaps,
+    chaps = res,
+    #chaps = chaps,
     pagination = pagination       
     )
 
@@ -72,20 +82,22 @@ def table():
 @app.route('/creation_exo/', methods=["GET", "POST"])
 def creation_exo():
     form = CreaExo()
-    #chaps = MetalChapter.query.filter_by(MetalChapter.name).all()
-    #notions = MetalGrammaticalElement.query.filter_by(MetalGrammaticalElement.name).all()
-    #quests = MetalQuestion.query.filter_by(MetalQuestion.instructions).all()
-    #notions = query_all_gram()
+    #query to get all the chapters avaiable
+    chaps = query_all_chaps()
+    print(chaps)
+    form.chap.choices = [(c.id,c.name) for c in chaps] #checker au debugger si on a bien ce que l'on veut mais sinon ok
+
+    #query for all notions (should have texts also) avaiable
+    notions = query_all_gram()
+    form.txt.choices = [(n.id, n.name) for n in notions]
+
     #quests = query_all_quests()
-    #chaps = query_all_chaps()
+    
     if form.validate_on_submit():
         return redirect(url_for('list_exo')) #change
     return render_template(
         'creation_exo.html',
         form = form
-        #notions = notions,
-        #chaps = chaps, 
-        #quests = quests
     )
 
 #result page from the exercice creation, displaying all the avaiable exercices
@@ -123,28 +135,42 @@ def list_exo():
     )
 
 #page where you have to confirm notions found by the analyser
+#@app.route('/validation/<int:count>/', methods=["GET", "POST"])  #ou sinon on fait 2 url une avec <> et l'autre sans 
+#def validation(count):
 @app.route('/validation/', methods=["GET", "POST"]) 
 def validation():
+    count = 0
     form = TxtBrowser()
     txtName = form.txt.data
-    #for now we will just query all the notions since we don't have our anaylyser
-    notions = query_all_gram()
+    print(txtName)
+    res_query = query_validaiton(txtName)
+
     page = request.args.get('page', 1, type=int)
     pagination = MetalGrammaticalElement.query.paginate(page, per_page=10)
-
+   
+    #for now we will just query all the notions since we don't have our anaylyser
+    
+    if count > 0:
+        notions = query_all_gram()
+        print(notions)
+    elif count == 0:
+        notions = None
+    
     if form.validate_on_submit():
-        return redirect(url_for('validation')) #change
+        count +=1
+        #count n'est pas retransmis au refresh de validation, il faudrait le return 
+        
+        return redirect(url_for('validation')) # request.referrer    render_template('validation.html', form= form, notions = notions, pagination=pagination) #change
         #if we validate this we stay on the same page and we have new things that appear 
         #how to link that ???
 
     return render_template(
         'validation.html',
         form = form,
-        #for the table 
         notions = notions, 
-        #titles = titles
         pagination = pagination,
-        txtName = txtName
+        txtName = txtName,
+        res_query = res_query
     )
 
 #connexion page 

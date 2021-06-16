@@ -1,8 +1,8 @@
-{% from 'bootstrap/form.html' import render_field %}
+{% from 'bootstrap/form.html' import render_field, render_hidden_errors, render_form_row %}
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container">
+<div class="container mb-5">
   <main>
     <div class="py-5 text-center">
       <h2>Exerciseur</h2>
@@ -16,15 +16,34 @@
           {{ form.csrf_token }}
           <div class="row g-3">
             <div class="col-12">
+                  {{ form.hidden_tag() }}
+                  {{ render_hidden_errors(form) }}
                   {{ render_field(form.formContent) }}
-                  {% if form.formContent.errors %}  
-                <div class="invalid-feedback">
+                  
+                  {% if form.formContent.errors %}
+                    <ul class="border border-danger">
+                    {% for error in form.formContent.errors %}
+                     <li>{{ error }}</li>
+                    {% endfor %}
+                    </ul>
+                  {% endif %}
+
+
+
+                  {# % if form.formContent.errors % #}  
+                <!-- <div class="invalid-feedback">
                   Valid name is required. 
-                </div>
-                {% endif %}
+                </div> -->
+                {# % endif % #}
+                {{ render_field(form.category) }}
+              <ul class="list-inline" style="list-style-type: none;">
+                {{ form.cat_test }}
+
+              </ul>
+                
               </div>
             </div> 
-
+            
             {{ render_field(form.submit) }}
           </div>
         </form>
@@ -32,7 +51,6 @@
     </div>
   </main>
 
- 
 </div>
 
 {% endblock %}
