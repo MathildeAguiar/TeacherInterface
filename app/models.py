@@ -276,7 +276,7 @@ def query_all_groups():
     grp = MetalGroup.query.order_by(MetalGroup.level).all()
     return grp
 
-#query to fetch all exercices related to a chapter (used in side nav) TODO test it 
+#query to fetch all exercices related to a chapter (used in side nav or not ? ) TODO test it 
 def query_exo_related_chaps(chap_name):
     #list_exo = MetalExercise.query.select_from(MetalExercise.name).join(MetalChapter, MetalChapter.id == MetalExercise.chapter_id).filter(MetalChapter.name == chap_name)
     list_exo = db.session.query(MetalExercise.name).join(MetalChapter, MetalChapter.id==MetalExercise.chapter_id).filter(MetalChapter.name==chap_name).all()
@@ -293,7 +293,7 @@ def new_exo(name, lvl, chapId, duration, text, quest, tags):
     exo.created_at = datetime.datetime.now()
     exo.updated_at = datetime.datetime.now()
     exo.chapter_id = chapId
-    exo.question_id = quest
+    exo.question_id = quest #wrong I think 
     exo.group_lvl = lvl
     exo.texts_related = text
     #exo.level = lvl
@@ -372,14 +372,11 @@ def general_query2(query, category):
 #query for 'validation' page  TODO
 
 def query_validation(txtName):
-    if txtName is not None: #or != 'None' ?
-        #notions = MetalGrammaticalElement.query.order_by(MetalGrammaticalElement.name).join(MetalText).filter_by(name = txtName).all()
-        notions = db.session.query(MetalNotion.name).join(MetalCorpus, MetalCorpus.notion_id == MetalNotion.id).filter(MetalCorpus.name==txtName).all()
-        #db.session.query(MetalCorpus).select_from(MetalNotion).join(MetalNotion.id).filter(MetalCorpus.name==txtName)
+    if txtName is not None: 
+        notions = db.session.query(MetalNotion.name).join(MetalCorpus, MetalCorpus.notion_id == MetalNotion.id).filter(MetalCorpus.name==txtName).all()       
         print(notions)
-       # texts = MetalText.query.filter_by(name = txtName).all() 
         if notions !=[]: 
             return notions 
-        else: return "Aucun texte ne correspond à votre demande !"    
-    else: return "Aucun texte ne correspond à votre demande !"
+        else: None #return "Aucun texte ne correspond à votre demande !"    
+    else: None #return "Aucun texte ne correspond à votre demande !"
         

@@ -64,21 +64,18 @@ def index():
 #the general search bar's result page 
 @app.route('/table/', methods=["GET", "POST"])
 def table():
-    ##### à uncomment pour tester la query par categorie
     form = ResearchForm()
     query = form.formContent.data
     category = form.category.data
     res = general_query2(query, category)
 
     page = request.args.get('page', 1, type=int)
-    #chaps = query_all_exos()
-    pagination = MetalExercise.query.paginate(page, per_page=20)
+    pagination = MetalExercise.query.paginate(page, per_page=20) #which class to paginate from 
 
 
     return render_template(
     'table.html',
     chaps = res,
-    #chaps = chaps,
     pagination = pagination       
     )
 
@@ -113,10 +110,6 @@ def creation_exo():
 @app.route('/list_exo/', methods=["GET", "POST"])
 def list_exo():
     
-    #chaps = pagination.items
-    #print(chaps)
-    #change the names 
-    
     #we get the infos filled in the form 
     form = CreaExo()
     name = form.exoName.data
@@ -129,18 +122,17 @@ def list_exo():
     #addition to the db
     new_exo(name, lvl, chapId, duration, text, quest, tags)
     #print check 
-    print(new_exo)
+    #print(new_exo)
 
     #pagination
     page = request.args.get('page', 1, type=int)
-    pagination = MetalExercise.query.paginate(page, per_page=30)
+    pagination = MetalExercise.query.paginate(page, per_page=20)
     exos = query_all_exos()
     
     return render_template(
         'list_exo.html',
         pagination = pagination,
         exos = exos
-        #chaps = chaps
     )
 
 #page where you have to confirm notions found by the analyser
@@ -152,24 +144,25 @@ def validation():
     form = TxtBrowser()
     txtName = form.txt.data
     print(txtName)
-    res_query = query_validation(txtName)
+    #res_query = query_validation(txtName)
 
     page = request.args.get('page', 1, type=int)
     pagination = MetalNotion.query.paginate(page, per_page=10)
+    notions = query_validation(txtName)
    
     #for now we will just query all the notions since we don't have our anaylyser
-    
+    """
     if count > 0:
         notions = query_all_gram()
         print(notions)
     elif count == 0:
         notions = None
-    
+    """
     if form.validate_on_submit():
         count +=1
         #count n'est pas retransmis au refresh de validation, il faudrait le return 
         
-        return redirect(url_for('validation')) # request.referrer    render_template('validation.html', form= form, notions = notions, pagination=pagination) #change
+        return redirect(url_for('validation/<count>/')) # request.referrer    render_template('validation.html', form= form, notions = notions, pagination=pagination) #change
         #if we validate this we stay on the same page and we have new things that appear 
         #how to link that ???
 
@@ -179,8 +172,36 @@ def validation():
         notions = notions, 
         pagination = pagination,
         txtName = txtName,
-        res_query = res_query
+        #res_query = res_query
     )
+    
+"""
+#route if it's not the first loading 
+@app.route('/validation/<int:count>/', methods=["GET", "POST"])  #ou sinon on fait 2 url une avec <> et l'autre sans 
+def validation(count):
+
+    form = TxtBrowser()
+    txtName = form.txt.data
+
+    if count > 0:
+        page = request.args.get('page', 1, type=int)
+        pagination = MetalNotion.query.paginate(page, per_page=10)
+        notions = query_validation(txtName)
+    elif count == 0:
+        notions = None
+
+    if form.validate_on_submit():
+        count +=1        
+        return redirect(url_for('validation/<count>/'))
+
+    return render_template(
+        'validation.html',
+        form = form,
+        notions = notions, 
+        pagination = pagination,
+        txtName = txtName
+    )
+"""
 
 #connexion page 
 @app.route('/connexion/', methods=["GET", "POST"])

@@ -45,12 +45,11 @@
 
         {% block content %}{% endblock %}
 
-
-        <footer class="footer mt-5 bg-light text-small w-100 p-3 shadow-lg rounded"> <!-- py-3 // my-5 pt-5 -->
+        <footer class="footer mt-5 bg-light text-small w-100 p-3 shadow-lg rounded" id="footer"> <!-- py-3 // my-5 pt-5 -->
           <ul class="list-inline">
              <li class="list-inline-item">
                  <div class="container">
-                     <img src="{{url_for('static', filename='loria.png')}}" id=footer_loria style="width: 80px; max-height: 80px;">
+                     <img src="{{url_for('static', filename='loria.png')}}" id="footer_loria" style="width: 80px; max-height: 80px;">
      
                  </div>
              </li>
@@ -60,7 +59,11 @@
               </div>
              </li>
              <li class="list-inline-item">
-               <img src="{{url_for('static', filename='ul.png')}}" id=footer_ul style="width: 80px; max-height: 80px;">
+               <img src="{{url_for('static', filename='ul.png')}}" id="footer_ul" style="width: 80px; max-height: 80px;">
+             </li>
+
+             <li class="list-inline-item">
+               <img src="{{url_for('static', filename='cnrs.svg')}}" id="footer_cnrs" style="width: 80px; max-height: 80px;">
              </li>
           </ul>
          </footer>
