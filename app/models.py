@@ -24,7 +24,7 @@ class MetalChapter(db.Model):
     id = Column(INTEGER, primary_key=True)
     #grade_id = Column(INTEGER, nullable=False)
     name = Column(VARCHAR(191), unique=True, nullable=False) #, unique=True
-    exercise_id = Column(Integer, ForeignKey('metal_exercises.id'), nullable=False)
+    #exercise_id = Column(Integer, ForeignKey('metal_exercises.id'), nullable=False)
     group_id = Column(Integer, ForeignKey('metal_groups.id'))
     tags = Column(TEXT)
     slug = Column(VARCHAR(191))
@@ -182,7 +182,7 @@ def init_db():
         chap.updated_at = datetime.datetime.now()
         chap.created_at = datetime.datetime.now()
         chap.course = 'cours {}'.format(i)
-        chap.exercise_id = 1
+        #chap.exercise_id = 1
         chap.tags = 'un tag'
         chap.group_id = randint(1, 3)
         db.session.add(chap)
@@ -240,7 +240,7 @@ def init_db():
     #random notion item 
     for i in range(5):
         notion_item = MetalNotionItem()
-        notion_item.name = 'notion_itm'.format(i+1)
+        notion_item.name = 'notion_itm.{}'.format(i+1)
         notion_item.notion_id = randint(1,4)
         notion_item.updated_at = datetime.datetime.now()
         notion_item.created_at = datetime.datetime.now()
@@ -275,6 +275,13 @@ def query_all_gram():
 def query_all_groups():
     grp = MetalGroup.query.order_by(MetalGroup.level).all()
     return grp
+
+#query to fetch all exercices related to a chapter (used in side nav) TODO test it 
+def query_exo_related_chaps(chap_name):
+    #list_exo = MetalExercise.query.select_from(MetalExercise.name).join(MetalChapter, MetalChapter.id == MetalExercise.chapter_id).filter(MetalChapter.name == chap_name)
+    list_exo = db.session.query(MetalExercise.name).join(MetalChapter, MetalChapter.id==MetalExercise.chapter_id).filter(MetalChapter.name==chap_name).all()
+    return list_exo
+
 
 #insert a newly created exercice in the database 
 def new_exo(name, lvl, chapId, duration, text, quest, tags):
@@ -364,10 +371,11 @@ def general_query2(query, category):
 
 #query for 'validation' page  TODO
 
-def query_validaiton(txtName):
+def query_validation(txtName):
     if txtName is not None: #or != 'None' ?
         #notions = MetalGrammaticalElement.query.order_by(MetalGrammaticalElement.name).join(MetalText).filter_by(name = txtName).all()
-        notions = db.session.query(MetalCorpus).select_from(MetalNotion).join(MetalNotion.id).filter(MetalCorpus.name==txtName)
+        notions = db.session.query(MetalNotion.name).join(MetalCorpus, MetalCorpus.notion_id == MetalNotion.id).filter(MetalCorpus.name==txtName).all()
+        #db.session.query(MetalCorpus).select_from(MetalNotion).join(MetalNotion.id).filter(MetalCorpus.name==txtName)
         print(notions)
        # texts = MetalText.query.filter_by(name = txtName).all() 
         if notions !=[]: 

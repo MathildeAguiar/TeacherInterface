@@ -29,7 +29,7 @@ csrf = CSRFProtect(app)
 babel = Babel(app)
 
 #imports from models (must stay here)
-from app.models import MetalExercise, general_query2, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_groups, query_all_quests, MetalChapter, MetalNotion, query_validaiton
+from app.models import MetalExercise, general_query2, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_groups, query_all_quests, MetalChapter, MetalNotion, query_validation, query_exo_related_chaps
 
 
 #routes 
@@ -44,6 +44,10 @@ def before_first_request_func():
 
 @app.route('/form/', methods=["GET", "POST"])
 def index():
+    #just a test 
+    test = query_exo_related_chaps('Pronoms personnels')
+    print(test)
+
     form = ResearchForm()
     if form.validate_on_submit():
         return redirect(url_for('table'))
@@ -148,7 +152,7 @@ def validation():
     form = TxtBrowser()
     txtName = form.txt.data
     print(txtName)
-    res_query = query_validaiton(txtName)
+    res_query = query_validation(txtName)
 
     page = request.args.get('page', 1, type=int)
     pagination = MetalNotion.query.paginate(page, per_page=10)
