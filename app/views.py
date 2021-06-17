@@ -39,6 +39,19 @@ from app.models import MetalExercise, general_query2, init_db, new_exo, query_al
 def before_first_request_func():
     init_db()
 
+#test to pass the list of chapters at all templates 
+
+@app.context_processor
+def inject_chapters():
+    names = list()
+    chaps = query_all_chaps()
+    for c in chaps:
+        names.append(c.name)
+    print("chaps :", chaps)
+    print("names of chaps", names)
+    return dict(chaps = names) 
+
+
 #index page with the general search bar
 @app.route('/')
 
