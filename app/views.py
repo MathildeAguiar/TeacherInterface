@@ -1,4 +1,6 @@
+from app.chapter_creation import CreaChapter
 import os
+from re import A
 from flask_wtf import CSRFProtect
 from flask_bootstrap import Bootstrap
 from flask_babel import Babel #test Babel
@@ -29,7 +31,7 @@ csrf = CSRFProtect(app)
 babel = Babel(app)
 
 #imports from models (must stay here)
-from app.models import MetalExercise, MetalGroup, general_query2, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_groups, MetalNotion, query_validation, query_exo_related_chaps
+from app.models import MetalChapter, MetalExercise, MetalGroup, general_query2, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_groups, MetalNotion, query_validation, query_exo_related_chaps
 
 
 #routes 
@@ -161,6 +163,48 @@ def list_exo(): #chap_name=None
         pagination = pagination,
         exos = exos
     )
+
+
+#page to create a new chapter
+@app.route('/chapter_creation', methods=['GET','POST'])
+def chapter_creation():
+
+    form = CreaChapter()
+    #get all the levels available
+    lvls = query_all_groups()
+    form.level.choices = [(l.id, l.level) for l in lvls]
+
+    #get all the exercises available 
+    ex = query_all_exos()
+    form.exos.choices = [(e.id, e.name) for e in ex]
+
+    #get all the texts and notions available (for now only notions)
+    notions = query_all_gram()
+    form.txt.choices = [(n.id, n.name) for n in notions]
+
+
+    return render_template(
+        'chapter_creation.html',
+        form = form
+    )
+
+#page where all the db's chapters are displayed 
+@app.route('/list_chapters/', methods=['GET','POST'])
+def list_chapters():
+
+    page = request.args.get('page', 1, type=int)
+    pagination = MetalChapter.query.paginate(page, per_page=20)
+    #for now we will display all the chapters
+    chaps = query_all_chaps() # we need a new query where we add the new created chapter 
+
+
+    return render_template(
+        'list_chapters.html',
+        pagination = pagination,
+        chaps = chaps
+    )
+
+
 
 #page where you have to confirm notions found by the analyser
 #@app.route('/validation/<int:count>/', methods=["GET", "POST"])  #ou sinon on fait 2 url une avec <> et l'autre sans 

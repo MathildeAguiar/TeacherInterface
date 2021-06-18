@@ -6,7 +6,6 @@ from wtforms.validators import Length, DataRequired
 l = ['All', 'Exercices', 'Chapitres', 'Questions', 'Textes', 'Notions']
 
 class MultiCheckboxField(SelectMultipleField):
-    #widget = widgets.TableWidget()
     widget = widgets.TableWidget()           #ListWidget(html_tag='ul', prefix_label=False)
     option_widget = widgets.CheckboxInput()
 

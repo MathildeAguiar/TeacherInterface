@@ -1,0 +1,12 @@
+{% from 'bootstrap/pagination.html' import render_pagination %}
+{% from 'bootstrap/table.html' import render_table %}
+{% extends 'base.html' %}
+
+{% block content %}
+
+{{ render_table(chaps) }}
+
+{{ render_pagination(pagination) }}
+
+
+{% endblock %}

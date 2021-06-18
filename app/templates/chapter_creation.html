@@ -1,0 +1,48 @@
+{% from 'bootstrap/form.html' import render_field %}
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <main>
+    <div class="py-5"> <!--text-center-->
+      <h2>Création de chapitre :</h2>
+    </div>
+
+    <div class="row g-5">
+      <div class="col-md-7 col-lg-8">
+        <form class="needs-validation" method="POST" action="{{ url_for('list_chapters') }}" novalidate> 
+          {{ form.csrf_token }}
+          <div class="row g-3">
+            <div class="col-12">
+                  {{ render_field(form.chapName) }}
+              </div> 
+
+            <div class="col-12">
+                {{ render_field(form.level) }}
+            </div>
+
+            <div class="col-12">
+                {{ render_field(form.exos) }}
+            </div> 
+
+            <div class="col-12">
+                {{ render_field(form.txt) }}
+            </div>
+
+            <div class="col-12">
+                {{ render_field(form.tags) }}
+                
+            </div>
+
+            {{ render_field(form.submit) }}
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+ 
+</div>
+
+
+{% endblock %}
