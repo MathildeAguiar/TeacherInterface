@@ -3,7 +3,7 @@ from wtforms import StringField, SubmitField, widgets
 from wtforms.fields.core import BooleanField, SelectMultipleField, SelectField
 from wtforms.validators import Length, DataRequired
 
-l = ['All', 'Exercices', 'Chapitres', 'Questions', 'Textes']
+l = ['All', 'Exercices', 'Chapitres', 'Questions', 'Textes', 'Notions']
 
 class MultiCheckboxField(SelectMultipleField):
     #widget = widgets.TableWidget()

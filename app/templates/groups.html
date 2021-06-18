@@ -1,0 +1,24 @@
+{% from 'bootstrap/table.html' import render_table %}
+{% from 'bootstrap/pagination.html' import render_pagination %}
+{% extends 'base.html' %}
+
+{% block content %}
+
+<main>
+    <div class="container">
+        <h4 class="row g-5">
+            Groupes disponibles 
+        </h4>
+    </div>
+
+    {% if groups == 'Aucun résultat !' %} 
+    <div class="container text-center">
+        {{ groups }}
+    </div>
+    {% else %}
+    {{ render_table(groups) }}
+    {{ render_pagination(pagination) }}
+    {% endif %}
+</main>
+
+{% endblock %}

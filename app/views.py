@@ -29,7 +29,7 @@ csrf = CSRFProtect(app)
 babel = Babel(app)
 
 #imports from models (must stay here)
-from app.models import MetalExercise, general_query2, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_groups, MetalNotion, query_validation, query_exo_related_chaps
+from app.models import MetalExercise, MetalGroup, general_query2, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_groups, MetalNotion, query_validation, query_exo_related_chaps
 
 
 #routes 
@@ -238,7 +238,27 @@ def connexion():
         'connexion.html'
     )
 
+#help page
+@app.route('/help/', methods=['GET', 'POST'])
+def help():
+    return render_template(
+        'help.html'
+    )
 
+#groups page
+@app.route('/groups/', methods=['GET', 'POST'])
+def groups():
+
+    page = request.args.get('page', 1, type=int)
+    pagination = MetalGroup.query.paginate(page, per_page=10)
+
+    groups = query_all_groups()
+
+    return render_template(
+        'groups.html', 
+        groups = groups,
+        pagination = pagination
+    )
 
 if __name__ == "__main__":
     app.run()

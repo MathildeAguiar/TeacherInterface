@@ -379,4 +379,3 @@ def query_validation(txtName):
             return notions 
         else: None #return "Aucun texte ne correspond à votre demande !"    
     else: None #return "Aucun texte ne correspond à votre demande !"
-        
