@@ -37,15 +37,15 @@
                   Accueil
                 </a>
               </li>
-              {% for c in chaps %}
+              {% for c in side_nav_chaps %}
                 <li>
-                  <a href="#" class="nav-link link-dark"> <!-- adapt the href-->
+                  <a href="{{ url_for('list_exo', chapName=c) }}" class="nav-link link-dark"> <!-- adapt the href="/list_exo/c" -->
                     <svg class="bi me-2" width="18" height="18"><use xlink:href="#book"/></svg>
                     {{ c }}
                   </a> 
                 </li> 
               {% endfor %}
-              <li>
+             <!-- <li>
                 <a href="#" class="nav-link link-dark">
                   <svg class="bi me-2" width="18" height="18"><use xlink:href="#book"/></svg>
                   Chapitre 1
@@ -56,7 +56,7 @@
                   <svg class="bi me-2" width="18" height="18"><use xlink:href="#book"/></svg>
                   Chapitre 2
                 </a>
-              </li>
+              </li> -->
               <li>
                 <a href="#" class="nav-link link-dark">
                   <svg class="bi me-2" width="18" height="18"><use xlink:href="#people-fill"/></svg>

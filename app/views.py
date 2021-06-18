@@ -3,7 +3,7 @@ from flask_wtf import CSRFProtect
 from flask_bootstrap import Bootstrap
 from flask_babel import Babel #test Babel
 from flask_sqlalchemy import request
-from flask import Flask, render_template, url_for, redirect
+from flask import Flask, render_template, url_for, redirect, request
 from .forms import ResearchForm
 from .creation_exo import CreaExo
 from .validation import TxtBrowser
@@ -29,7 +29,7 @@ csrf = CSRFProtect(app)
 babel = Babel(app)
 
 #imports from models (must stay here)
-from app.models import MetalExercise, general_query2, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_groups, query_all_quests, MetalChapter, MetalNotion, query_validation, query_exo_related_chaps
+from app.models import MetalExercise, general_query2, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_groups, MetalNotion, query_validation, query_exo_related_chaps
 
 
 #routes 
@@ -44,12 +44,10 @@ def before_first_request_func():
 @app.context_processor
 def inject_chapters():
     names = list()
-    chaps = query_all_chaps()
-    for c in chaps:
+    side_nav_chaps = query_all_chaps()
+    for c in side_nav_chaps:
         names.append(c.name)
-    print("chaps :", chaps)
-    print("names of chaps", names)
-    return dict(chaps = names) 
+    return dict(side_nav_chaps = names) 
 
 
 #index page with the general search bar
@@ -88,7 +86,7 @@ def table():
 
     return render_template(
     'table.html',
-    chaps = res,
+    res = res,
     pagination = pagination       
     )
 
@@ -120,27 +118,43 @@ def creation_exo():
     )
 
 #result page from the exercice creation, displaying all the avaiable exercices
+#@app.route('/list_exo/<chap_name>/', methods=["GET", "POST"])
 @app.route('/list_exo/', methods=["GET", "POST"])
-def list_exo():
+def list_exo(): #chap_name=None
     
-    #we get the infos filled in the form 
-    form = CreaExo()
-    name = form.exoName.data
-    lvl = form.level.data #level.data[0] ! ici on aura potentiellement une liste et pas juste une valeur
-    chapId = form.chap.data #chap.data[0] ! ici on aura potentiellement une liste et pas juste une valeur
-    duration = form.tps.data
-    text = form.txt.data #txt.data[0] !! ici on aura potentiellement une liste et pas juste une valeur
-    quest = form.quest.data
-    tags = form.tags.data
-    #addition to the db
-    new_exo(name, lvl, chapId, duration, text, quest, tags)
-    #print check 
-    #print(new_exo)
-
-    #pagination
+    chap_name = request.args.get("chapName")
+    print("request args",request.args)
+    print("chap name extraction", chap_name)
+    #print(chap_name)
     page = request.args.get('page', 1, type=int)
     pagination = MetalExercise.query.paginate(page, per_page=20)
-    exos = query_all_exos()
+
+    #case where we get only the exercices related to a specific chapter 
+
+    if chap_name is not None: 
+        
+        exos = query_exo_related_chaps(chap_name)
+        print("liste des exos rreturned : ", exos)
+
+    elif chap_name is None :
+        #case where we display all the exercices avaiable in the db 
+        #we get the infos filled in the form 
+        form = CreaExo()
+        name = form.exoName.data
+        lvl = form.level.data #level.data[0] ! ici on aura potentiellement une liste et pas juste une valeur
+        chapId = form.chap.data #chap.data[0] ! ici on aura potentiellement une liste et pas juste une valeur
+        duration = form.tps.data
+        text = form.txt.data #txt.data[0] !! ici on aura potentiellement une liste et pas juste une valeur
+        quest = form.quest.data
+        tags = form.tags.data
+        #addition to the db
+        new_exo(name, lvl, chapId, duration, text, quest, tags)
+        #print check 
+        print(new_exo)
+
+        exos = query_all_exos()
+
+
     
     return render_template(
         'list_exo.html',

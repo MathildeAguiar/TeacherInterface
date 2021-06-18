@@ -279,7 +279,7 @@ def query_all_groups():
 #query to fetch all exercices related to a chapter (used in side nav or not ? ) TODO test it 
 def query_exo_related_chaps(chap_name):
     #list_exo = MetalExercise.query.select_from(MetalExercise.name).join(MetalChapter, MetalChapter.id == MetalExercise.chapter_id).filter(MetalChapter.name == chap_name)
-    list_exo = db.session.query(MetalExercise.name).join(MetalChapter, MetalChapter.id==MetalExercise.chapter_id).filter(MetalChapter.name==chap_name).all()
+    list_exo = db.session.query(MetalExercise).join(MetalChapter, MetalChapter.id==MetalExercise.chapter_id).filter(MetalChapter.name==chap_name).all()
     return list_exo
 
 
