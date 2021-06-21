@@ -13,7 +13,7 @@ class CreaChapter(FlaskForm):
             Length(min=1, message='the name should be longer')]
     )
 
-    level = SelectField( #SelectMultipleField(
+    level = SelectMultipleField( #SelectMultipleField(
         "Niveaux",
         validators=[DataRequired(message="please select at least one")]
     )

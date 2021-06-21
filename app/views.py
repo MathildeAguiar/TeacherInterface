@@ -216,6 +216,9 @@ def validation():
     print(submit_status)
     #getting the url arguments to check the vars of the query 
 
+    notions = None
+    pagination = None
+
     #pour éviter d'appeller des mêmes bouts de code plusieurs fois pour rien on va juste placer une condition sur le submit 
 
     if submit_status == 'True':
