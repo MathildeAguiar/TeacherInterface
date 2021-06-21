@@ -220,34 +220,29 @@ def validation():
 
     if submit_status == 'True':
         txtNameReq = request.args.get('txtName')
+        #CHANGE THAT IT'S UGLY 
+        page = request.args.get('page', 1, type=int)
+        pagination = MetalNotion.query.paginate(page, per_page=10)
+        notions = query_validation(txtNameReq)
+        print("this is notions in the if ", notions)
     else : txtNameReq = None
 
-    
-    count = 0
+
     form = TxtBrowser()
     txtName = form.txt.data
     print(txtName)
 
+    """ moved in the if, please CLEAN THE CODE 
     page = request.args.get('page', 1, type=int)
     pagination = MetalNotion.query.paginate(page, per_page=10)
     notions = query_validation(txtName)
+    """
    
-    #for now we will just query all the notions since we don't have our anaylyser
-    """
-    if count > 0:
-        notions = query_all_gram()
-        print(notions)
-    elif count == 0:
-        notions = None
-    """
+  
     if form.validate_on_submit():
-        count +=1
-        #count n'est pas retransmis au refresh de validation, il faudrait le return 
-
         
-        return redirect(url_for('validation', submitted = True, txtName = txtName)) # request.referrer    render_template('validation.html', form= form, notions = notions, pagination=pagination) #change
-        #if we validate this we stay on the same page and we have new things that appear 
-        #how to link that ???
+        return redirect(url_for('validation', submitted = True, txtName = txtName)) # request.referrer ?   
+
 
     return render_template(
         'validation.html',
@@ -257,34 +252,6 @@ def validation():
         txtName = txtNameReq,
         submit = submit_status
     )
-    
-"""
-#route if it's not the first loading 
-@app.route('/validation/<int:count>/', methods=["GET", "POST"])  #ou sinon on fait 2 url une avec <> et l'autre sans 
-def validation(count):
-
-    form = TxtBrowser()
-    txtName = form.txt.data
-
-    if count > 0:
-        page = request.args.get('page', 1, type=int)
-        pagination = MetalNotion.query.paginate(page, per_page=10)
-        notions = query_validation(txtName)
-    elif count == 0:
-        notions = None
-
-    if form.validate_on_submit():
-        count +=1        
-        return redirect(url_for('validation/<count>/'))
-
-    return render_template(
-        'validation.html',
-        form = form,
-        notions = notions, 
-        pagination = pagination,
-        txtName = txtName
-    )
-"""
 
 #connexion page 
 @app.route('/connexion/', methods=["GET", "POST"])
@@ -316,5 +283,6 @@ def groups():
         pagination = pagination
     )
 
+#run 
 if __name__ == "__main__":
     app.run()

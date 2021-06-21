@@ -28,7 +28,7 @@
         </div>
       </div>
 
-   {% if submit == 'True' %}
+  {% if submit == 'True' %}
      
     <!-- si on a sélectionné le texte alors on voit ça apparaitre -->
     
@@ -42,28 +42,25 @@
           <h5 class="font-weight-bold font-italic mx-3 mb-2" id="text-analysed">
             {{ txtName }}
           </h5>
-        {% endif %}
-           
+        {% endif %}         
       </div>
+
       <div class="row g-5"> <!-- Notions extraites -->
         <h5 id="extracted-notions">
           Notions extraites :
         </h5>
-        <!--plutot que de faire une liste on utilise div d-inline
-        <div class="d-inline">
-          <a class="btn btn-success text-white">COI</a>
-  
-        </div> mouai bof -->
-
+        {% if notions is not none %}
         <ul class="list-inline"> 
+          {% for n in notions %}
           <li class="list-inline-item">
               <div class="container pb-2">
                 <!-- where the notion pods should be -->
                 {#  if display== True  class=qq chose endif      #}
-                <a class="btn btn-success text-white">COI</a> <!-- border radius plz -->
-  
+                <a class="btn btn-success text-white"> {{ n.name }} </a> <!-- border radius plz -->
               </div>
           </li>
+          {% endfor %}
+        {% endif %}
 
           <li class="list-inline-item">
             <div class="container pb-2">
@@ -107,12 +104,7 @@
       {% endif %}
     </div>
 
-    {% endif %}
-
-
-    <!-- {# endif #} -->
-
-
+  {% endif %}
 
 
     </main>

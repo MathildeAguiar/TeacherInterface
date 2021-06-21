@@ -383,7 +383,8 @@ def general_query2(query, category):
 
 def query_validation(txtName):
     if txtName is not None: 
-        notions = db.session.query(MetalNotion.name).join(MetalCorpus, MetalCorpus.notion_id == MetalNotion.id).filter(MetalCorpus.name==txtName).all()       
+        #previously query(MetalNotion.name)... but I need objects and not just a string 
+        notions = db.session.query(MetalNotion).join(MetalCorpus, MetalCorpus.notion_id == MetalNotion.id).filter(MetalCorpus.name==txtName).all()       
         print(notions)
         if notions !=[]: 
             return notions 
