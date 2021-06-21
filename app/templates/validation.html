@@ -28,7 +28,7 @@
         </div>
       </div>
 
- <!-- {# if analyzed == True #} -->
+   {% if submit == 'True' %}
      
     <!-- si on a sélectionné le texte alors on voit ça apparaitre -->
     
@@ -38,10 +38,10 @@
           Texte analysé :
         </h5>
         <!--   here we will have the displayed text and infos after analysis-->
-        {% if txtName is not none %}
-          <h6 class="font-weight-bold font-italic mx-3 my-1" id="text-analysed">
+        {% if txtName is not none  %} <!--- is not none -->
+          <h5 class="font-weight-bold font-italic mx-3 mb-2" id="text-analysed">
             {{ txtName }}
-          </h6>
+          </h5>
         {% endif %}
            
       </div>
@@ -106,6 +106,8 @@
       {{ render_pagination(pagination) }}
       {% endif %}
     </div>
+
+    {% endif %}
 
 
     <!-- {# endif #} -->

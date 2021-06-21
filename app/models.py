@@ -29,6 +29,7 @@ class MetalChapter(db.Model):
     tags = Column(TEXT)
     slug = Column(VARCHAR(191))
     course = Column(TEXT) 
+    summary = Column(TEXT)
     created_at = Column(TIMESTAMP)
     updated_at = Column(TIMESTAMP)
 
@@ -305,6 +306,15 @@ def new_exo(name, lvl, chapId, duration, text, quest, tags):
     lg.warning('Addition done !')
 
 
+#insert a newly created chapter to the database TODO
+def new_chapter(name, level, exos, texts, summary, tags):
+    chap = MetalChapter()
+    chap.group_id = level
+    chap.name = name
+    chap.slug = summary
+    chap.summary = summary
+    chap.tags = tags
+    #il faut gérer l'update des exos ici et celui des texts
 
 #home query 
 def general_query2(query, category):

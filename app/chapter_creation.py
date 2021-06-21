@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.fields.core import Label, SelectMultipleField, SelectField
+from wtforms.fields.simple import TextAreaField, TextField
 from wtforms.validators import DataRequired, Length
 
 class CreaChapter(FlaskForm):
@@ -31,6 +32,13 @@ class CreaChapter(FlaskForm):
     """ 
      we can add a text zone for the teacher to enter informations about the chapter --> need to do a new field in the db 
     """
+
+    summary = TextAreaField(
+        "Résumé du cours (optionnel)"
+    )
+
+
+
 
     tags = StringField(
         "Mots-clés (facultatif)"      

@@ -211,11 +211,22 @@ def list_chapters():
 #def validation(count):
 @app.route('/validation/', methods=["GET", "POST"]) 
 def validation():
+    #if the submit button have been used 
+    submit_status = request.args.get("submitted")
+    print(submit_status)
+    #getting the url arguments to check the vars of the query 
+
+    #pour éviter d'appeller des mêmes bouts de code plusieurs fois pour rien on va juste placer une condition sur le submit 
+
+    if submit_status == 'True':
+        txtNameReq = request.args.get('txtName')
+    else : txtNameReq = None
+
+    
     count = 0
     form = TxtBrowser()
     txtName = form.txt.data
     print(txtName)
-    #res_query = query_validation(txtName)
 
     page = request.args.get('page', 1, type=int)
     pagination = MetalNotion.query.paginate(page, per_page=10)
@@ -232,8 +243,9 @@ def validation():
     if form.validate_on_submit():
         count +=1
         #count n'est pas retransmis au refresh de validation, il faudrait le return 
+
         
-        return redirect(url_for('validation/<count>/')) # request.referrer    render_template('validation.html', form= form, notions = notions, pagination=pagination) #change
+        return redirect(url_for('validation', submitted = True, txtName = txtName)) # request.referrer    render_template('validation.html', form= form, notions = notions, pagination=pagination) #change
         #if we validate this we stay on the same page and we have new things that appear 
         #how to link that ???
 
@@ -242,8 +254,8 @@ def validation():
         form = form,
         notions = notions, 
         pagination = pagination,
-        txtName = txtName,
-        #res_query = res_query
+        txtName = txtNameReq,
+        submit = submit_status
     )
     
 """
