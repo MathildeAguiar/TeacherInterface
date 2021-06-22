@@ -23,11 +23,13 @@ class ResearchForm(FlaskForm):
         choices=l #linker ça et changer les noms 
     )
     
+    """
     cat_test = MultiCheckboxField(
         'test',
         choices=[('hi', 'hi'), ('test', 'test')]
     )
-    
+    """
+
     #cat_test2 = BooleanField(label='Text') the label doesn't display itself
     #cat_test3 = BooleanField(label='Chapitre')
     #cat_test2 = BooleanField(label='test2' ,widget=widgets.CheckboxInput())

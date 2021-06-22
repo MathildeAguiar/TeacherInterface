@@ -18,26 +18,20 @@ class CreaChapter(FlaskForm):
         validators=[DataRequired(message="please select at least one")]
     )
 
-    exos =  SelectField( #should be select multiple field 
+    exos =  SelectMultipleField( #should be select multiple field 
         "Sélectionner un ou des exercises"
     )
  
    
-    txt = SelectField(
+    txt = SelectMultipleField( #test for multi select
         "Sélectionner un ou des textes/notions à inclure",
         validators= [DataRequired(message="Veuillez choisir au moins un.e notion/texte")]
     )
 
 
-    """ 
-     we can add a text zone for the teacher to enter informations about the chapter --> need to do a new field in the db 
-    """
-
     summary = TextAreaField(
         "Résumé du cours (optionnel)"
     )
-
-
 
 
     tags = StringField(

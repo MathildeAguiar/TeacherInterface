@@ -1,9 +1,9 @@
 # coding: utf-8
 import datetime
 from re import L
-from types import FrameType
 from sqlalchemy import BigInteger, Column, DECIMAL, DateTime, Float, ForeignKey, Integer, SmallInteger, String, TIMESTAMP, Table, Text, text
 from sqlalchemy.dialects.mysql import INTEGER, LONGTEXT, SMALLINT, TEXT, TINYINT, VARCHAR
+from sqlalchemy.sql.expression import null
 from sqlalchemy.sql.sqltypes import BOOLEAN, Boolean, TIME
 from .views import app
 import logging as lg
@@ -22,9 +22,7 @@ class MetalChapter(db.Model):
     __tablename__ = 'metal_chapters'
 
     id = Column(INTEGER, primary_key=True)
-    #grade_id = Column(INTEGER, nullable=False)
-    name = Column(VARCHAR(191), unique=True, nullable=False) #, unique=True
-    #exercise_id = Column(Integer, ForeignKey('metal_exercises.id'), nullable=False)
+    name = Column(VARCHAR(191), unique=True, nullable=False) 
     group_id = Column(Integer, ForeignKey('metal_groups.id'))
     tags = Column(TEXT)
     slug = Column(VARCHAR(191))
@@ -50,6 +48,7 @@ class MetalGrade(db.Model):
     id = Column(INTEGER, primary_key=True)
     user_id = Column(INTEGER, ForeignKey('metal_users.id'), nullable=False)
     exercise_id = Column(Integer, ForeignKey('metal_exercises.id'), nullable=False)
+    chapter_id = Column(Integer, ForeignKey('metal_chapters.id'))
     slug = Column(VARCHAR(191))
     created_at = Column(TIMESTAMP)
     updated_at = Column(TIMESTAMP)
@@ -91,7 +90,7 @@ class MetalGroup(db.Model):
     id = Column(INTEGER, primary_key=True)
     level = Column(VARCHAR(191), unique=True, nullable=False)
 
-#add question type ? 
+#add question type et metal question aswers ? 
 class MetalQuestion(db.Model):
     __tablename__ = 'metal_questions'
 
@@ -101,6 +100,7 @@ class MetalQuestion(db.Model):
     grade = Column(INTEGER)
     duration = Column(Integer)
     slug = Column(VARCHAR(191))
+    exercise_id = Column(Integer, ForeignKey('metal_exercises.id')) #add nullable=False
     created_at = Column(TIMESTAMP)
     updated_at = Column(TIMESTAMP)
 
@@ -109,7 +109,7 @@ class MetalExercise(db.Model):
 
     id = Column(INTEGER, primary_key=True)
     chapter_id = Column(ForeignKey('metal_chapters.id'), nullable=False)
-    question_id = Column(ForeignKey('metal_questions.id'), nullable=False)
+    question_id = Column(ForeignKey('metal_questions.id'), nullable=False) #remove this field 
     name = Column(VARCHAR(191), unique=True, nullable=False)
     type = Column(VARCHAR(191))
     limited_time = Column(Boolean) #does boolean works here ? 
