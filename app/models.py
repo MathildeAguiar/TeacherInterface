@@ -28,8 +28,8 @@ class MetalChapter(db.Model):
     slug = Column(VARCHAR(191))
     course = Column(TEXT) 
     summary = Column(TEXT)
-    created_at = Column(TIMESTAMP)
-    updated_at = Column(TIMESTAMP)
+    #created_at = Column(TIMESTAMP)
+    #updated_at = Column(TIMESTAMP)
 
 class MetalUser(db.Model):
     __tablename__ = 'metal_users'
@@ -41,7 +41,7 @@ class MetalUser(db.Model):
     group_id = Column(Integer, ForeignKey('metal_groups.id'))
     type = Column(VARCHAR(191))
 
-
+"""
 class MetalGrade(db.Model):
     __tablename__ = 'metal_grades'
 
@@ -52,14 +52,14 @@ class MetalGrade(db.Model):
     slug = Column(VARCHAR(191))
     created_at = Column(TIMESTAMP)
     updated_at = Column(TIMESTAMP)
-
+"""
 
 class MetalCorpus(db.Model):
     __tablename__ = 'metal_corpuses'
 
     id = Column(INTEGER, primary_key=True)
     name = Column(VARCHAR(191), unique=True, nullable=False)
-    analysed_at = Column(TIMESTAMP)
+    #analysed_at = Column(TIMESTAMP)
     notion_id = Column(ForeignKey('metal_notions.id'), nullable=False)
     author = Column(VARCHAR(191))
 
@@ -69,9 +69,10 @@ class MetalNotion(db.Model): #equivalent to grammatical element
 
     id = Column(INTEGER, primary_key=True)
     name = Column(VARCHAR(191), unique=True, nullable=False)
-    created_at = Column(TIMESTAMP)
-    updated_at = Column(TIMESTAMP)
-    question_id = Column(ForeignKey('metal_questions.id'))
+    question_id = Column(INTEGER, ForeignKey('metal_questions.id'))
+
+    #created_at = Column(TIMESTAMP)
+    #updated_at = Column(TIMESTAMP)
 
 
 class MetalNotionItem(db.Model): #equivalent to grammatical item 
@@ -80,8 +81,8 @@ class MetalNotionItem(db.Model): #equivalent to grammatical item
     id = Column(INTEGER, primary_key=True)
     name = Column(VARCHAR(191), nullable=False)
     notion_id = Column(INTEGER, ForeignKey('metal_notions.id'),  nullable=False)
-    created_at = Column(TIMESTAMP)
-    updated_at = Column(TIMESTAMP)
+    #created_at = Column(TIMESTAMP)
+    #updated_at = Column(TIMESTAMP)
 
 
 class MetalGroup(db.Model):
@@ -101,8 +102,31 @@ class MetalQuestion(db.Model):
     duration = Column(Integer)
     slug = Column(VARCHAR(191))
     exercise_id = Column(Integer, ForeignKey('metal_exercises.id')) #add nullable=False
-    created_at = Column(TIMESTAMP)
-    updated_at = Column(TIMESTAMP)
+    #do we need to add a type ? since we already have the link with question id in QUestion Highlight etc I don't think so but idk 
+    #created_at = Column(TIMESTAMP)
+    #updated_at = Column(TIMESTAMP)
+
+class MetalQuestionHighlight(db.Model):
+    __tablename__ = 'metal_question_highlights'
+
+    id = Column(INTEGER, primary_key=True)
+    question_id = Column(INTEGER, ForeignKey('metal_questions.id'), nullable=False)
+    word_position = Column(INTEGER, nullable=False)
+
+class MetalQUestionFillBlank(db.Model):
+    __tablename__ = 'metal_question_fill_blanks'
+
+    id = Column(INTEGER, primary_key=True)
+    question_id = Column(INTEGER, ForeignKey('metal_questions.id'), nullable=False)
+    word_position = Column(INTEGER, nullable=False)
+
+class MetalQuestionTrueFalse(db.Model):
+    __tablename__ = 'metal_question_true_falses'
+
+    id = Column(INTEGER, primary_key=True)
+    question_id = Column(INTEGER, ForeignKey('metal_questions.id'), nullable=False)
+    #do we need to add the available choices (Vrai, faux) ???? 
+
 
 class MetalExercise(db.Model):
     __tablename__ = 'metal_exercises'
@@ -122,6 +146,33 @@ class MetalExercise(db.Model):
     #add a notion field ? 
 
 
+class MetalAnswerUser(db.Model):
+    __tablename__ = 'metal_answer_users'
+
+    id = Column(INTEGER, primary_key=True)
+    user_id = Column(INTEGER, ForeignKey('metal_users.id'), nullable=False)
+    chapter_id = Column(INTEGER, ForeignKey('metal_chapters.id'), nullable=False)
+    question_id = Column(INTEGER, ForeignKey('metal_questions.id'), nullable=False)
+    session_id = Column(INTEGER, ForeignKey('metal_sessions.id'))
+    #is_correct = Column(TINYINT(1), nullable=False) should we keep it ? 
+    #question_answers_id = Column(String(191, 'utf8mb4_unicode_ci'), nullable=False)  # what is that ? 
+    correct_answer = Column(Text(collation='utf8mb4_unicode_ci'), nullable=False) #do we need it or is it done by the analyser or smth
+    user_answer = Column(Text(collation='utf8mb4_unicode_ci'), nullable=False)
+    created_at = Column(TIMESTAMP) #should we keep that ?
+    updated_at = Column(TIMESTAMP) # "   "  "  "
+
+class MetalSession(db.Model):
+    __tablename__ = 'metal_sessions'
+
+    id = Column(INTEGER, primary_key=True)
+    user_id = Column(INTEGER, ForeignKey('metal_users.id'), nullable=False)  #? keep???
+    name = Column(String(191, 'utf8mb4_unicode_ci'), nullable=False)
+    code = Column(INTEGER, nullable=False)
+    created_at = Column(TIMESTAMP) #il faut garder
+    updated_at = Column(TIMESTAMP)
+
+
+
 # database initialization 
 
 def init_db():
@@ -131,6 +182,7 @@ def init_db():
 
     #population of the db 
 
+    """
     #random grades 
 
     for i in range(3): #usr 1
@@ -150,6 +202,7 @@ def init_db():
         grade.created_at = datetime.datetime.now()
         grade.updated_at = datetime.datetime.now()
         db.session.add(grade)
+    """
 
 
     #random groups 
@@ -167,8 +220,8 @@ def init_db():
     groups = ["3ème.1", "3ème.2", "4ème.2", "4ème.1"]
     for i in range(5):
         usr = MetalUser()
-        usr.lastName = "Dupont".format(i+1)
-        usr.firstName = "Pierre".format(i+1)
+        usr.lastName = "Dupont{}".format(i+1)
+        usr.firstName = "Pierre{}".format(i+1)
         usr.group_id = groups[i-1]
         usr.password = randint(1, 99)
         db.session.add(usr)

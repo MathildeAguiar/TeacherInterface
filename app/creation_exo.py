@@ -27,24 +27,10 @@ class CreaExo(FlaskForm):
         validators=[DataRequired(message="please select at least one")]
     )
        
-
-
-    """
-    #I want to have dynamic choices 
-    chap =  SelectField( #SelectMultipleField(
-        "Sélectionner un ou des chapitres",
-        
-        choices=[                       #change with something dynamic (need the db)
-            ('chap1', 'chapitre 1'),
-            ("chap2", "chapitre 2")
-        ]
-        #choices=[chaps]
-    )
-    """
-
-    chap =  SelectField(
+    chap =  SelectField( #SelectMultipleField
         "Sélectionner un ou des chapitres"
     )
+
     """
     tps = RadioField(
         "Temps limité ?",
@@ -57,16 +43,7 @@ class CreaExo(FlaskForm):
         "Temps limité ?", 
         validators=[DataRequired(message="Veuillez choisir une option")]
     )
-    """
-    txt = SelectField(  #SelectMultipleField(
-        "Sélectionner un ou des textes/notions à inclure",
-        choices=[                       #change with something dynamic (need the db)
-            ('txt1', 'texte 1'),
-            ("txt2", "texte 2")
-        ], #choices=[notions]
-        validators= [DataRequired(message="Veuillez choisir au moins un.e notion/texte")]
-    )
-    """
+   
     txt = SelectField(
         "Sélectionner un ou des textes/notions à inclure",
         validators= [DataRequired(message="Veuillez choisir au moins un.e notion/texte")]
@@ -76,13 +53,7 @@ class CreaExo(FlaskForm):
         "Choisissez des questions",
         validators=[DataRequired(message="Veuillez choisir au moins une question")]
     )
-    """ to test
-    quest = SelectMultipleField(
-        "Choisissez des questions",
-        validators=[DataRequired(message="Veuillez choisir au moins une question")]
-        #choices=[quests]
-    )
-    """
+ 
 
     tags = StringField(
         "Mots-clés (facultatif)"      
