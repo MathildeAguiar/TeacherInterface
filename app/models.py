@@ -1,14 +1,14 @@
 # coding: utf-8
 import datetime
-from re import L
-from sqlalchemy import BigInteger, Column, DECIMAL, DateTime, Float, ForeignKey, Integer, SmallInteger, String, TIMESTAMP, Table, Text, text
+from sqlalchemy import BigInteger, Column, DECIMAL, DateTime, Float, ForeignKey, Integer, SmallInteger, String, TIMESTAMP, Table, Text, delete
 from sqlalchemy.dialects.mysql import INTEGER, LONGTEXT, SMALLINT, TEXT, TINYINT, VARCHAR
-from sqlalchemy.sql.expression import null
+from sqlalchemy.sql.expression import update
+#rom sqlalchemy.sql.expression import delete, null
 from sqlalchemy.sql.sqltypes import BOOLEAN, Boolean, TIME
 from .views import app
 import logging as lg
 from flask_sqlalchemy import SQLAlchemy, request
-from random import choices, randint
+from random import choices, randint, randrange
 
 
 
@@ -26,7 +26,7 @@ class MetalChapter(db.Model):
     group_id = Column(Integer, ForeignKey('metal_groups.id'))
     tags = Column(TEXT)
     slug = Column(VARCHAR(191))
-    course = Column(TEXT) 
+    course = Column(TEXT)  #not in the form 
     summary = Column(TEXT)
     #created_at = Column(TIMESTAMP)
     #updated_at = Column(TIMESTAMP)
@@ -97,11 +97,12 @@ class MetalQuestion(db.Model):
 
     id = Column(INTEGER, primary_key=True)
     instructions = Column(TEXT, nullable=False)
-    answers = Column(VARCHAR(512), nullable=False)
-    grade = Column(INTEGER)
+    type = Column(VARCHAR(191))
+    #answers = Column(VARCHAR(512), nullable=False) it depends on the question type 
+    grade = Column(INTEGER) #should we keep it ? 
     duration = Column(Integer)
     slug = Column(VARCHAR(191))
-    exercise_id = Column(Integer, ForeignKey('metal_exercises.id')) #add nullable=False
+    exercise_id = Column(Integer, ForeignKey('metal_exercises.id'), nullable=False) #add nullable=False
     #do we need to add a type ? since we already have the link with question id in QUestion Highlight etc I don't think so but idk 
     #created_at = Column(TIMESTAMP)
     #updated_at = Column(TIMESTAMP)
@@ -113,7 +114,7 @@ class MetalQuestionHighlight(db.Model):
     question_id = Column(INTEGER, ForeignKey('metal_questions.id'), nullable=False)
     word_position = Column(INTEGER, nullable=False)
 
-class MetalQUestionFillBlank(db.Model):
+class MetalQuestionFillBlank(db.Model):
     __tablename__ = 'metal_question_fill_blanks'
 
     id = Column(INTEGER, primary_key=True)
@@ -133,16 +134,16 @@ class MetalExercise(db.Model):
 
     id = Column(INTEGER, primary_key=True)
     chapter_id = Column(ForeignKey('metal_chapters.id'), nullable=False)
-    question_id = Column(ForeignKey('metal_questions.id'), nullable=False) #remove this field 
+    #question_id = Column(ForeignKey('metal_questions.id'), nullable=False) #remove this field 
     name = Column(VARCHAR(191), unique=True, nullable=False)
-    type = Column(VARCHAR(191))
+    #type = Column(VARCHAR(191))
     limited_time = Column(Boolean) #does boolean works here ? 
     tags = Column(VARCHAR(191))
     slug = Column(VARCHAR(191))
-    created_at = Column(TIMESTAMP)
-    updated_at = Column(TIMESTAMP)
-    group_lvl = Column(ForeignKey('metal_groups.level'))
-    text_related = Column(ForeignKey('metal_corpuses.name'))
+    #created_at = Column(TIMESTAMP)
+    #updated_at = Column(TIMESTAMP)
+    group_lvl = Column(ForeignKey('metal_groups.level')) #redondant ? 
+    text_related = Column(ForeignKey('metal_corpuses.name')) #here ? 
     #add a notion field ? 
 
 
@@ -156,18 +157,19 @@ class MetalAnswerUser(db.Model):
     session_id = Column(INTEGER, ForeignKey('metal_sessions.id'))
     #is_correct = Column(TINYINT(1), nullable=False) should we keep it ? 
     #question_answers_id = Column(String(191, 'utf8mb4_unicode_ci'), nullable=False)  # what is that ? 
-    correct_answer = Column(Text(collation='utf8mb4_unicode_ci'), nullable=False) #do we need it or is it done by the analyser or smth
-    user_answer = Column(Text(collation='utf8mb4_unicode_ci'), nullable=False)
+    correct_answer = Column(Text, nullable=False) #do we need it or is it done by the analyser or smth
+    user_answer = Column(Text, nullable=False)
     created_at = Column(TIMESTAMP) #should we keep that ?
     updated_at = Column(TIMESTAMP) # "   "  "  "
 
-class MetalSession(db.Model):
+class MetalSession(db.Model): #exercices session 
     __tablename__ = 'metal_sessions'
 
     id = Column(INTEGER, primary_key=True)
     user_id = Column(INTEGER, ForeignKey('metal_users.id'), nullable=False)  #? keep???
-    name = Column(String(191, 'utf8mb4_unicode_ci'), nullable=False)
+    name = Column(VARCHAR(191), nullable=False)
     code = Column(INTEGER, nullable=False)
+    mark = Column(Integer, nullable=False)
     created_at = Column(TIMESTAMP) #il faut garder
     updated_at = Column(TIMESTAMP)
 
@@ -231,52 +233,67 @@ def init_db():
     for i in range(5):
         chap = MetalChapter()
         chap.name = chap_name[i]
-        #choices(chap_name).pop(0)
         chap.slug = str(chap.name)
-        chap.updated_at = datetime.datetime.now()
-        chap.created_at = datetime.datetime.now()
+        chap.summary = "Ceci est un résumé de chapitre"
         chap.course = 'cours {}'.format(i)
-        #chap.exercise_id = 1
         chap.tags = 'un tag'
-        chap.group_id = randint(1, 3)
+        chap.group_id = randint(1, 3) #here or not 
         db.session.add(chap)
     
     # random quests 
     instruct = ['instr 1', 'instr 2', 'instr 3']
-    answers_possible = [ "'oui', 'non'", "'yes', 'no'", "1, 2, 3"]
-    for i in range(8):
+    for i in range(9):
         quest = MetalQuestion()
-        quest.updated_at = datetime.datetime.now()
-        quest.created_at = datetime.datetime.now()
-        quest.answers = choices(answers_possible).pop(0)
         quest.duration = randint(1, 60)
-        quest.instructions = choices(instruct).pop(0)
+        quest.instructions = "instruction n° {}".format(i)
+        #choices(instruct).pop(0)
         quest.grade = randint(0, 20)
+        quest.exercise_id = randint(1,5)
+        quest.type = "question type "
         db.session.add(quest)
 
-    #random exo
+    #random question types -- highlights
+
+    for i in range(3):
+        questHighlight =  MetalQuestionHighlight()
+        questHighlight.question_id = randint(1,3)
+        questHighlight.word_position = randint(1, 15)
+        db.session.add(questHighlight)
+
+    #random quest types -- fill blank 
+
+    for i in range(3):
+        questFill = MetalQuestionFillBlank()
+        questFill.word_position = randint(1, 12)
+        questFill.question_id = randint(4,6)
+        db.session.add(questFill)
+
+    #random question types -- true false 
+
+    for i in range(3):
+        questTF  = MetalQuestionTrueFalse()
+        questTF.question_id = randint(7,9)
+        db.session.add(questTF)
+           
+   
+    #random exo --> check the fields again !!!!!
     for i in range(5):
         exo = MetalExercise()
-        exo.updated_at = datetime.datetime.now()
-        exo.created_at = datetime.datetime.now()
         exo.limited_time = choices([True, False]).pop(0)
         exo.name = "name {}".format(i+1)
         exo.slug = "this is an exo slug"
         exo.tags = "exo's tags"
         exo.chapter_id = randint(1, 4)
-        exo.question_id = randint(1,3)
         db.session.add(exo)
 
 
-    #random corpus
+    #random corpus 
     texts = ['Vingt mille lieues sous les mers', 'Le Grand Meaulnes', 'Maupassant', 'Corpus test']
     for i in range(4):
         corp = MetalCorpus()
         corp.name = texts[i]
-        #choices(['Vingt mille lieues sous les mers', 'Le Grand Meaulnes', 'Maupassant', 'Corpus test']).pop(0)
         corp.notion_id = randint(1, 3)
-        corp.author = "author".format(i+1)
-        corp.analysed_at = datetime.datetime.now()
+        corp.author = "author {}".format(i+1)
         db.session.add(corp)
 
 
@@ -287,8 +304,6 @@ def init_db():
         notion.name = n[i]
         #choices(['conjonction-subordination', 'groupe nominal', 'groupe-nominal-sujet', 'pronom relatif', 'indicatif-present', 'complement-d-agent']).pop(0)
         notion.question_id = randint(1, 3)
-        notion.updated_at = datetime.datetime.now()
-        notion.created_at = datetime.datetime.now()
         db.session.add(notion)
 
     #random notion item 
@@ -296,9 +311,31 @@ def init_db():
         notion_item = MetalNotionItem()
         notion_item.name = 'notion_itm.{}'.format(i+1)
         notion_item.notion_id = randint(1,4)
-        notion_item.updated_at = datetime.datetime.now()
-        notion_item.created_at = datetime.datetime.now()
         db.session.add(notion_item)
+
+    #random exercices sessions 
+    for i in range(4):
+        sess = MetalSession()
+        sess.created_at = datetime.datetime.now()
+        sess.mark = randint(0, 20)
+        sess.name = "session n° {}".format(i)
+        sess.updated_at = datetime.datetime.now()
+        sess.user_id = i
+        sess.code = randint(44,777)
+        db.session.add(sess)
+
+    #random usr answers 
+    for i in range(4):
+        usrans = MetalAnswerUser()
+        usrans.user_id = i
+        usrans.chapter_id = i
+        usrans.correct_answer = "this is the correct answer"
+        usrans.created_at = datetime.datetime.now()
+        usrans.question_id = i
+        usrans.session_id = i
+        usrans.user_answer = "user {} answer".format(i)
+        usrans.user_id = i
+        db.session.add(usrans)
 
     db.session.commit()
     lg.warning('Database initialized!')
@@ -330,7 +367,7 @@ def query_all_groups():
     grp = MetalGroup.query.order_by(MetalGroup.level).all()
     return grp
 
-#query to fetch all exercices related to a chapter (used in side nav or not ? ) TODO test it 
+#query to fetch all exercices related to a chapter TODO test it 
 def query_exo_related_chaps(chap_name):
     #list_exo = MetalExercise.query.select_from(MetalExercise.name).join(MetalChapter, MetalChapter.id == MetalExercise.chapter_id).filter(MetalChapter.name == chap_name)
     list_exo = db.session.query(MetalExercise).join(MetalChapter, MetalChapter.id==MetalExercise.chapter_id).filter(MetalChapter.name==chap_name).all()
@@ -344,13 +381,10 @@ def new_exo(name, lvl, chapId, duration, text, quest, tags):
     exo = MetalExercise()
     exo.name = name
     exo.limited_time = duration
-    exo.created_at = datetime.datetime.now()
-    exo.updated_at = datetime.datetime.now()
     exo.chapter_id = chapId
     exo.question_id = quest #wrong I think 
     exo.group_lvl = lvl
     exo.texts_related = text
-    #exo.level = lvl
     exo.tags = tags
 
     #the query itself 
@@ -443,3 +477,22 @@ def query_validation(txtName):
             return notions 
         else: None #return "Aucun texte ne correspond à votre demande !"    
     else: None #return "Aucun texte ne correspond à votre demande !"
+
+#query to edit a notion find by the analyser 
+
+def edit_notion(notionName, name): #TODO we can't change much with only those fields missing the sentence examined 
+    if notionName is not None:
+        #notionObject = db.session.query(MetalNotion).filter(MetalNotion.name==notionName)
+        #notionObject.name = name
+        update(MetalNotion).where(MetalNotion.name == notionName).values(name=name)
+        db.session.commit()
+        lg.warning('Modifications done !')
+
+#query to delete a notion "forever"
+
+def delete_notion(notionName):
+    if notionName is not None:
+        delete(MetalNotion).where(MetalNotion.name == notionName) 
+        #attention on doit supprimer une notion liée à une phrase en particulier là on va juste suppr toutes les notions de ce nom!!!!
+        db.session.commit()
+        lg.warning('Deleted done !')

@@ -22,12 +22,12 @@ class CreaExo(FlaskForm):
             Length(min=1, message='the name should be longer')]
     )
 
-    level = SelectField( #SelectMultipleField(
+    level = SelectMultipleField( #SelectMultipleField(
         "Niveaux",
         validators=[DataRequired(message="please select at least one")]
     )
        
-    chap =  SelectField( #SelectMultipleField
+    chap =  SelectMultipleField( #SelectMultipleField
         "Sélectionner un ou des chapitres"
     )
 
@@ -44,12 +44,12 @@ class CreaExo(FlaskForm):
         validators=[DataRequired(message="Veuillez choisir une option")]
     )
    
-    txt = SelectField(
+    txt = SelectMultipleField(
         "Sélectionner un ou des textes/notions à inclure",
         validators= [DataRequired(message="Veuillez choisir au moins un.e notion/texte")]
     )
 
-    quest = StringField(
+    quest = SelectMultipleField(
         "Choisissez des questions",
         validators=[DataRequired(message="Veuillez choisir au moins une question")]
     )

@@ -31,7 +31,7 @@ csrf = CSRFProtect(app)
 babel = Babel(app)
 
 #imports from models (must stay here)
-from app.models import MetalChapter, MetalExercise, MetalGroup, general_query2, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_groups, MetalNotion, query_validation, query_exo_related_chaps
+from app.models import MetalChapter, MetalExercise, MetalGroup, general_query2, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_groups, query_all_quests, MetalNotion, query_validation, query_exo_related_chaps
 
 
 #routes 
@@ -98,7 +98,6 @@ def creation_exo():
     form = CreaExo()
     #query to get all the chapters avaiable
     chaps = query_all_chaps()
-    print(chaps)
     form.chap.choices = [(c.id,c.name) for c in chaps] #checker au debugger si on a bien ce que l'on veut mais sinon ok
 
     #query for all notions (should have texts also) avaiable
@@ -110,7 +109,8 @@ def creation_exo():
 
     #form.tps.name = 'oui' looking for the right way to display propositions 
 
-    #quests = query_all_quests()
+    quests = query_all_quests()
+    form.quest.choices = [(q.id, q.instructions) for q in quests]
     
     if form.validate_on_submit():
         return redirect(url_for('list_exo')) #change
@@ -127,7 +127,6 @@ def list_exo(): #chap_name=None
     chap_name = request.args.get("chapName")
     print("request args",request.args)
     print("chap name extraction", chap_name)
-    #print(chap_name)
     page = request.args.get('page', 1, type=int)
     pagination = MetalExercise.query.paginate(page, per_page=20)
 
@@ -233,7 +232,6 @@ def validation():
 
     form = TxtBrowser()
     txtName = form.txt.data
-    print(txtName)
 
     """ moved in the if, please CLEAN THE CODE 
     page = request.args.get('page', 1, type=int)
