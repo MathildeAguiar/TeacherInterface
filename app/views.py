@@ -288,7 +288,8 @@ def groups():
 
 #exercices sessions' page
 @app.route('/creation_session/',  methods=['GET', 'POST'])
-def session():
+def creation_session():
+    
     form = SessionExo()
     #get all the levels available
     grps = query_all_groups()

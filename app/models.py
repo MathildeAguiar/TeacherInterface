@@ -493,11 +493,38 @@ def edit_notion(notionName, name): #TODO we can't change much with only those fi
         db.session.commit()
         lg.warning('Modifications done !')
 
-#query to delete a notion "forever"
+
+# DANS TOUS LES DELETE ATTENTION AUX DÉPENDANCES !!!!!!
+#query to delete a notion "forever" TODO TO TEST
 
 def delete_notion(notionName):
     if notionName is not None:
         delete(MetalNotion).where(MetalNotion.name == notionName) 
         #attention on doit supprimer une notion liée à une phrase en particulier là on va juste suppr toutes les notions de ce nom!!!!
         db.session.commit()
-        lg.warning('Deleted done !')
+        lg.warning('Deleted notion !')
+
+#query to delete a session TODO TO TEST
+
+def delete_session(sessionName):
+    if sessionName is not None:
+        delete(MetalSession).where(MetalSession.name == sessionName) 
+        db.session.commit()
+        lg.warning('Deleted session !')
+
+#query to delete a chapter TODO TO TEST
+
+def delete_chapter(chapName):
+    if chapName is not None:
+        delete(MetalChapter).where(MetalChapter.name == chapName) 
+        db.session.commit()
+        lg.warning('Deleted chapter !')
+
+#query to delete an exercise TODO TO TEST
+
+def delete_exercise(exoName):
+    if exoName is not None:
+        delete(MetalExercise).where(MetalExercise.name == exoName) 
+        #attention les dépendances !!!! 
+        db.session.commit()
+        lg.warning('Deleted exercise !')
