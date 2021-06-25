@@ -367,6 +367,11 @@ def query_all_groups():
     grp = MetalGroup.query.order_by(MetalGroup.level).all()
     return grp
 
+#query all the exercices sessions avaiable 
+def query_all_sessions():
+    session = MetalSession.query.order_by(MetalSession.name).all()
+    return session
+
 #query to fetch all exercices related to a chapter TODO test it 
 def query_exo_related_chaps(chap_name):
     #list_exo = MetalExercise.query.select_from(MetalExercise.name).join(MetalChapter, MetalChapter.id == MetalExercise.chapter_id).filter(MetalChapter.name == chap_name)

@@ -1,6 +1,7 @@
+from app.session_exo import SessionExo
 from app.chapter_creation import CreaChapter
 import os
-from re import A
+import random, string
 from flask_wtf import CSRFProtect
 from flask_bootstrap import Bootstrap
 from flask_babel import Babel #test Babel
@@ -31,7 +32,7 @@ csrf = CSRFProtect(app)
 babel = Babel(app)
 
 #imports from models (must stay here)
-from app.models import MetalChapter, MetalExercise, MetalGroup, general_query2, init_db, new_exo, query_all_chaps, query_all_exos, query_all_gram, query_all_groups, query_all_quests, MetalNotion, query_validation, query_exo_related_chaps
+from app.models import MetalChapter, MetalExercise, MetalGroup, MetalSession, general_query2, init_db, new_exo, query_all_chaps, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_all_quests, MetalNotion, query_validation, query_exo_related_chaps
 
 
 #routes 
@@ -181,6 +182,7 @@ def chapter_creation():
     notions = query_all_gram()
     form.txt.choices = [(n.id, n.name) for n in notions]
 
+    #ajouter la requete de création/ajout du chap!!!!
 
     return render_template(
         'chapter_creation.html',
@@ -282,6 +284,47 @@ def groups():
         'groups.html', 
         groups = groups,
         pagination = pagination
+    )
+
+#exercices sessions' page
+@app.route('/creation_session/',  methods=['GET', 'POST'])
+def session():
+    form = SessionExo()
+    #get all the levels available
+    grps = query_all_groups()
+    form.grps.choices = [(g.id, g.level) for g in grps]
+
+    #get all the exercises available 
+    ex = query_all_exos()
+    form.exos.choices = [(e.id, e.name) for e in ex]
+
+    #session code 
+    sessionCode = "".join([random.choice(string.ascii_uppercase + string.digits) for _ in range(10)])
+
+     #ajouter la requete de création/ajout de la session!!!!
+
+    if form.validate_on_submit():      
+        return redirect(url_for('list_sessions')) 
+
+    return render_template(
+        "creation_session.html",
+        form = form,
+        sessionCode = sessionCode
+    )
+
+#list of all sessions created 
+@app.route('/list_sessions/',  methods=['GET', 'POST'])
+def list_sessions():
+
+    page = request.args.get('page', 1, type=int)
+    pagination = MetalSession.query.paginate(page, per_page=20)
+   
+    sessions = query_all_sessions()
+
+    return render_template(
+        "list_sessions.html",
+        pagination = pagination,
+        sessions = sessions
     )
 
 #run 
