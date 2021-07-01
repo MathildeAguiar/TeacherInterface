@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField, MultipleFileField
 from wtforms.fields.core import Label, SelectMultipleField, SelectField
 from wtforms.fields.simple import TextAreaField, TextField
 from wtforms.validators import DataRequired, Length
@@ -24,14 +24,20 @@ class CreaChapter(FlaskForm):
  
    
     txt = SelectMultipleField( #test for multi select
-        "Sélectionner un ou des textes/notions à inclure",
-        validators= [DataRequired(message="Veuillez choisir au moins un.e notion/texte")]
+        "Sélectionner un ou des textes à inclure",
+        validators= [DataRequired(message="Veuillez choisir au moins un texte")]
     )
 
+    notion = SelectMultipleField(
+        "Sélectionner une ou des notions à inclure",
+        validators= [DataRequired(message="Veuillez choisir au moins une notion")]
+    )
 
     summary = TextAreaField(
-        "Résumé du cours (optionnel)"
+        "Résumé du cours (facultatif)"
     )
+
+    file = MultipleFileField("Choisir un fichier")
 
 
     tags = StringField(

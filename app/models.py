@@ -1,8 +1,10 @@
 # coding: utf-8
 import datetime
+import random, string
 from sqlalchemy import BigInteger, Column, DECIMAL, DateTime, Float, ForeignKey, Integer, SmallInteger, String, TIMESTAMP, Table, Text, delete
 from sqlalchemy.dialects.mysql import INTEGER, LONGTEXT, SMALLINT, TEXT, TINYINT, VARCHAR
 from sqlalchemy.sql.expression import update
+from sqlalchemy.orm import relationship
 #rom sqlalchemy.sql.expression import delete, null
 from sqlalchemy.sql.sqltypes import BOOLEAN, Boolean, TIME
 from .views import app
@@ -12,24 +14,12 @@ from random import choices, randint, randrange
 
 
 
+
 #database 
 db = SQLAlchemy(app)
 
 
 #classes of our tables 
-
-class MetalChapter(db.Model):
-    __tablename__ = 'metal_chapters'
-
-    id = Column(INTEGER, primary_key=True)
-    name = Column(VARCHAR(191), unique=True, nullable=False) 
-    group_id = Column(Integer, ForeignKey('metal_groups.id'))
-    tags = Column(TEXT)
-    slug = Column(VARCHAR(191))
-    course = Column(TEXT)  #not in the form 
-    summary = Column(TEXT)
-    #created_at = Column(TIMESTAMP)
-    #updated_at = Column(TIMESTAMP)
 
 class MetalUser(db.Model):
     __tablename__ = 'metal_users'
@@ -38,30 +28,132 @@ class MetalUser(db.Model):
     lastName = Column(VARCHAR(191), nullable=False)
     firstName = Column(VARCHAR(191), nullable=False)
     password = Column(VARCHAR(191), nullable=False)
+    #many to one with groups  (many users can be in 1 group) --> might change to many to many 
     group_id = Column(Integer, ForeignKey('metal_groups.id'))
-    type = Column(VARCHAR(191))
+    group = relationship("MetalGroup", back_populates="users")
+    type = Column(VARCHAR(191)) #role 
 
-"""
-class MetalGrade(db.Model):
-    __tablename__ = 'metal_grades'
+association_groups_chaps = Table('groups_chaps', db.metadata, Column('group_id', Integer, ForeignKey('metal_groups.id')), Column("chapter_id", Integer, ForeignKey('metal_chapters.id')))
+
+class MetalGroup(db.Model):
+    __tablename__ = 'metal_groups'
 
     id = Column(INTEGER, primary_key=True)
-    user_id = Column(INTEGER, ForeignKey('metal_users.id'), nullable=False)
-    exercise_id = Column(Integer, ForeignKey('metal_exercises.id'), nullable=False)
-    chapter_id = Column(Integer, ForeignKey('metal_chapters.id'))
+    level = Column(VARCHAR(191), unique=True, nullable=False)
+    #many to one with users  --> might change into many to many 
+    users = relationship("MetalUser", back_populates="group")
+    #many to one avec session d'exercices 
+    sessions = relationship("MetalAssignment", back_populates="group")
+    #many to many with chapter table 
+    chapters = relationship("MetalChapter", secondary= association_groups_chaps, back_populates="groups")
+
+association_chap_exos= Table('chaps_exos', db.metadata, Column('chap_id', Integer, ForeignKey('metal_chapters.id')), Column('exo_id', Integer, ForeignKey('metal_exercises.id')))
+
+association_chaps_notions = Table('exos_notions', db.metadata, Column('notion_id', Integer, ForeignKey('metal_notions.id')), Column('chap_id', Integer, ForeignKey('metal_chapters.id')))
+
+class MetalChapter(db.Model):
+    __tablename__ = 'metal_chapters'
+
+    id = Column(INTEGER, primary_key=True)
+    name = Column(VARCHAR(191), unique=True, nullable=False)
+    tags = Column(TEXT)
     slug = Column(VARCHAR(191))
+    cycle = Column(TEXT)  #not in the form 
+    summary = Column(TEXT)
+    #many to many with the table Groups  
+    groups = relationship("MetalGroup", secondary=association_groups_chaps, back_populates="chapters")
+    #many to many with exercices 
+    exos = relationship("MetalExercise", secondary=association_chap_exos, back_populates="chaps")
+    #many to many with notions 
+    notions = relationship("MetalNotion", secondary=association_chaps_notions, back_populates='chaps')
+
+association_exos_quests = Table('quests_exos', db.metadata, Column('quest_id', Integer, ForeignKey('metal_questions.id')), Column('exo_id', Integer, ForeignKey('metal_exercises.id')))   
+
+association_exos_sessions = Table('sess_exos', db.metadata, Column('sess_id', Integer, ForeignKey('metal_assignments.id')), Column('exo_id', Integer, ForeignKey('metal_exercises.id')))
+
+association_exos_txts = Table('exos_txts', db.metadata, Column('txt_id', Integer, ForeignKey('metal_corpuses.id')), Column('exo_id', Integer, ForeignKey('metal_exercises.id')))
+
+#association_exos_notions = Table('exos_notions', db.metadata, Column('notion_id', Integer, ForeignKey('metal_notions.id')), Column('exo_id', Integer, ForeignKey('metal_exercices.id')))
+
+class MetalExercise(db.Model):
+    __tablename__ = 'metal_exercises'
+
+    id = Column(INTEGER, primary_key=True)
+    #many to many with chapters 
+    chaps = relationship("MetalChapter", secondary=association_chap_exos, back_populates="exos")
+    name = Column(VARCHAR(191), unique=True, nullable=False)
+    limited_time = Column(Boolean) #does boolean works here ? 
+    tags = Column(VARCHAR(191))
+    slug = Column(VARCHAR(191))
+    #many to many with questions 
+    quests = relationship("MetalQuestion", secondary=association_exos_quests, back_populates="exos")
+    #many to many with sessions 
+    sessions = relationship("MetalAssignment", secondary=association_exos_sessions, back_populates="exos")
+    #many to many with corpus
+    corpuses = relationship("MetalCorpus", secondary=association_exos_txts, back_populates="exos")
+    #many to may with notions --> simplify
+    #notions = relationship("MetalNotion", secondary=association_exos_notions, back_populates="exos")
+    #question déjà liée à la notion et au texte donc pas besoin de redondance 
+    #text_related = Column(ForeignKey('metal_corpuses.name')) 
+
+
+#add question type et metal question aswers ? 
+class MetalQuestion(db.Model):
+    __tablename__ = 'metal_questions'
+
+    id = Column(INTEGER, primary_key=True)
+    type = Column(VARCHAR(191)) #to link with the different types 
+    grade = Column(INTEGER) #should we keep it ? 
+    duration = Column(Integer)
+    slug = Column(VARCHAR(191))
+    #many to many with exos 
+    exos = relationship("MetalExercise", secondary=association_exos_quests, back_populates="quests")
+    #many to one with notion
+    notion_id = Column(Integer, ForeignKey('metal_notions.id'))
+    notion = relationship("MetalNotion", back_populates="questions")
+    #relation with usr answer
+    usr_answer = relationship("MetalAnswerUser", back_populates="question")
+    #different types of questions relationships 
+    questTF = relationship("MetalQuestionTrueFalse", back_populates="questions")
+    questFillBlank = relationship("MetalQuestionFillBlank", back_populates="questions")
+    questHighlight = relationship("MetalQuestionHighlight", bake_queries="questions")
+
+    #do we need to add a type ? since we already have the link with question id in QUestion Highlight etc I don't think so but idk 
+
+
+class MetalAssignment(db.Model): #exercices session 
+    __tablename__ = 'metal_assignments'
+
+    id = Column(INTEGER, primary_key=True)
+    user_id = Column(INTEGER, ForeignKey('metal_users.id'), nullable=False)  #? keep???
+    name = Column(VARCHAR(191), nullable=False)
+    code = Column(INTEGER) #some have codes (mandatory groups of exercices) and some don't (non mandatory ones)
+    mark = Column(Integer, nullable=False)
+    #many to one with Groups 
+    group_id = Column(Integer, ForeignKey('metal_groups.id') )
+    group = relationship("MetalGroup", back_populates="sessions")
+    #many to many with exercices 
+    exos = relationship("MetalExercise", secondary=association_exos_sessions, back_populates="sessions")
+    #one to many with Usr answer
+    usr_answers = relationship("MetalAnswerUser", back_populates="session")
     created_at = Column(TIMESTAMP)
     updated_at = Column(TIMESTAMP)
-"""
+
+ 
+
+association_notions_txts = Table('notions_txts', db.metadata, Column('notion_id', Integer, ForeignKey('metal_notions.id')), Column('txt_id', Integer, ForeignKey('metal_corpuses.id')))
 
 class MetalCorpus(db.Model):
     __tablename__ = 'metal_corpuses'
 
     id = Column(INTEGER, primary_key=True)
     name = Column(VARCHAR(191), unique=True, nullable=False)
-    #analysed_at = Column(TIMESTAMP)
-    notion_id = Column(ForeignKey('metal_notions.id'), nullable=False)
+    #notion_id = Column(ForeignKey('metal_notions.id'), nullable=False)
     author = Column(VARCHAR(191))
+    #many to many with exercices
+    exos = relationship("MetalExercise", secondary=association_exos_txts, back_populates="corpuses")
+    #many to many with notions
+    notions = relationship("MetalNotion", secondary=association_notions_txts, back_populates="corpuses")
 
 
 class MetalNotion(db.Model): #equivalent to grammatical element 
@@ -69,82 +161,59 @@ class MetalNotion(db.Model): #equivalent to grammatical element
 
     id = Column(INTEGER, primary_key=True)
     name = Column(VARCHAR(191), unique=True, nullable=False)
-    question_id = Column(INTEGER, ForeignKey('metal_questions.id'))
+    #many to many with exos 
+    #exos = relationship("MetalExercices", secondary=association_exos_notions, back_populates="notions")
+    #one to many with notion items 
+    notion_item = relationship('MetalNotionItems')
+    #many to many with corpus
+    corpuses = relationship("MetalCorpus", secondary=association_notions_txts, back_populates="notions")
+    #one to many with notion item 
+    notion_item = relationship("MetalNotionItem")
+    #many to one with questions
+    questions = relationship("MetalQuestion",back_populates="notion")
+    #question_id = Column(INTEGER, ForeignKey('metal_questions.id')) 
+    #many to many with chapters
+    chaps = relationship("MetalChapter", secondary=association_chaps_notions, back_populates="notions")
 
-    #created_at = Column(TIMESTAMP)
-    #updated_at = Column(TIMESTAMP)
 
-
-class MetalNotionItem(db.Model): #equivalent to grammatical item 
+class MetalNotionItem(db.Model): #equivalent to grammatical marker 
     __tablename__ = 'metal_notion_items'
 
     id = Column(INTEGER, primary_key=True)
     name = Column(VARCHAR(191), nullable=False)
     notion_id = Column(INTEGER, ForeignKey('metal_notions.id'),  nullable=False)
-    #created_at = Column(TIMESTAMP)
-    #updated_at = Column(TIMESTAMP)
 
 
-class MetalGroup(db.Model):
-    __tablename__ = 'metal_groups'
 
-    id = Column(INTEGER, primary_key=True)
-    level = Column(VARCHAR(191), unique=True, nullable=False)
-
-#add question type et metal question aswers ? 
-class MetalQuestion(db.Model):
-    __tablename__ = 'metal_questions'
-
-    id = Column(INTEGER, primary_key=True)
-    instructions = Column(TEXT, nullable=False)
-    type = Column(VARCHAR(191))
-    #answers = Column(VARCHAR(512), nullable=False) it depends on the question type 
-    grade = Column(INTEGER) #should we keep it ? 
-    duration = Column(Integer)
-    slug = Column(VARCHAR(191))
-    exercise_id = Column(Integer, ForeignKey('metal_exercises.id'), nullable=False) #add nullable=False
-    #do we need to add a type ? since we already have the link with question id in QUestion Highlight etc I don't think so but idk 
-    #created_at = Column(TIMESTAMP)
-    #updated_at = Column(TIMESTAMP)
+########################### MANY TO MANY AND SO ON TO DEFINE FROM HERE
 
 class MetalQuestionHighlight(db.Model):
     __tablename__ = 'metal_question_highlights'
 
     id = Column(INTEGER, primary_key=True)
     question_id = Column(INTEGER, ForeignKey('metal_questions.id'), nullable=False)
+    questions = relationship("MetalQuestion", back_populates="questHighlight")
     word_position = Column(INTEGER, nullable=False)
+    instructions = Column(TEXT, nullable=False)
 
 class MetalQuestionFillBlank(db.Model):
     __tablename__ = 'metal_question_fill_blanks'
 
     id = Column(INTEGER, primary_key=True)
     question_id = Column(INTEGER, ForeignKey('metal_questions.id'), nullable=False)
+    questions = relationship("MetalQuestion", back_populates="questFillBlank")
     word_position = Column(INTEGER, nullable=False)
+    instructions = Column(TEXT, nullable=False)
 
 class MetalQuestionTrueFalse(db.Model):
     __tablename__ = 'metal_question_true_falses'
 
     id = Column(INTEGER, primary_key=True)
     question_id = Column(INTEGER, ForeignKey('metal_questions.id'), nullable=False)
+    questions = relationship("MetalQuestion", back_populates="questTF")
+    instructions = Column(TEXT, nullable=False)
     #do we need to add the available choices (Vrai, faux) ???? 
 
-
-class MetalExercise(db.Model):
-    __tablename__ = 'metal_exercises'
-
-    id = Column(INTEGER, primary_key=True)
-    chapter_id = Column(ForeignKey('metal_chapters.id'), nullable=False)
-    #question_id = Column(ForeignKey('metal_questions.id'), nullable=False) #remove this field 
-    name = Column(VARCHAR(191), unique=True, nullable=False)
-    #type = Column(VARCHAR(191))
-    limited_time = Column(Boolean) #does boolean works here ? 
-    tags = Column(VARCHAR(191))
-    slug = Column(VARCHAR(191))
-    #created_at = Column(TIMESTAMP)
-    #updated_at = Column(TIMESTAMP)
-    group_lvl = Column(ForeignKey('metal_groups.level')) #redondant ? 
-    text_related = Column(ForeignKey('metal_corpuses.name')) #here ? 
-    #add a notion field ? 
 
 
 class MetalAnswerUser(db.Model):
@@ -152,30 +221,21 @@ class MetalAnswerUser(db.Model):
 
     id = Column(INTEGER, primary_key=True)
     user_id = Column(INTEGER, ForeignKey('metal_users.id'), nullable=False)
-    chapter_id = Column(INTEGER, ForeignKey('metal_chapters.id'), nullable=False)
+    #chapter_id = Column(INTEGER, ForeignKey('metal_chapters.id'), nullable=False)
+    #many to one with questions
     question_id = Column(INTEGER, ForeignKey('metal_questions.id'), nullable=False)
-    session_id = Column(INTEGER, ForeignKey('metal_sessions.id'))
-    #is_correct = Column(TINYINT(1), nullable=False) should we keep it ? 
-    #question_answers_id = Column(String(191, 'utf8mb4_unicode_ci'), nullable=False)  # what is that ? 
-    correct_answer = Column(Text, nullable=False) #do we need it or is it done by the analyser or smth
+    question = relationship("MetalQuestion", back_populates="usr_answer")
+    #one to many with sessions  
+    session_id = Column(INTEGER, ForeignKey('metal_assignments.id'))
+    session = relationship("MetalAssignment", back_populates="usr_answers") 
+    #correct_answer = Column(Text, nullable=False) #do we need it or is it done by the analyser or smth already in the question type table 
     user_answer = Column(Text, nullable=False)
     created_at = Column(TIMESTAMP) #should we keep that ?
     updated_at = Column(TIMESTAMP) # "   "  "  "
 
-class MetalSession(db.Model): #exercices session 
-    __tablename__ = 'metal_sessions'
 
-    id = Column(INTEGER, primary_key=True)
-    user_id = Column(INTEGER, ForeignKey('metal_users.id'), nullable=False)  #? keep???
-    name = Column(VARCHAR(191), nullable=False)
-    code = Column(INTEGER, nullable=False)
-    mark = Column(Integer, nullable=False)
-    created_at = Column(TIMESTAMP) #il faut garder
-    updated_at = Column(TIMESTAMP)
+####### database initialization ########
 
-
-
-# database initialization 
 
 def init_db():
     
@@ -183,29 +243,6 @@ def init_db():
     db.create_all()
 
     #population of the db 
-
-    """
-    #random grades 
-
-    for i in range(3): #usr 1
-        grade = MetalGrade()
-        grade.user_id = 1 
-        grade.slug = "exo 1"
-        grade.exercise_id = 1
-        grade.created_at = datetime.datetime.now()
-        grade.updated_at = datetime.datetime.now()
-        db.session.add(grade)
-
-    for i in range(3): #usr 2
-        grade = MetalGrade()
-        grade.slug = "exo 1"
-        grade.exercise_id = 1
-        grade.user_id = 2
-        grade.created_at = datetime.datetime.now()
-        grade.updated_at = datetime.datetime.now()
-        db.session.add(grade)
-    """
-
 
     #random groups 
 
@@ -235,27 +272,26 @@ def init_db():
         chap.name = chap_name[i]
         chap.slug = str(chap.name)
         chap.summary = "Ceci est un résumé de chapitre"
-        chap.course = 'cours {}'.format(i)
+        chap.cycle = 'cours du cycle {}'.format(i)
         chap.tags = 'un tag'
-        chap.group_id = randint(1, 3) #here or not 
         db.session.add(chap)
     
     # random quests 
-    instruct = ['instr 1', 'instr 2', 'instr 3']
     for i in range(9):
         quest = MetalQuestion()
         quest.duration = randint(1, 60)
-        quest.instructions = "instruction n° {}".format(i)
-        #choices(instruct).pop(0)
-        quest.grade = randint(0, 20)
-        quest.exercise_id = randint(1,5)
-        quest.type = "question type "
+        #quest.instructions = "instruction n° {}".format(i) dépend du type de quest 
+        quest.grade = randint(0, 20) #keep it ? 
+        quest.type = "question type " #keep it ? 
+        quest.notion_id = randint(1, 4)
+        quest.slug = "this is a question slug"
         db.session.add(quest)
 
     #random question types -- highlights
 
     for i in range(3):
         questHighlight =  MetalQuestionHighlight()
+        questHighlight.instructions = "this is instructions for quest highlight"
         questHighlight.question_id = randint(1,3)
         questHighlight.word_position = randint(1, 15)
         db.session.add(questHighlight)
@@ -264,6 +300,7 @@ def init_db():
 
     for i in range(3):
         questFill = MetalQuestionFillBlank()
+        questFill.instructions = "this is instructions for quest fill"
         questFill.word_position = randint(1, 12)
         questFill.question_id = randint(4,6)
         db.session.add(questFill)
@@ -272,18 +309,19 @@ def init_db():
 
     for i in range(3):
         questTF  = MetalQuestionTrueFalse()
+        questTF.instructions = "this is instructions for quest T/F"
         questTF.question_id = randint(7,9)
         db.session.add(questTF)
            
    
-    #random exo --> check the fields again !!!!!
+    #random exo 
     for i in range(5):
         exo = MetalExercise()
         exo.limited_time = choices([True, False]).pop(0)
         exo.name = "name {}".format(i+1)
         exo.slug = "this is an exo slug"
         exo.tags = "exo's tags"
-        exo.chapter_id = randint(1, 4)
+        #exo.chapter_id = randint(1, 4)
         db.session.add(exo)
 
 
@@ -292,7 +330,7 @@ def init_db():
     for i in range(4):
         corp = MetalCorpus()
         corp.name = texts[i]
-        corp.notion_id = randint(1, 3)
+        #corp.notion_id = randint(1, 3)
         corp.author = "author {}".format(i+1)
         db.session.add(corp)
 
@@ -302,8 +340,7 @@ def init_db():
     for i in range(5):
         notion = MetalNotion()
         notion.name = n[i]
-        #choices(['conjonction-subordination', 'groupe nominal', 'groupe-nominal-sujet', 'pronom relatif', 'indicatif-present', 'complement-d-agent']).pop(0)
-        notion.question_id = randint(1, 3)
+        #notion.question_id = randint(1, 3)
         db.session.add(notion)
 
     #random notion item 
@@ -315,30 +352,28 @@ def init_db():
 
     #random exercices sessions 
     for i in range(4):
-        sess = MetalSession()
+        sess = MetalAssignment()
         sess.created_at = datetime.datetime.now()
         sess.mark = randint(0, 20)
+        sess.code = "".join([random.choice(string.ascii_uppercase + string.digits) for _ in range(10)])
         sess.name = "session n° {}".format(i)
         sess.updated_at = datetime.datetime.now()
         sess.user_id = i
-        sess.code = randint(44,777)
         db.session.add(sess)
 
     #random usr answers 
     for i in range(4):
         usrans = MetalAnswerUser()
         usrans.user_id = i
-        usrans.chapter_id = i
-        usrans.correct_answer = "this is the correct answer"
         usrans.created_at = datetime.datetime.now()
-        usrans.question_id = i
         usrans.session_id = i
         usrans.user_answer = "user {} answer".format(i)
-        usrans.user_id = i
+        usrans.question_id = randint(1,4)
         db.session.add(usrans)
 
     db.session.commit()
     lg.warning('Database initialized!')
+
 
 #fct queries 
 
@@ -353,9 +388,11 @@ def query_all_exos():
     exos = MetalExercise.query.order_by(MetalExercise.name).all()
     return exos
 
-#get all the questions and order them by their names 
+#get all the questions and order them by their names  TODO there is no more instructions in here !!!
 def query_all_quests():
-    quests = MetalQuestion.query.order_by(MetalQuestion.instructions).all()
+    questsTF = MetalQuestionTrueFalse.query.order_by(MetalQuestionTrueFalse.instructions).all()
+    questsFB = MetalQuestionFillBlank.query.order_by(MetalQuestionFillBlank.instructions).all()
+    questsH = MetalQuestionHighlight.query.order_by(MetalQuestionHighlight.instructions).all()
     return quests
 
 #get all the grammatical elements and order them by their names 
@@ -369,14 +406,21 @@ def query_all_groups():
 
 #query all the exercices sessions avaiable 
 def query_all_sessions():
-    session = MetalSession.query.order_by(MetalSession.name).all()
+    session = MetalAssignment.query.order_by(MetalAssignment.name).all()
     return session
 
-#query to fetch all exercices related to a chapter TODO test it 
+#query all the texts avaiable 
+def query_all_corpuses():
+    corpuses = MetalCorpus.query.order_by(MetalCorpus.name).all()
+    return corpuses
+
+
+#query to fetch all exercices related to a chapter TODO changer le chapter_id 
 def query_exo_related_chaps(chap_name):
     #list_exo = MetalExercise.query.select_from(MetalExercise.name).join(MetalChapter, MetalChapter.id == MetalExercise.chapter_id).filter(MetalChapter.name == chap_name)
-    list_exo = db.session.query(MetalExercise).join(MetalChapter, MetalChapter.id==MetalExercise.chapter_id).filter(MetalChapter.name==chap_name).all()
-    return list_exo
+    #list_exo = db.session.query(MetalExercise).join(MetalChapter, MetalChapter.id==MetalExercise.chapter_id).filter(MetalChapter.name==chap_name).all()
+    #return list_exo
+    return None
 
 
 #insert a newly created exercice in the database 
@@ -386,7 +430,7 @@ def new_exo(name, lvl, chapId, duration, text, quest, tags):
     exo = MetalExercise()
     exo.name = name
     exo.limited_time = duration
-    exo.chapter_id = chapId
+    #exo.chapter_id = chapId
     exo.question_id = quest #wrong I think 
     exo.group_lvl = lvl
     exo.texts_related = text
@@ -425,7 +469,7 @@ def general_query2(query, category):
         print(tmp_chap)
         tmp_exo = MetalExercise.query.filter(MetalExercise.name.like(search)).all()
         print(tmp_exo)
-        tmp_quest = MetalQuestion.query.filter(MetalQuestion.instructions.like(search)).all()
+        tmp_quest = MetalQuestion.query.filter(MetalQuestion.instructions.like(search)).all() #instructions !! à changer
         tmp_gramm = MetalNotion.query.filter(MetalNotion.name.like(search)).all()
         tmp_txt = MetalCorpus.query.filter(MetalCorpus.name.like(search)).all()
 
@@ -460,7 +504,7 @@ def general_query2(query, category):
         tmp_gramm = MetalNotion.query.filter(MetalNotion.name.like(search)).all()
         res.append(tmp_gramm)
     if category=='Questions':
-        tmp_quest = MetalQuestion.query.filter(MetalQuestion.instructions.like(search)).all()
+        tmp_quest = MetalQuestion.query.filter(MetalQuestion.instructions.like(search)).all()  #instructions !! à changer
         res.append(tmp_quest)
     if category == 'Textes':
         tmp_txt = MetalCorpus.query.filter(MetalCorpus.name.like(search)).all()
@@ -473,7 +517,7 @@ def general_query2(query, category):
 
 #query for 'validation' page  TODO
 
-def query_validation(txtName):
+def query_validation(txtName): #TO CHANGE (the join is wrong)
     if txtName is not None: 
         #previously query(MetalNotion.name)... but I need objects and not just a string 
         notions = db.session.query(MetalNotion).join(MetalCorpus, MetalCorpus.notion_id == MetalNotion.id).filter(MetalCorpus.name==txtName).all()       
@@ -508,7 +552,7 @@ def delete_notion(notionName):
 
 def delete_session(sessionName):
     if sessionName is not None:
-        delete(MetalSession).where(MetalSession.name == sessionName) 
+        delete(MetalAssignment).where(MetalAssignment.name == sessionName) 
         db.session.commit()
         lg.warning('Deleted session !')
 

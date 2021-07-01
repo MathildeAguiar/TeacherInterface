@@ -45,8 +45,8 @@ class CreaExo(FlaskForm):
     )
    
     txt = SelectMultipleField(
-        "Sélectionner un ou des textes/notions à inclure",
-        validators= [DataRequired(message="Veuillez choisir au moins un.e notion/texte")]
+        "Sélectionner un ou des textes à inclure",
+        validators= [DataRequired(message="Veuillez choisir au moins un texte")]
     )
 
     quest = SelectMultipleField(

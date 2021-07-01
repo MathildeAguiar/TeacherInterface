@@ -32,7 +32,7 @@ csrf = CSRFProtect(app)
 babel = Babel(app)
 
 #imports from models (must stay here)
-from app.models import MetalChapter, MetalExercise, MetalGroup, MetalSession, general_query2, init_db, new_exo, query_all_chaps, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_all_quests, MetalNotion, query_validation, query_exo_related_chaps
+from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_all_quests, MetalNotion, query_validation, query_exo_related_chaps
 
 
 #routes 
@@ -59,8 +59,8 @@ def inject_chapters():
 @app.route('/form/', methods=["GET", "POST"])
 def index():
     #just a test 
-    test = query_exo_related_chaps('Pronoms personnels')
-    print(test)
+    #test = query_exo_related_chaps('Pronoms personnels')
+    #print(test)
 
     form = ResearchForm()
     if form.validate_on_submit():
@@ -99,16 +99,13 @@ def creation_exo():
     form = CreaExo()
     #query to get all the chapters avaiable
     chaps = query_all_chaps()
-    form.chap.choices = [(c.id,c.name) for c in chaps] #checker au debugger si on a bien ce que l'on veut mais sinon ok
+    form.chap.choices = [(c.id,c.name) for c in chaps] 
 
-    #query for all notions (should have texts also) avaiable
-    notions = query_all_gram()
-    form.txt.choices = [(n.id, n.name) for n in notions]
+    txts = query_all_corpuses()
+    form.txt.choices = [(t.id, t.name) for t in txts]
 
     lvls = query_all_groups()
     form.level.choices = [(l.id, l.level) for l in lvls]
-
-    #form.tps.name = 'oui' looking for the right way to display propositions 
 
     quests = query_all_quests()
     form.quest.choices = [(q.id, q.instructions) for q in quests]
@@ -180,7 +177,11 @@ def chapter_creation():
 
     #get all the texts and notions available (for now only notions)
     notions = query_all_gram()
-    form.txt.choices = [(n.id, n.name) for n in notions]
+    form.notion.choices = [(n.id, n.name) for n in notions]
+
+    #get all texts avaiable
+    txts = query_all_corpuses()
+    form.txt.choices = [(t.id, t.name) for t in txts]
 
     #ajouter la requete de création/ajout du chap!!!!
 
@@ -318,7 +319,7 @@ def creation_session():
 def list_sessions():
 
     page = request.args.get('page', 1, type=int)
-    pagination = MetalSession.query.paginate(page, per_page=20)
+    pagination = MetalAssignment.query.paginate(page, per_page=20)
    
     sessions = query_all_sessions()
 
