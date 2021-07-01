@@ -32,7 +32,7 @@ csrf = CSRFProtect(app)
 babel = Babel(app)
 
 #imports from models (must stay here)
-from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_all_quests, MetalNotion, query_validation, query_exo_related_chaps
+from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_all_quests, MetalNotion, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF
 
 
 #routes 
@@ -107,11 +107,18 @@ def creation_exo():
     lvls = query_all_groups()
     form.level.choices = [(l.id, l.level) for l in lvls]
 
-    quests = query_all_quests()
-    form.quest.choices = [(q.id, q.instructions) for q in quests]
-    
+    questsTF= query_all_qTF() 
+    form.questTF.choices = [(q.id, q.instructions) for q in questsTF]
+
+    questsFill= query_all_qFB()
+    form.questFill.choices = [(q.id, q.instructions) for q in questsFill]
+
+    questsHigh= query_all_qH()
+    form.questHighlight.choices = [(q.id, q.instructions) for q in questsHigh]
+
+
     if form.validate_on_submit():
-        return redirect(url_for('list_exo')) #change
+        return redirect(url_for('list_exo')) 
     return render_template(
         'creation_exo.html',
         form = form

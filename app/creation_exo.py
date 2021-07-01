@@ -49,8 +49,18 @@ class CreaExo(FlaskForm):
         validators= [DataRequired(message="Veuillez choisir au moins un texte")]
     )
 
-    quest = SelectMultipleField(
-        "Choisissez des questions",
+    questTF = SelectMultipleField(
+        "Choisissez des questions de type 'Vrai ou Faux' ",
+        validators=[DataRequired(message="Veuillez choisir au moins une question")] #enlever les data requiered mais il faut quand même choisir au moins 1 question !
+    )
+
+    questFill = SelectMultipleField(
+        "Choisissez des questions de type 'texte à trous' ",
+        validators=[DataRequired(message="Veuillez choisir au moins une question")]
+    )
+
+    questHighlight = SelectMultipleField(
+        "Choisissez des questions de type 'surlignage' ",
         validators=[DataRequired(message="Veuillez choisir au moins une question")]
     )
  

@@ -128,7 +128,7 @@ class MetalAssignment(db.Model): #exercices session
     user_id = Column(INTEGER, ForeignKey('metal_users.id'), nullable=False)  #? keep???
     name = Column(VARCHAR(191), nullable=False)
     code = Column(INTEGER) #some have codes (mandatory groups of exercices) and some don't (non mandatory ones)
-    mark = Column(Integer, nullable=False)
+    #mark = Column(Integer, nullable=False) --> doit être par rapport à un élève 
     #many to one with Groups 
     group_id = Column(Integer, ForeignKey('metal_groups.id') )
     group = relationship("MetalGroup", back_populates="sessions")
@@ -332,6 +332,12 @@ def init_db():
         corp.name = texts[i]
         #corp.notion_id = randint(1, 3)
         corp.author = "author {}".format(i+1)
+        n = MetalNotion()
+        n.name = "test corpus/notions {}".format(i)
+        corp.notions.append(n)
+        n1 = MetalNotion()
+        n1.name = "Test 2 {}".format(i)
+        corp.notions.append(n1)
         db.session.add(corp)
 
 
@@ -341,6 +347,10 @@ def init_db():
         notion = MetalNotion()
         notion.name = n[i]
         #notion.question_id = randint(1, 3)
+        #populate the corpuses field 
+        c = MetalCorpus()
+        c.name = "test notion {}".format(i)
+        notion.corpuses.append(c)
         db.session.add(notion)
 
     #random notion item 
@@ -353,8 +363,8 @@ def init_db():
     #random exercices sessions 
     for i in range(4):
         sess = MetalAssignment()
-        sess.created_at = datetime.datetime.now()
-        sess.mark = randint(0, 20)
+        sess.created_at = datetime.datetime.now() 
+        #sess.mark = randint(0, 20) --> doit être par rapport à un élève 
         sess.code = "".join([random.choice(string.ascii_uppercase + string.digits) for _ in range(10)])
         sess.name = "session n° {}".format(i)
         sess.updated_at = datetime.datetime.now()
@@ -388,12 +398,29 @@ def query_all_exos():
     exos = MetalExercise.query.order_by(MetalExercise.name).all()
     return exos
 
-#get all the questions and order them by their names  TODO there is no more instructions in here !!!
+#get all the questions and order them by their names  TODO there is no more instructions in here !!! 
 def query_all_quests():
+    quests = MetalQuestion()
     questsTF = MetalQuestionTrueFalse.query.order_by(MetalQuestionTrueFalse.instructions).all()
     questsFB = MetalQuestionFillBlank.query.order_by(MetalQuestionFillBlank.instructions).all()
     questsH = MetalQuestionHighlight.query.order_by(MetalQuestionHighlight.instructions).all()
-    return quests
+    return quests.append(questsTF, questsFB, questsH)
+
+#get all the questions True False and order them by their instructions
+def query_all_qTF():
+    questsTF = MetalQuestionTrueFalse.query.order_by(MetalQuestionTrueFalse.instructions).all()
+    return questsTF
+
+#get all the questions Fill blank and order them by their instructions
+def query_all_qFB():
+    questsFB = MetalQuestionFillBlank.query.order_by(MetalQuestionFillBlank.instructions).all()
+    return questsFB
+
+#get all the questions Highlight and order them by their instructions
+def query_all_qH():
+    questsH = MetalQuestionHighlight.query.order_by(MetalQuestionHighlight.instructions).all()
+    return questsH
+
 
 #get all the grammatical elements and order them by their names 
 def query_all_gram():
@@ -469,7 +496,9 @@ def general_query2(query, category):
         print(tmp_chap)
         tmp_exo = MetalExercise.query.filter(MetalExercise.name.like(search)).all()
         print(tmp_exo)
-        tmp_quest = MetalQuestion.query.filter(MetalQuestion.instructions.like(search)).all() #instructions !! à changer
+        tmp_questTF = MetalQuestionTrueFalse.query.filter(MetalQuestionTrueFalse.instructions.like(search)).all() 
+        tmp_questFB = MetalQuestionFillBlank.query.filter(MetalQuestionFillBlank.instructions.like(search)).all() 
+        tmp_questH = MetalQuestionHighlight.query.filter(MetalQuestionHighlight.instructions.like(search)).all() 
         tmp_gramm = MetalNotion.query.filter(MetalNotion.name.like(search)).all()
         tmp_txt = MetalCorpus.query.filter(MetalCorpus.name.like(search)).all()
 
@@ -483,8 +512,14 @@ def general_query2(query, category):
         if tmp_gramm !=[]:
             res.append(tmp_gramm)
         
-        if tmp_quest!=[]:
-            res.append(tmp_quest)
+        if tmp_questTF!=[]:
+            res.append(tmp_questTF)
+
+        if tmp_questFB!=[]:
+            res.append(tmp_questFB)
+        
+        if tmp_questH!=[]:
+            res.append(tmp_questH)
         
         if tmp_txt!=[]:
             res.append(tmp_txt)
@@ -504,8 +539,17 @@ def general_query2(query, category):
         tmp_gramm = MetalNotion.query.filter(MetalNotion.name.like(search)).all()
         res.append(tmp_gramm)
     if category=='Questions':
-        tmp_quest = MetalQuestion.query.filter(MetalQuestion.instructions.like(search)).all()  #instructions !! à changer
-        res.append(tmp_quest)
+        tmp_questTF = MetalQuestionTrueFalse.query.filter(MetalQuestionTrueFalse.instructions.like(search)).all() 
+        tmp_questFB = MetalQuestionFillBlank.query.filter(MetalQuestionFillBlank.instructions.like(search)).all() 
+        tmp_questH = MetalQuestionHighlight.query.filter(MetalQuestionHighlight.instructions.like(search)).all()
+        if tmp_questH != []:
+            res.append(tmp_questH) 
+        if tmp_questFB != []:
+            res.append(tmp_questFB)
+        if tmp_questTF !=[]:
+            res.append(tmp_questTF)
+        #tmp_quest = MetalQuestion.query.filter(MetalQuestion.instructions.like(search)).all()  #instructions !! à changer
+        #res.append(tmp_quest)
     if category == 'Textes':
         tmp_txt = MetalCorpus.query.filter(MetalCorpus.name.like(search)).all()
         res.append(tmp_txt)
@@ -520,7 +564,9 @@ def general_query2(query, category):
 def query_validation(txtName): #TO CHANGE (the join is wrong)
     if txtName is not None: 
         #previously query(MetalNotion.name)... but I need objects and not just a string 
-        notions = db.session.query(MetalNotion).join(MetalCorpus, MetalCorpus.notion_id == MetalNotion.id).filter(MetalCorpus.name==txtName).all()       
+        #notions = db.session.query(MetalNotion).join(MetalCorpus, MetalCorpus.notion_id == MetalNotion.id).filter(MetalCorpus.name==txtName).all()       
+        notions = db.session.query(MetalNotion).join(MetalCorpus, MetalNotion.corpuses).filter(MetalCorpus.name==txtName).all()   
+        #on récupère déjà tous les obj MetalCorpus qui ont se nom    
         print(notions)
         if notions !=[]: 
             return notions 

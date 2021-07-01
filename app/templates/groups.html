@@ -16,7 +16,7 @@
         {{ groups }}
     </div>
     {% else %}
-    {{ render_table(groups) }}
+    {{ render_table(groups, show_actions=True, view_url=url_for('connexion'), edit_url=url_for('connexion')) }}
     {{ render_pagination(pagination) }}
     {% endif %}
 </main>
