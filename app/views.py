@@ -32,7 +32,7 @@ csrf = CSRFProtect(app)
 babel = Babel(app)
 
 #imports from models (must stay here)
-from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_all_quests, MetalNotion, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF
+from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_all_quests, MetalNotion, query_delete_chapter, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise
 
 
 #routes 
@@ -168,6 +168,32 @@ def list_exo(): #chap_name=None
         exos = exos
     )
 
+@app.route('/list_exo/<exo_id>/delete_exo', methods=['POST', 'GET'])
+def delete_exo(exo_id):
+
+    query_delete_exercise(exo_id)
+    
+
+    page = request.args.get('page', 1, type=int)
+    pagination = MetalExercise.query.paginate(page, per_page=20)
+   
+    exos = query_all_exos()
+    
+    return render_template(
+        "list_exo.html", 
+        pagination = pagination,
+        exos = exos
+    )
+
+
+@app.route('/list_exo/<exo_id>/modify_exo', methods=['GET', 'POST']) #TODO
+def modify_exo(exo_id):
+    exo_id = request.args.get('exo_id')
+    if exo_id:
+        return True
+    
+    return True
+
 
 #page to create a new chapter
 @app.route('/chapter_creation', methods=['GET','POST'])
@@ -213,6 +239,31 @@ def list_chapters():
         chaps = chaps
     )
 
+@app.route('/list_chapters/<chapter_id>/delete_chapter', methods=['POST', 'GET'])
+def delete_chapter(chapter_id):
+
+    query_delete_chapter(chapter_id)
+    
+
+    page = request.args.get('page', 1, type=int)
+    pagination = MetalChapter.query.paginate(page, per_page=20)
+   
+    chaps = query_all_chaps()
+    
+    return render_template(
+        "list_chapters.html", 
+        pagination = pagination,
+        chaps = chaps
+    )
+
+
+@app.route('/list_chapters/<chapter_id>/modify_chapter', methods=['GET', 'POST']) #TODO
+def modify_chapter(chapter_id):
+    chapter_id = request.args.get('chapter_id')
+    if chapter_id:
+        return True
+    
+    return True
 
 
 #page where you have to confirm notions found by the analyser
@@ -335,6 +386,41 @@ def list_sessions():
         pagination = pagination,
         sessions = sessions
     )
+
+@app.route('/list_sessions/<session_id>/delete', methods=['POST', 'GET'])
+def delete_session(session_id):
+
+    #sess_id = request.args.get('session_id')
+    print(session_id)
+    #sess_id = int(sess_id)
+    query_delete_session(session_id)
+    
+
+    page = request.args.get('page', 1, type=int)
+    pagination = MetalAssignment.query.paginate(page, per_page=20)
+   
+    sessions = query_all_sessions()
+
+    #session_id = request.args.get(session_id)
+    #if session_id:
+
+    
+    return render_template(
+        "list_sessions.html", 
+        pagination = pagination,
+        sessions = sessions
+    )
+
+    #return redirect(url_for('list_sessions'))
+
+@app.route('/list_sessions/<session_id>/modify_session', methods=['GET', 'POST'])
+def modify_session(session_id):
+    session_id = request.args.get('session_id')
+    if session_id:
+        #edit_session(session_id) n'existe pas encore 
+        return True
+    
+    return True
 
 #run 
 if __name__ == "__main__":

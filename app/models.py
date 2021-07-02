@@ -54,7 +54,7 @@ association_chaps_notions = Table('exos_notions', db.metadata, Column('notion_id
 class MetalChapter(db.Model):
     __tablename__ = 'metal_chapters'
 
-    id = Column(INTEGER, primary_key=True)
+    id = Column(Integer, primary_key=True)
     name = Column(VARCHAR(191), unique=True, nullable=False)
     tags = Column(TEXT)
     slug = Column(VARCHAR(191))
@@ -561,20 +561,18 @@ def general_query2(query, category):
 
 #query for 'validation' page  TODO
 
-def query_validation(txtName): #TO CHANGE (the join is wrong)
+def query_validation(txtName): 
     if txtName is not None: 
-        #previously query(MetalNotion.name)... but I need objects and not just a string 
         #notions = db.session.query(MetalNotion).join(MetalCorpus, MetalCorpus.notion_id == MetalNotion.id).filter(MetalCorpus.name==txtName).all()       
         notions = db.session.query(MetalNotion).join(MetalCorpus, MetalNotion.corpuses).filter(MetalCorpus.name==txtName).all()   
-        #on récupère déjà tous les obj MetalCorpus qui ont se nom    
         print(notions)
         if notions !=[]: 
             return notions 
         else: None #return "Aucun texte ne correspond à votre demande !"    
     else: None #return "Aucun texte ne correspond à votre demande !"
 
-#query to edit a notion find by the analyser 
 
+#query to edit a notion find by the analyser 
 def edit_notion(notionName, name): #TODO we can't change much with only those fields missing the sentence examined 
     if notionName is not None:
         #notionObject = db.session.query(MetalNotion).filter(MetalNotion.name==notionName)
@@ -583,38 +581,61 @@ def edit_notion(notionName, name): #TODO we can't change much with only those fi
         db.session.commit()
         lg.warning('Modifications done !')
 
+#query to modify an exercice assignment  TODO
+def edit_assignment(assignment_id):
+    if assignment_id:
+        return True
 
 # DANS TOUS LES DELETE ATTENTION AUX DÉPENDANCES !!!!!!
 #query to delete a notion "forever" TODO TO TEST
-
-def delete_notion(notionName):
+def query_delete_notion(notionName):
     if notionName is not None:
-        delete(MetalNotion).where(MetalNotion.name == notionName) 
+        #db.session.delete(MetalNotion).where(MetalNotion.name == notionName) #doit plutot delete la question associée à la notion non ? 
         #attention on doit supprimer une notion liée à une phrase en particulier là on va juste suppr toutes les notions de ce nom!!!!
+        db.session.delete(MetalQuestion).join(MetalNotion ,MetalQuestion.notion).where(MetalNotion.name == notionName) #doit plutot delete la question associée à la notion non ? 
         db.session.commit()
         lg.warning('Deleted notion !')
 
-#query to delete a session TODO TO TEST
-
-def delete_session(sessionName):
-    if sessionName is not None:
-        delete(MetalAssignment).where(MetalAssignment.name == sessionName) 
+#query to delete a session 
+def query_delete_session(sessionId):
+    sess = MetalAssignment.query.get(sessionId)
+    if sess:
+        db.session.delete(sess)
         db.session.commit()
         lg.warning('Deleted session !')
 
+    #if sessionId is not None:
+        #db.session.delete(MetalAssignment).where(MetalAssignment.id == sessionId)
+        #db.session.commit()
+        #lg.warning('Deleted session !')
+
 #query to delete a chapter TODO TO TEST
 
-def delete_chapter(chapName):
-    if chapName is not None:
-        delete(MetalChapter).where(MetalChapter.name == chapName) 
+def query_delete_chapter(chapId):
+    chap = MetalChapter.query.get(chapId)
+    if chap:
+        db.session.delete(chap)
         db.session.commit()
         lg.warning('Deleted chapter !')
-
+    """"
+    if chapName is not None:
+        db.session.delete(MetalChapter).where(MetalChapter.name == chapName) 
+        db.session.commit()
+        lg.warning('Deleted chapter !')
+    """
 #query to delete an exercise TODO TO TEST
 
-def delete_exercise(exoName):
+def query_delete_exercise(exoId):
+    exo = MetalExercise.query.get(exoId)
+    if exo:
+        db.session.delete(exo)
+        db.session.commit()
+        lg.warning('Deleted exercise !')
+
+    """
     if exoName is not None:
         delete(MetalExercise).where(MetalExercise.name == exoName) 
         #attention les dépendances !!!! 
         db.session.commit()
         lg.warning('Deleted exercise !')
+    """

@@ -15,7 +15,7 @@
 
 
 
-{{ render_table(exos) }}
+{{ render_table(exos, show_actions=True, edit_url=url_for('modify_exo', exo_id=":primary_key"), delete_url= url_for('delete_exo', exo_id=':primary_key')) }}
 
 {{ render_pagination(pagination) }}
 

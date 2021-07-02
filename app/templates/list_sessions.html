@@ -15,7 +15,7 @@
 
 
 
-{{ render_table(sessions, show_actions=True, edit_url=url_for('list_sessions', message_id=':primary_key'), delete_url= url_for('list_sessions', message_id=':primary_key') ) }}
+{{ render_table(sessions, show_actions=True, edit_url=url_for('modify_session', session_id=":primary_key"), delete_url= url_for('delete_session', session_id=':primary_key') ) }}
 
 <div class="col-12">
     {{ render_pagination(pagination) }}
