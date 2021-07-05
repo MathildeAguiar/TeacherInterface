@@ -385,8 +385,8 @@ def init_db():
     lg.warning('Database initialized!')
 
 
-#fct queries 
 
+################# Queries that fetch all items of one kind #################
 
 #get all the chapters and order them by their names 
 def query_all_chaps():
@@ -441,7 +441,6 @@ def query_all_corpuses():
     corpuses = MetalCorpus.query.order_by(MetalCorpus.name).all()
     return corpuses
 
-
 #query to fetch all exercices related to a chapter TODO changer le chapter_id 
 def query_exo_related_chaps(chap_name):
     #list_exo = MetalExercise.query.select_from(MetalExercise.name).join(MetalChapter, MetalChapter.id == MetalExercise.chapter_id).filter(MetalChapter.name == chap_name)
@@ -450,36 +449,95 @@ def query_exo_related_chaps(chap_name):
     return None
 
 
+
+########### Queries to create a new exercise/chapter/assignment ################
+
 #insert a newly created exercice in the database 
-def new_exo(name, lvl, chapId, duration, text, quest, tags):
+def new_exo(name, chaps, duration, texts, questsTF, questsFB, questsH, tags): 
 
     #fct to insert a new exercice in the db after clicking on "create" button
-    exo = MetalExercise()
-    exo.name = name
-    exo.limited_time = duration
-    #exo.chapter_id = chapId
-    exo.question_id = quest #wrong I think 
-    exo.group_lvl = lvl
-    exo.texts_related = text
-    exo.tags = tags
+    if name and chaps and texts and questsFB and questsH and questsTF: #the case where one of a kind of quest is not selected !!!
+        exo = MetalExercise()
+        exo.name = name
+        exo.limited_time = duration
+
+        for c in chaps: #!!!! on ajoute des strings là mais on devrait ajouter des obj, il faut get les objets qui correspondent 
+            q = db.session.query(MetalChapter).get(c)
+            print(q)
+            if q:
+                exo.chaps.append(q)
+        
+        for t in texts:
+            q = db.session.query(MetalCorpus).get(t)
+            exo.corpuses.append(q)
+        
+        for q1 in questsTF:
+            q = db.session.query(MetalQuestionTrueFalse).get(q1)
+            exo.quests.append(q)
+
+        for q2 in questsFB:
+            q = db.session.query(MetalQuestionFillBlank).get(q2)
+            exo.quests.append(q)
+        
+        for q3 in questsH:
+            q = db.session.query(MetalQuestionHighlight).get(q3)
+            exo.quests.append(q)
+
+        exo.tags = tags
+
+        #the query itself 
+        db.session.add(exo)
+        db.session.commit()
+        lg.warning('Addition done !')
+
+
+#insert a newly created chapter to the database TODO to test
+def new_chapter(name, levels, exos, notions, summary, tags): #texts, to delete ?
+    chap = MetalChapter()
+    chap.name = name
+    if levels is not None:
+        for l in levels:
+            chap.groups.append(l)
+    if exos is not None:
+        for e in exos:
+            chap.exos.append(e)
+
+    if notions is not None:
+        for n in notions:
+            chap.notions.append(n)
+    
+    chap.slug = summary
+    chap.summary = summary
+    chap.tags = tags
 
     #the query itself 
-    db.session.add(exo)
+    db.session.add(chap)
+    db.session.commit()
+    lg.warning('Addition done !')
+
+#query to create a new assignment
+
+def new_assignment(name, choosenExos, groups, code):
+
+    assignment = MetalAssignment()
+    assignment.name = name
+    assignment.code = code #like that ? rn it's in views but maybe here with the unique cheking it's better ? 
+    assignment.created_at = datetime.datetime.now()
+    assignment.updated_at = datetime.datetime.now()
+    if choosenExos is not None:
+        for e in choosenExos:
+            assignment.exos.append(e)
+    if groups is not None:
+        for g in groups:
+            assignment.group_id = g.id #??????????????????? la relationship ne va pas 
+    #the query itself 
+    db.session.add(assignment)
     db.session.commit()
     lg.warning('Addition done !')
 
 
-#insert a newly created chapter to the database TODO
-def new_chapter(name, level, exos, texts, summary, tags):
-    chap = MetalChapter()
-    chap.group_id = level
-    chap.name = name
-    chap.slug = summary
-    chap.summary = summary
-    chap.tags = tags
-    #il faut gérer l'update des exos ici et celui des texts
 
-#home query 
+######################### Home page query ###########################################
 def general_query2(query, category):
 
     res = list()
@@ -524,7 +582,7 @@ def general_query2(query, category):
         if tmp_txt!=[]:
             res.append(tmp_txt)
 
-        elif len(res)==0: return "Aucun résultat !" #might need to change the data form here too 
+        elif len(res)==0: return "Aucun résultat !"
     
     if category == 'Chapitres':
         tmp_chap = MetalChapter.query.filter(MetalChapter.name.like(search)).all()
@@ -559,7 +617,11 @@ def general_query2(query, category):
     for o in res:
         return o
 
-#query for 'validation' page  TODO
+
+
+############ Validation page's query ################# 
+
+#query for 'validation' page
 
 def query_validation(txtName): 
     if txtName is not None: 
@@ -581,20 +643,87 @@ def edit_notion(notionName, name): #TODO we can't change much with only those fi
         db.session.commit()
         lg.warning('Modifications done !')
 
-#query to modify an exercice assignment  TODO
-def edit_assignment(assignment_id):
-    if assignment_id:
-        return True
 
 # DANS TOUS LES DELETE ATTENTION AUX DÉPENDANCES !!!!!!
-#query to delete a notion "forever" TODO TO TEST
-def query_delete_notion(notionName):
-    if notionName is not None:
+#query to delete a notion "forever" TODO TO TEST --> problem with dependancies 
+def query_delete_notion(notionId):
+    if notionId is not None:
         #db.session.delete(MetalNotion).where(MetalNotion.name == notionName) #doit plutot delete la question associée à la notion non ? 
         #attention on doit supprimer une notion liée à une phrase en particulier là on va juste suppr toutes les notions de ce nom!!!!
-        db.session.delete(MetalQuestion).join(MetalNotion ,MetalQuestion.notion).where(MetalNotion.name == notionName) #doit plutot delete la question associée à la notion non ? 
-        db.session.commit()
-        lg.warning('Deleted notion !')
+        #db.session.delete(MetalQuestion).join(MetalNotion ,MetalQuestion.notion).where(MetalNotion.name == notionName) #doit plutot delete la question associée à la notion non ? 
+        questNotion = db.session.query(MetalQuestion).join(MetalNotion ,MetalQuestion.notion).where(MetalNotion.id == notionId).first()
+        #MetalNotion.query.get(notionId)
+
+        if questNotion:
+            db.session.delete(questNotion)
+            #db.session.delete(MetalQuestion).join(MetalNotion ,MetalQuestion.notion).where(MetalNotion.id == notionId) 
+            db.session.commit()
+            lg.warning('Deleted notion !')
+
+
+
+################# Modifications/deletions of chapters/exos/assignments ########################
+
+#query to modify an exercice assignment  TODO 
+def edit_assignment(assignName, newName, groups, exos):
+    #on récupère l'objet à modifier et ensuite seulement on modifie ses params 
+    if newName:
+        update(MetalAssignment).where(MetalAssignment.name == assignName).values(name=newName) #???
+    
+    if groups:
+        update(MetalAssignment).where(MetalAssignment.name== assignName).values(group_id = groups) #???
+
+    #lire la doc sur les update avec many many 
+        return True
+
+#query to edit a chapter infos TODO
+def edit_chapter(chapName, newName, groups, txts, exos, notions, summary, tags):
+    #on récupère l'objet correspondant
+    chap = db.session.query(MetalChapter).filter(MetalChapter.name==chapName).first()
+    if newName:
+        chap.name = newName
+    if tags:
+        chap.tags = tags
+    if summary:
+        chap.summary = summary
+        chap.slug = summary
+    if groups:
+        chap.groups = groups
+    if notions:
+        chap.notions
+    if exos:
+        chap.exos = exos
+    db.session.commit()
+    lg.warning('Modified chapter')
+
+#query to edit an exo infos TODO 
+def edit_exo(exoName, newName, chaps, duration, txts, qTF, qH, qFB, tags):
+    #on récupère l'exercice correspondant
+    exo = db.session.query(MetalExercise).filter(MetalExercise.name==exoName).first()
+    if newName:
+        exo.name = newName
+    if tags:
+        exo.tags = tags
+    if duration:
+        exo.limited_time = duration
+    if chaps: #pas opti du tout on traite pas ceux qui changent pas et qui restent 
+        for c1 in exo.chaps:
+            exo.chaps.remove(c1)
+        for c in chaps:
+            exo.chaps.append(c)
+    if txts: #est ce que c'est déjà une liste ou non ? sinon on peut simplement faire comme suit 
+        exo.corpuses = txts
+    if qTF: #HORRIBLE
+        exo.quests = qTF
+    if qH:
+        exo.quests.append(qH)
+    if qFB:
+        exo.quests.append(qFB)
+
+    db.session.commit()
+    lg.warning('Modified chapter')
+
+
 
 #query to delete a session 
 def query_delete_session(sessionId):
@@ -617,12 +746,8 @@ def query_delete_chapter(chapId):
         db.session.delete(chap)
         db.session.commit()
         lg.warning('Deleted chapter !')
-    """"
-    if chapName is not None:
-        db.session.delete(MetalChapter).where(MetalChapter.name == chapName) 
-        db.session.commit()
-        lg.warning('Deleted chapter !')
-    """
+    
+
 #query to delete an exercise TODO TO TEST
 
 def query_delete_exercise(exoId):

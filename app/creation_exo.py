@@ -21,12 +21,13 @@ class CreaExo(FlaskForm):
         validators=[DataRequired(message="please type a name"),
             Length(min=1, message='the name should be longer')]
     )
-
+    """
     level = SelectMultipleField( #SelectMultipleField(
         "Niveaux",
         validators=[DataRequired(message="please select at least one")]
     )
-       
+    """
+    
     chap =  SelectMultipleField( #SelectMultipleField
         "Sélectionner un ou des chapitres"
     )

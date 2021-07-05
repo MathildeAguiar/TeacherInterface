@@ -98,7 +98,7 @@
     <!-- we want to paginate the table -->
     <div class="container">
       {% if notions is not none %}
-      {{ render_table(notions, show_actions=True, edit_url= url_for('table', message_id=':primary_key') , delete_url= url_for('connexion', message_id=':primary_key') ) }}
+      {{ render_table(notions, show_actions=True, edit_url= url_for('modify_validation', notion_id=':primary_key') , delete_url= url_for('delete_validation', notion_id=':primary_key') ) }}
       {{ render_pagination(pagination) }}
       {% endif %}
     </div>

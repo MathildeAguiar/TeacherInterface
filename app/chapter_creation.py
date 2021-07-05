@@ -24,8 +24,8 @@ class CreaChapter(FlaskForm):
  
    
     txt = SelectMultipleField( #test for multi select
-        "Sélectionner un ou des textes à inclure",
-        validators= [DataRequired(message="Veuillez choisir au moins un texte")]
+        "Sélectionner un ou des textes à inclure"
+        #validators= [DataRequired(message="Veuillez choisir au moins un texte")]
     )
 
     notion = SelectMultipleField(

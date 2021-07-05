@@ -32,7 +32,7 @@ csrf = CSRFProtect(app)
 babel = Babel(app)
 
 #imports from models (must stay here)
-from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_all_quests, MetalNotion, query_delete_chapter, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise
+from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_all_quests, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, new_chapter, new_assignment
 
 
 #routes 
@@ -104,8 +104,8 @@ def creation_exo():
     txts = query_all_corpuses()
     form.txt.choices = [(t.id, t.name) for t in txts]
 
-    lvls = query_all_groups()
-    form.level.choices = [(l.id, l.level) for l in lvls]
+    #lvls = query_all_groups()
+    #form.level.choices = [(l.id, l.level) for l in lvls]
 
     questsTF= query_all_qTF() 
     form.questTF.choices = [(q.id, q.instructions) for q in questsTF]
@@ -140,21 +140,23 @@ def list_exo(): #chap_name=None
     if chap_name is not None: 
         
         exos = query_exo_related_chaps(chap_name)
-        print("liste des exos rreturned : ", exos)
+        print("liste des exos returned : ", exos)
 
     elif chap_name is None :
         #case where we display all the exercices avaiable in the db 
         #we get the infos filled in the form 
         form = CreaExo()
         name = form.exoName.data
-        lvl = form.level.data #level.data[0] ! ici on aura potentiellement une liste et pas juste une valeur
-        chapId = form.chap.data #chap.data[0] ! ici on aura potentiellement une liste et pas juste une valeur
+        #lvl = form.level.data #level.data[0] ! ici on aura potentiellement une liste et pas juste une valeur
+        chaps = form.chap.data #chap.data[0] ! ici on aura potentiellement une liste et pas juste une valeur
         duration = form.tps.data
         text = form.txt.data #txt.data[0] !! ici on aura potentiellement une liste et pas juste une valeur
-        quest = form.quest.data
+        questTF = form.questTF.data
+        questFB = form.questFill.data
+        questH = form.questHighlight.data
         tags = form.tags.data
         #addition to the db
-        new_exo(name, lvl, chapId, duration, text, quest, tags)
+        new_exo(name, chaps, duration, text, questTF, questFB, questH, tags)
         #print check 
         print(new_exo)
 
@@ -196,7 +198,7 @@ def modify_exo(exo_id):
 
 
 #page to create a new chapter
-@app.route('/chapter_creation', methods=['GET','POST'])
+@app.route('/chapter_creation/', methods=['GET','POST'])
 def chapter_creation():
 
     form = CreaChapter()
@@ -218,6 +220,12 @@ def chapter_creation():
 
     #ajouter la requete de création/ajout du chap!!!!
 
+    if form.validate_on_submit():      
+        return redirect(url_for('list_chapters', submitted='True')) 
+    else:
+        print("Validation Failed for creation chapter")
+        print(form.errors)
+
     return render_template(
         'chapter_creation.html',
         form = form
@@ -226,6 +234,18 @@ def chapter_creation():
 #page where all the db's chapters are displayed 
 @app.route('/list_chapters/', methods=['GET','POST'])
 def list_chapters():
+
+    submitted_status = request.args.get('submitted')
+    if submitted_status == 'True':
+        form = CreaChapter()
+        name = form.chapName.data
+        levels = form.level.data
+        exos = form.exos.data
+        summary = form.summary.data
+        tags = form.tags.data
+        notionsEx = form.notion.data
+        #reste à savoir si on link les textes dans la BD 
+        new_chapter(name, levels, exos, notionsEx, summary, tags)
 
     page = request.args.get('page', 1, type=int)
     pagination = MetalChapter.query.paginate(page, per_page=20)
@@ -315,6 +335,23 @@ def validation():
         submit = submit_status
     )
 
+#if we delete one notion/question from the analysis
+@app.route('/validation/<notion_id>/delete_notion/', methods=["GET", "POST"]) 
+def delete_validation(notion_id):
+
+    query_delete_notion(notion_id)
+    
+    txtName = request.args.get("txtName")
+    print(txtName)
+    
+    return redirect(url_for('validation'))   
+
+
+#if we modify a notion on the validation page
+@app.route('/validation/<notion_id>/modify_notion/', methods=["GET", "POST"]) 
+def modify_validation():
+    return True
+
 #connexion page 
 @app.route('/connexion/', methods=["GET", "POST"])
 def connexion():
@@ -345,7 +382,7 @@ def groups():
         pagination = pagination
     )
 
-#exercices sessions' page
+#exercises sessions' page
 @app.route('/creation_session/',  methods=['GET', 'POST'])
 def creation_session():
     
@@ -391,7 +428,6 @@ def list_sessions():
 def delete_session(session_id):
 
     #sess_id = request.args.get('session_id')
-    print(session_id)
     #sess_id = int(sess_id)
     query_delete_session(session_id)
     
