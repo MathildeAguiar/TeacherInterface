@@ -382,6 +382,54 @@ def groups():
         pagination = pagination
     )
 
+#where we can see which sessions are related to a choosen group
+@app.route('/groups/<group_id>/groups_sessions', methods=['POST', 'GET'])
+def groups_sessions(group_id):
+
+    #sessions = query_groups_session(group_id) #TODO in models
+    sessions = query_all_groups() #juste pour le test 
+
+    grpName = MetalGroup.query.get(group_id)
+    grpName = grpName.level
+    
+
+    page = request.args.get('page', 1, type=int)
+    pagination = MetalGroup.query.paginate(page, per_page=20)
+   
+    
+    
+    return render_template(
+        "groups_sessions.html",  
+        pagination = pagination,
+        sessions = sessions,
+        grpName = grpName
+    )
+
+
+
+#where we can see which students are related to a choosen group
+@app.route('/groups/<group_id>/groups_students', methods=['POST', 'GET'])
+def groups_students(group_id):
+
+    #students = query_groups_students(group_id) #TODO in models
+
+    students = query_all_groups() #juste pour le test 
+
+    grpName = MetalGroup.query.get(group_id)
+    grpName = grpName.level    
+
+    page = request.args.get('page', 1, type=int)
+    pagination = MetalGroup.query.paginate(page, per_page=20) #should paginate with the users not group
+   
+    
+    
+    return render_template(
+        "groups_students.html",  
+        pagination = pagination,
+        students = students,
+        grpName = grpName
+    )
+
 #exercises sessions' page
 @app.route('/creation_session/',  methods=['GET', 'POST'])
 def creation_session():
