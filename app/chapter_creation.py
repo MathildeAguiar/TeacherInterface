@@ -37,7 +37,7 @@ class CreaChapter(FlaskForm):
         "Résumé du cours (facultatif)"
     )
 
-    file = MultipleFileField("Choisir un fichier")
+    #file = MultipleFileField("Choisir un fichier")
 
 
     tags = StringField(

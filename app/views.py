@@ -32,7 +32,7 @@ csrf = CSRFProtect(app)
 babel = Babel(app)
 
 #imports from models (must stay here)
-from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_all_quests, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, new_chapter, new_assignment
+from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment, MetalUser, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_groups_sessions, query_groups_students, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, query_new_chapter, new_assignment
 
 
 #routes 
@@ -218,10 +218,9 @@ def chapter_creation():
     txts = query_all_corpuses()
     form.txt.choices = [(t.id, t.name) for t in txts]
 
-    #ajouter la requete de création/ajout du chap!!!!
 
     if form.validate_on_submit():      
-        return redirect(url_for('list_chapters', submitted='True')) 
+        return redirect(url_for('new_chapter', submitted_status='True')) 
     else:
         print("Validation Failed for creation chapter")
         print(form.errors)
@@ -235,6 +234,7 @@ def chapter_creation():
 @app.route('/list_chapters/', methods=['GET','POST'])
 def list_chapters():
 
+    """
     submitted_status = request.args.get('submitted')
     if submitted_status == 'True':
         form = CreaChapter()
@@ -245,8 +245,8 @@ def list_chapters():
         tags = form.tags.data
         notionsEx = form.notion.data
         #reste à savoir si on link les textes dans la BD 
-        new_chapter(name, levels, exos, notionsEx, summary, tags)
-
+        query_new_chapter(name, levels, exos, notionsEx, summary, tags)
+    """
     page = request.args.get('page', 1, type=int)
     pagination = MetalChapter.query.paginate(page, per_page=20)
     #for now we will display all the chapters
@@ -255,6 +255,34 @@ def list_chapters():
 
     return render_template(
         'list_chapters.html',
+        pagination = pagination,
+        chaps = chaps
+    )
+
+@app.route('/list_chapters/<submitted_status>/new_chapter', methods=['GET','POST'])
+def new_chapter(submitted_status):
+
+    if submitted_status == 'True' :
+    
+        form = CreaChapter()
+        name = form.chapName.data
+        levels = form.level.data
+        exos = form.exos.data
+        summary = form.summary.data
+        tags = form.tags.data
+        notionsEx = form.notion.data
+        #reste à savoir si on link les textes dans la BD 
+        query_new_chapter(name, levels, exos, notionsEx, summary, tags)
+
+    
+
+    page = request.args.get('page', 1, type=int)
+    pagination = MetalChapter.query.paginate(page, per_page=20)
+   
+    chaps = query_all_chaps()
+    
+    return render_template(
+        "list_chapters.html", 
         pagination = pagination,
         chaps = chaps
     )
@@ -367,6 +395,8 @@ def help():
         'help.html'
     )
 
+############ Groups gestion ################
+
 #groups page
 @app.route('/groups/', methods=['GET', 'POST'])
 def groups():
@@ -386,8 +416,8 @@ def groups():
 @app.route('/groups/<group_id>/groups_sessions', methods=['POST', 'GET'])
 def groups_sessions(group_id):
 
-    #sessions = query_groups_session(group_id) #TODO in models
-    sessions = query_all_groups() #juste pour le test 
+    sessions = query_groups_sessions(group_id) 
+    #sessions = query_all_groups() #juste pour le test 
 
     grpName = MetalGroup.query.get(group_id)
     grpName = grpName.level
@@ -411,15 +441,15 @@ def groups_sessions(group_id):
 @app.route('/groups/<group_id>/groups_students', methods=['POST', 'GET'])
 def groups_students(group_id):
 
-    #students = query_groups_students(group_id) #TODO in models
+    students = query_groups_students(group_id) 
 
-    students = query_all_groups() #juste pour le test 
+    #students = query_all_groups() #juste pour le test 
 
     grpName = MetalGroup.query.get(group_id)
     grpName = grpName.level    
 
     page = request.args.get('page', 1, type=int)
-    pagination = MetalGroup.query.paginate(page, per_page=20) #should paginate with the users not group
+    pagination = MetalUser.query.paginate(page, per_page=20) 
    
     
     

@@ -256,12 +256,12 @@ def init_db():
         db.session.add(grp)
 
     #random users 
-    groups = ["3ème.1", "3ème.2", "4ème.2", "4ème.1"]
+    #groups = ["3ème.1", "3ème.2", "4ème.2", "4ème.1"]
     for i in range(5):
         usr = MetalUser()
         usr.lastName = "Dupont{}".format(i+1)
         usr.firstName = "Pierre{}".format(i+1)
-        usr.group_id = groups[i-1]
+        usr.group_id = randint(1, 4)
         usr.password = randint(1, 99)
         db.session.add(usr)
     
@@ -369,6 +369,7 @@ def init_db():
         sess.name = "session n° {}".format(i)
         sess.updated_at = datetime.datetime.now()
         sess.user_id = i
+        sess.group_id = i
         db.session.add(sess)
 
     #random usr answers 
@@ -492,19 +493,22 @@ def new_exo(name, chaps, duration, texts, questsTF, questsFB, questsH, tags):
 
 
 #insert a newly created chapter to the database TODO to test
-def new_chapter(name, levels, exos, notions, summary, tags): #texts, to delete ?
+def query_new_chapter(name, levels, exos, notions, summary, tags): #texts, to delete ?
     chap = MetalChapter()
     chap.name = name
     if levels is not None:
         for l in levels:
-            chap.groups.append(l)
+            q = db.session.query(MetalGroup).get(l)
+            chap.groups.append(q)
     if exos is not None:
         for e in exos:
-            chap.exos.append(e)
+            q = db.session.query(MetalExercise).get(e)
+            chap.exos.append(q)
 
     if notions is not None:
         for n in notions:
-            chap.notions.append(n)
+            q = db.session.query(MetalNotion).get(n)
+            chap.notions.append(q)
     
     chap.slug = summary
     chap.summary = summary
@@ -764,3 +768,18 @@ def query_delete_exercise(exoId):
         db.session.commit()
         lg.warning('Deleted exercise !')
     """
+#query the exercises assignments done by one group 
+def query_groups_sessions(group_id):
+    sess = db.session.query(MetalAssignment).filter(MetalAssignment.group_id==group_id).all()
+    if sess:
+        return sess
+    else :
+        return "Aucun résultat !"
+
+#query the students from one group
+def query_groups_students(group_id):
+    stud = db.session.query(MetalUser).filter(MetalUser.group_id==group_id).all()
+    if stud:
+        return stud 
+    else :
+        return "Aucun résultat !"
