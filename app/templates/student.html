@@ -7,16 +7,16 @@
 <main>
     <div class="container">
         <h4 class="row g-5">
-            Groupes disponibles 
+            {{ studentFirstName }} {{ studentLastName}}
         </h4>
     </div>
 
-    {% if groups == 'Aucun résultat !' %} 
+    {% if answers == 'Aucun résultat !' %} 
     <div class="container text-center">
-        {{ groups }}
+        {{ answers }}
     </div>
     {% else %}
-    {{ render_table(groups, show_actions=True, actions_title="Sessions d'exercices/Élèves",  edit_url=url_for('groups_sessions', group_id=':primary_key'), view_url=url_for('groups_students', group_id=':primary_key') )}}
+    {{ render_table(answers)}}
     {{ render_pagination(pagination) }}
     {% endif %}
 </main>

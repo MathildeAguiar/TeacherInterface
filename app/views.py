@@ -33,7 +33,7 @@ csrf = CSRFProtect(app)
 babel = Babel(app)
 
 #imports from models (must stay here)
-from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment, MetalUser, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_groups_sessions, query_groups_students, query_new_assignment, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, query_new_chapter
+from app.models import MetalAnswerUser, MetalChapter, MetalExercise, MetalGroup, MetalAssignment, MetalUser, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_groups_sessions, query_groups_students, query_new_assignment, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, query_new_chapter, query_answers_user
 
 
 #routes 
@@ -491,6 +491,31 @@ def groups_students(group_id):
         students = students,
         grpName = grpName
     )
+
+
+#where we can see which students are related to a choosen group
+@app.route('/groups/<group_id>/groups_students/<user_id>/student', methods=['POST', 'GET'])
+def student(user_id, group_id):
+
+    student = MetalUser.query.get(user_id)
+    studentFirstName = student.firstName  
+    studentLastName = student.lastName
+
+    answers = query_answers_user(user_id)  
+
+    page = request.args.get('page', 1, type=int)
+    pagination = MetalAnswerUser.query.paginate(page, per_page=20) 
+   
+    
+    
+    return render_template(
+        "student.html",  
+        pagination = pagination,
+        studentLastName = studentLastName,
+        studentFirstName = studentFirstName,
+        answers = answers
+    )
+
 
 #exercises sessions' page
 @app.route('/creation_session/',  methods=['GET', 'POST'])

@@ -16,7 +16,7 @@
         {{ students }}
     </div>
     {% else %}
-    {{ render_table(students)}} 
+    {{ render_table(students, show_actions=True, actions_title='Détails élève', view_url=url_for('student', user_id=':primary_key', group_id=':primary_key'))}} 
     {{ render_pagination(pagination) }}
     {% endif %}
 </main>

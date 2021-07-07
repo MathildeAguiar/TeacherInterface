@@ -5,6 +5,7 @@ from sqlalchemy import BigInteger, Column, DECIMAL, DateTime, Float, ForeignKey,
 from sqlalchemy.dialects.mysql import INTEGER, LONGTEXT, SMALLINT, TEXT, TINYINT, VARCHAR
 from sqlalchemy.sql.expression import update
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql.functions import user
 #rom sqlalchemy.sql.expression import delete, null
 from sqlalchemy.sql.sqltypes import BOOLEAN, Boolean, TIME
 from .views import app
@@ -82,7 +83,8 @@ class MetalExercise(db.Model):
     #many to many with chapters 
     chaps = relationship("MetalChapter", secondary=association_chap_exos, back_populates="exos")
     name = Column(VARCHAR(191), unique=True, nullable=False)
-    limited_time = Column(Boolean) #does boolean works here ? 
+    limited_time = Column(Integer)
+    #limited_time = Column(Boolean) #does boolean works here ? 
     tags = Column(VARCHAR(191))
     slug = Column(VARCHAR(191))
     #many to many with questions 
@@ -317,7 +319,8 @@ def init_db():
     #random exo 
     for i in range(5):
         exo = MetalExercise()
-        exo.limited_time = choices([True, False]).pop(0)
+        #exo.limited_time = choices([True, False]).pop(0)
+        exo.limited_time = randint(3,20)
         exo.name = "name {}".format(i+1)
         exo.slug = "this is an exo slug"
         exo.tags = "exo's tags"
@@ -375,7 +378,7 @@ def init_db():
     #random usr answers 
     for i in range(4):
         usrans = MetalAnswerUser()
-        usrans.user_id = i
+        usrans.user_id = 1
         usrans.created_at = datetime.datetime.now()
         usrans.session_id = i
         usrans.user_answer = "user {} answer".format(i)
@@ -461,6 +464,7 @@ def new_exo(name, chaps, duration, texts, questsTF, questsFB, questsH, tags):
         exo = MetalExercise()
         exo.name = name
         exo.limited_time = duration
+        exo.slug = tags
 
         for c in chaps: 
             q = db.session.query(MetalChapter).get(c)
@@ -525,7 +529,7 @@ def query_new_chapter(name, levels, exos, notions, summary, tags): #texts, to de
     db.session.commit()
     lg.warning('Addition done !')
 
-#query to create a new assignment
+#query to create a new assignment TODO vérifier la relationship pour groups
 
 def query_new_assignment(name, choosenExos, groups, code):
 
@@ -792,3 +796,10 @@ def query_groups_students(group_id):
         return stud 
     else :
         return "Aucun résultat !"
+
+#query to get all the answers from a user 
+def query_answers_user(user_id):
+    answers = db.session.query(MetalAnswerUser).filter(MetalAnswerUser.user_id == user_id).all()
+    if answers:
+        return answers
+    else :  return "Aucun résultat !"
