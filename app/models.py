@@ -125,7 +125,7 @@ class MetalAssignment(db.Model): #exercices session
     __tablename__ = 'metal_assignments'
 
     id = Column(INTEGER, primary_key=True)
-    user_id = Column(INTEGER, ForeignKey('metal_users.id'), nullable=False)  #? keep???
+    user_id = Column(INTEGER, ForeignKey('metal_users.id'))  #? keep??? , nullable=False
     name = Column(VARCHAR(191), nullable=False)
     code = Column(INTEGER) #some have codes (mandatory groups of exercices) and some don't (non mandatory ones)
     #mark = Column(Integer, nullable=False) --> doit être par rapport à un élève 
@@ -223,7 +223,7 @@ class MetalAnswerUser(db.Model):
     user_id = Column(INTEGER, ForeignKey('metal_users.id'), nullable=False)
     #chapter_id = Column(INTEGER, ForeignKey('metal_chapters.id'), nullable=False)
     #many to one with questions
-    question_id = Column(INTEGER, ForeignKey('metal_questions.id'), nullable=False)
+    question_id = Column(INTEGER, ForeignKey('metal_questions.id')) #, nullable=False --> conflic when u delete a question notion in validate page 
     question = relationship("MetalQuestion", back_populates="usr_answer")
     #one to many with sessions  
     session_id = Column(INTEGER, ForeignKey('metal_assignments.id'))
@@ -457,12 +457,12 @@ def query_exo_related_chaps(chap_name):
 def new_exo(name, chaps, duration, texts, questsTF, questsFB, questsH, tags): 
 
     #fct to insert a new exercice in the db after clicking on "create" button
-    if name and chaps and texts and questsFB and questsH and questsTF: #the case where one of a kind of quest is not selected !!!
+    if name and chaps and texts and (questsFB or questsH or questsTF): #the case where one of a kind of quest is not selected !!!
         exo = MetalExercise()
         exo.name = name
         exo.limited_time = duration
 
-        for c in chaps: #!!!! on ajoute des strings là mais on devrait ajouter des obj, il faut get les objets qui correspondent 
+        for c in chaps: 
             q = db.session.query(MetalChapter).get(c)
             print(q)
             if q:
@@ -472,17 +472,23 @@ def new_exo(name, chaps, duration, texts, questsTF, questsFB, questsH, tags):
             q = db.session.query(MetalCorpus).get(t)
             exo.corpuses.append(q)
         
-        for q1 in questsTF:
-            q = db.session.query(MetalQuestionTrueFalse).get(q1)
-            exo.quests.append(q)
+        if questsTF:
+            for q1 in questsTF:
+                qTF = db.session.query(MetalQuestionTrueFalse).get(q1)
+                q = db.session.query(MetalQuestion).get(qTF.question_id)
+                exo.quests.append(q)
 
-        for q2 in questsFB:
-            q = db.session.query(MetalQuestionFillBlank).get(q2)
-            exo.quests.append(q)
-        
-        for q3 in questsH:
-            q = db.session.query(MetalQuestionHighlight).get(q3)
-            exo.quests.append(q)
+        if questsFB:
+            for q2 in questsFB:
+                qFB = db.session.query(MetalQuestionFillBlank).get(q2)
+                q = db.session.query(MetalQuestion).get(qFB.question_id)
+                exo.quests.append(q)
+
+        if questsH:
+            for q3 in questsH:
+                qH = db.session.query(MetalQuestionHighlight).get(q3)
+                q = db.session.query(MetalQuestion).get(qH.question_id)
+                exo.quests.append(q)
 
         exo.tags = tags
 
@@ -492,7 +498,7 @@ def new_exo(name, chaps, duration, texts, questsTF, questsFB, questsH, tags):
         lg.warning('Addition done !')
 
 
-#insert a newly created chapter to the database TODO to test
+#insert a newly created chapter to the database
 def query_new_chapter(name, levels, exos, notions, summary, tags): #texts, to delete ?
     chap = MetalChapter()
     chap.name = name
@@ -521,7 +527,7 @@ def query_new_chapter(name, levels, exos, notions, summary, tags): #texts, to de
 
 #query to create a new assignment
 
-def new_assignment(name, choosenExos, groups, code):
+def query_new_assignment(name, choosenExos, groups, code):
 
     assignment = MetalAssignment()
     assignment.name = name
@@ -530,10 +536,13 @@ def new_assignment(name, choosenExos, groups, code):
     assignment.updated_at = datetime.datetime.now()
     if choosenExos is not None:
         for e in choosenExos:
-            assignment.exos.append(e)
+            q = db.session.query(MetalExercise).get(e)
+            assignment.exos.append(q)
     if groups is not None:
         for g in groups:
-            assignment.group_id = g.id #??????????????????? la relationship ne va pas 
+            q = db.session.query(MetalGroup).get(g)
+            assignment.group = q #??????????????????? la relationship ne va pas 
+    
     #the query itself 
     db.session.add(assignment)
     db.session.commit()

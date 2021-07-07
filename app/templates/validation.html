@@ -11,7 +11,7 @@
     <main> 
       <div class="row g-5">
         <div class="col-md-7 col-lg-8">
-          <form class="needs-validation" method="POST" action="{{ url_for('validation') }}" novalidate> <!--change by the result -->
+          <form class="needs-validation" method="POST" novalidate> <!--change by the result  , submitted_status = 'True'       action="{{ url_for('validation', txt_name = form.txt  ) }}"-->
             {{ form.csrf_token }}
             <div class="row g-3">
                 <div class="py-5 mx-3"> <!--text-center-->

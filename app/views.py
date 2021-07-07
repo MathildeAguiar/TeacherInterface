@@ -1,3 +1,4 @@
+from re import template
 from app.session_exo import SessionExo
 from app.chapter_creation import CreaChapter
 import os
@@ -32,7 +33,7 @@ csrf = CSRFProtect(app)
 babel = Babel(app)
 
 #imports from models (must stay here)
-from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment, MetalUser, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_groups_sessions, query_groups_students, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, query_new_chapter, new_assignment
+from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment, MetalUser, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_groups_sessions, query_groups_students, query_new_assignment, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, query_new_chapter
 
 
 #routes 
@@ -274,7 +275,6 @@ def new_chapter(submitted_status):
         #reste à savoir si on link les textes dans la BD 
         query_new_chapter(name, levels, exos, notionsEx, summary, tags)
 
-    
 
     page = request.args.get('page', 1, type=int)
     pagination = MetalChapter.query.paginate(page, per_page=20)
@@ -315,20 +315,18 @@ def modify_chapter(chapter_id):
 
 
 #page where you have to confirm notions found by the analyser
-#@app.route('/validation/<int:count>/', methods=["GET", "POST"])  #ou sinon on fait 2 url une avec <> et l'autre sans 
-#def validation(count):
 @app.route('/validation/', methods=["GET", "POST"]) 
 def validation():
     #if the submit button have been used 
-    submit_status = request.args.get("submitted")
-    print(submit_status)
+    #submit_status = request.args.get("submitted")
+    #print(submit_status)
     #getting the url arguments to check the vars of the query 
 
     notions = None
     pagination = None
 
     #pour éviter d'appeller des mêmes bouts de code plusieurs fois pour rien on va juste placer une condition sur le submit 
-
+    """
     if submit_status == 'True':
         txtNameReq = request.args.get('txtName')
         #CHANGE THAT IT'S UGLY 
@@ -337,21 +335,16 @@ def validation():
         notions = query_validation(txtNameReq)
         print("this is notions in the if ", notions)
     else : txtNameReq = None
-
+    """
 
     form = TxtBrowser()
     txtName = form.txt.data
 
-    """ moved in the if, please CLEAN THE CODE 
-    page = request.args.get('page', 1, type=int)
-    pagination = MetalNotion.query.paginate(page, per_page=10)
-    notions = query_validation(txtName)
-    """
    
   
     if form.validate_on_submit():
         
-        return redirect(url_for('validation', submitted = True, txtName = txtName)) # request.referrer ?   
+        return redirect(url_for('validation_analyzed', txt_name = txtName)) # request.referrer ?    submitted_status = True,
 
 
     return render_template(
@@ -359,9 +352,37 @@ def validation():
         form = form,
         notions = notions, 
         pagination = pagination,
-        txtName = txtNameReq,
-        submit = submit_status
+        txtName = None,
+        submit = True
     )
+
+#??????????????????????????????????????????
+@app.route('/validation/<txt_name>/analyzed/', methods=["GET", "POST"])  #<submitted_status>
+def validation_analyzed(txt_name): #, submitted_status
+
+    form = TxtBrowser()
+    form_field = form.txt.data
+    print(form_field)
+
+    if txt_name:
+        #txtNameReq = request.args.get('txtName')
+        page = request.args.get('page', 1, type=int)
+        pagination = MetalNotion.query.paginate(page, per_page=10)
+        notions = query_validation(txt_name)
+        print("this is notions in the if ", notions)
+  
+    if form.validate_on_submit and form_field:
+        return redirect(url_for('validation_analyzed', txt_name = form_field))
+
+    return render_template(
+        'validation.html',
+        notions = notions, 
+        pagination = pagination,
+        form = form,
+        txtName = txt_name,
+        submit ='True'
+    )
+
 
 #if we delete one notion/question from the analysis
 @app.route('/validation/<notion_id>/delete_notion/', methods=["GET", "POST"]) 
@@ -369,10 +390,24 @@ def delete_validation(notion_id):
 
     query_delete_notion(notion_id)
     
-    txtName = request.args.get("txtName")
-    print(txtName)
+    url_parent = request.referrer #####""???????
+    print(url_parent)
+    txtName = url_parent.get("txt_name")
+    #print(txtName)
+    #print(txtName)
+
+    """
+    return render_template(
+        'validation.html',
+        notions = notions, 
+        pagination = pagination,
+        form = form,
+        txtName = txt_name,
+        submit ='True'
+    )
+    """
     
-    return redirect(url_for('validation'))   
+    return redirect(url_for('validation_analyzed', txt_name=txtName))   
 
 
 #if we modify a notion on the validation page
@@ -417,7 +452,6 @@ def groups():
 def groups_sessions(group_id):
 
     sessions = query_groups_sessions(group_id) 
-    #sessions = query_all_groups() #juste pour le test 
 
     grpName = MetalGroup.query.get(group_id)
     grpName = grpName.level
@@ -442,8 +476,6 @@ def groups_sessions(group_id):
 def groups_students(group_id):
 
     students = query_groups_students(group_id) 
-
-    #students = query_all_groups() #juste pour le test 
 
     grpName = MetalGroup.query.get(group_id)
     grpName = grpName.level    
@@ -479,7 +511,7 @@ def creation_session():
      #ajouter la requete de création/ajout de la session!!!!
 
     if form.validate_on_submit():      
-        return redirect(url_for('list_sessions')) 
+        return redirect(url_for('new_assignment', submitted_status=True)) 
 
     return render_template(
         "creation_session.html",
@@ -501,6 +533,34 @@ def list_sessions():
         pagination = pagination,
         sessions = sessions
     )
+
+#after a new sessions has been created
+@app.route('/list_sessions/<submitted_status>/new_assignment', methods=['GET','POST'])
+def new_assignment(submitted_status):
+
+    if submitted_status == 'True' :
+    
+        form = SessionExo()
+        name = form.sessionName.data
+        groups = form.grps.data
+        exos = form.exos.data
+        code = request.form.get("sessionCode")
+        print(code)
+        
+        query_new_assignment(name,exos,groups, code)
+
+
+    page = request.args.get('page', 1, type=int)
+    pagination = MetalAssignment.query.paginate(page, per_page=20)
+   
+    sessions = query_all_sessions()
+    
+    return render_template(
+        "list_sessions.html", 
+        pagination = pagination,
+        sessions = sessions
+    )
+
 
 @app.route('/list_sessions/<session_id>/delete', methods=['POST', 'GET'])
 def delete_session(session_id):
