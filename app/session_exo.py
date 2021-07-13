@@ -5,7 +5,7 @@ from wtforms.validators import DataRequired, Length
 
 class SessionExo(FlaskForm):
 
-    sessionName = StringField(
+    name = StringField( #sessionName
         "Nom de la session d'exercices :",
         validators=[DataRequired(message="please type a name"),
             Length(min=1, message='the name should be longer')]

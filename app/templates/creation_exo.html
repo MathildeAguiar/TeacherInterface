@@ -2,6 +2,13 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
+<script>
+  function outputUpdate(tps) {
+      document.querySelector('#selected-duration').value = tps;
+  }
+</script>
+
 <div class="container">
   <main>
     <div class="py-5"> <!--text-center-->
@@ -33,8 +40,15 @@
             </div> 
 
             <div class="col-12">
-                {{ render_field(form.tps) }}
+                {{ form.tps.label }}
             </div>
+            <div class="col-12">
+              {{ form.tps(min=0, max=100, oninput="outputUpdate(value)") }}
+     
+                <output for="tps" id="selected-duration" class="mx-2 py-2">{{ form.tps.data }}</output> 
+    
+            </div>
+            
 
             <div class="col-12">
                 {{ render_field(form.txt) }}

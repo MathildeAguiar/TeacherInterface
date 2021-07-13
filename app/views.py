@@ -3,9 +3,10 @@ from app.session_exo import SessionExo
 from app.chapter_creation import CreaChapter
 import os
 import random, string
-from flask_wtf import CSRFProtect
+from flask_wtf import CSRFProtect, form
 from flask_bootstrap import Bootstrap
-from flask_babel import Babel #test Babel
+from flask_ckeditor import CKEditor
+#from flask_babel import Babel #test Babel
 from flask_sqlalchemy import request
 from flask import Flask, render_template, url_for, redirect, request
 from .forms import ResearchForm
@@ -29,11 +30,13 @@ bootstrap = Bootstrap(app)
 csrf = CSRFProtect(app)
 
 #test with Babel 
+#babel = Babel(app)
 
-babel = Babel(app)
+#CKEditor
+ckeditor = CKEditor(app)
 
 #imports from models (must stay here)
-from app.models import MetalAnswerUser, MetalChapter, MetalExercise, MetalGroup, MetalAssignment, MetalUser, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_groups_sessions, query_groups_students, query_new_assignment, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, query_new_chapter, query_answers_user
+from app.models import MetalAnswerUser, MetalChapter, MetalExercise, MetalGroup, MetalAssignment, MetalUser, edit_assignment, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_groups_sessions, query_groups_students, query_new_assignment, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, query_new_chapter, query_answers_user
 
 
 #routes 
@@ -270,10 +273,12 @@ def new_chapter(submitted_status):
         levels = form.level.data
         exos = form.exos.data
         summary = form.summary.data
+        file = form.file.data
         tags = form.tags.data
         notionsEx = form.notion.data
+        cycle = form.cycle.data
         #reste à savoir si on link les textes dans la BD 
-        query_new_chapter(name, levels, exos, notionsEx, summary, tags)
+        query_new_chapter(name, levels, cycle, exos, notionsEx, summary, file, tags)
 
 
     page = request.args.get('page', 1, type=int)
@@ -533,7 +538,6 @@ def creation_session():
     #session code 
     sessionCode = "".join([random.choice(string.ascii_uppercase + string.digits) for _ in range(10)])
 
-     #ajouter la requete de création/ajout de la session!!!!
 
     if form.validate_on_submit():      
         return redirect(url_for('new_assignment', submitted_status=True)) 
@@ -566,7 +570,7 @@ def new_assignment(submitted_status):
     if submitted_status == 'True' :
     
         form = SessionExo()
-        name = form.sessionName.data
+        name = form.name.data
         groups = form.grps.data
         exos = form.exos.data
         code = request.form.get("sessionCode")
@@ -590,8 +594,6 @@ def new_assignment(submitted_status):
 @app.route('/list_sessions/<session_id>/delete', methods=['POST', 'GET'])
 def delete_session(session_id):
 
-    #sess_id = request.args.get('session_id')
-    #sess_id = int(sess_id)
     query_delete_session(session_id)
     
 
@@ -600,9 +602,6 @@ def delete_session(session_id):
    
     sessions = query_all_sessions()
 
-    #session_id = request.args.get(session_id)
-    #if session_id:
-
     
     return render_template(
         "list_sessions.html", 
@@ -610,16 +609,37 @@ def delete_session(session_id):
         sessions = sessions
     )
 
-    #return redirect(url_for('list_sessions'))
 
 @app.route('/list_sessions/<session_id>/modify_session', methods=['GET', 'POST'])
 def modify_session(session_id):
-    session_id = request.args.get('session_id')
+
     if session_id:
-        #edit_session(session_id) n'existe pas encore 
-        return True
-    
-    return True
+        #we query the corresponding object to the id 
+        assignment = MetalAssignment.query.get(session_id)
+        prefilled_form = SessionExo(obj=assignment)
+
+        #get all the levels available
+        grps = query_all_groups()
+        prefilled_form.grps.choices = [(g.id, g.level) for g in grps]
+
+        #get all the exercises available 
+        ex = query_all_exos()
+        prefilled_form.exos.choices = [(e.id, e.name) for e in ex]
+        
+        sessCode = assignment.code
+
+        if prefilled_form.validate_on_submit():
+            edit_assignment(session_id)
+            return redirect(url_for('list_sessions'))
+
+
+    return render_template(
+        "creation_session.html",
+        form = prefilled_form,
+        sessionCode = sessCode, 
+        modify_status = True #variable to pass to the template to know if we are modifying or creating (see in action of <form> tag)
+    )
+
 
 #run 
 if __name__ == "__main__":

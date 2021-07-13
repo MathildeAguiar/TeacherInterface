@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.fields.core import BooleanField, IntegerField, Label, RadioField, SelectMultipleField, SelectField
 from wtforms.validators import DataRequired, Length
+from wtforms.fields.html5 import IntegerRangeField
 
 #champ dyn pattern
 #     myField3 = SelectField(u'Select Account', choices=[], coerce=int) 
@@ -28,7 +29,7 @@ class CreaExo(FlaskForm):
     )
     """
     
-    chap =  SelectMultipleField( #SelectMultipleField
+    chap =  SelectMultipleField(
         "Sélectionner un ou des chapitres"
     )
 
@@ -44,11 +45,14 @@ class CreaExo(FlaskForm):
         "Temps limité ?", 
         validators=[DataRequired(message="Veuillez choisir une option")]
     )
-    """
+    
     
     tps = IntegerField(
         "Temps limité ? Entrez une valeur en minutes"
     )
+    """
+
+    tps = IntegerRangeField('Temps imparti (en minutes)', default=0)
    
     txt = SelectMultipleField(
         "Sélectionner un ou des textes à inclure",

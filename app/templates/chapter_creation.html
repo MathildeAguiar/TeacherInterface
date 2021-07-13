@@ -30,7 +30,10 @@
             <div class="col-12">
                 {{ render_field(form.level) }}
             </div>
-      
+
+            <div class="col-12">
+              {{ render_field(form.cycle) }}
+            </div>
 
             <div class="col-12">              
               {{ render_field(form.exos) }}
@@ -50,7 +53,7 @@
             </div>
 
             <div class="col-12">
-              {# { render_field(form.file) } #}
+              {{ render_field(form.file) }}
               
             </div>
 
@@ -71,6 +74,8 @@
 
  
 </div>
+{{ ckeditor.load() }}
+{{ ckeditor.config(name='summary') }}
 {{ form.hidden_tag() }}
 
 {% endblock %}

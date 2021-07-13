@@ -16,7 +16,7 @@
         {{ groups }}
     </div>
     {% else %}
-    {{ render_table(groups, show_actions=True, actions_title="Sessions d'exercices/Élèves",  edit_url=url_for('groups_sessions', group_id=':primary_key'), view_url=url_for('groups_students', group_id=':primary_key') )}}
+    {{ render_table(groups, show_actions=True, actions_title="Élèves/Sessions d'exercices",  edit_url=url_for('groups_sessions', group_id=':primary_key'), view_url=url_for('groups_students', group_id=':primary_key') )}}
     {{ render_pagination(pagination) }}
     {% endif %}
 </main>

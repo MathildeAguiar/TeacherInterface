@@ -10,11 +10,11 @@
   
       <div class="row g-5">
         <div class="col-md-7 col-lg-8">
-          <form class="needs-validation" method="POST" action="{{ url_for('new_assignment', submitted_status=True) }}" novalidate> <!--change by the result -->
+          <form class="needs-validation" method="POST" {% if modify_status: %} action="{{ url_for('list_sessions') }}" {% else %} action="{{ url_for('new_assignment', submitted_status=True) }}" {% endif %} novalidate> <!--À VÉRIFIER !!!!  -->
             {{ form.csrf_token }}
             <div class="row g-3">
               <div class="col-12">
-                  {{ render_field(form.sessionName) }}
+                  {{ render_field(form.name) }} <!-- sessionName -->
               </div> 
 
               <div class="col-12 my-2">

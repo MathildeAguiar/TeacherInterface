@@ -1,6 +1,7 @@
 # coding: utf-8
 import datetime
 import random, string
+from re import split
 from sqlalchemy import BigInteger, Column, DECIMAL, DateTime, Float, ForeignKey, Integer, SmallInteger, String, TIMESTAMP, Table, Text, delete
 from sqlalchemy.dialects.mysql import INTEGER, LONGTEXT, SMALLINT, TEXT, TINYINT, VARCHAR
 from sqlalchemy.sql.expression import update
@@ -67,6 +68,8 @@ class MetalChapter(db.Model):
     exos = relationship("MetalExercise", secondary=association_chap_exos, back_populates="chaps")
     #many to many with notions 
     notions = relationship("MetalNotion", secondary=association_chaps_notions, back_populates='chaps')
+    #to handle files paths 
+    files = Column(VARCHAR(512)) #not sure if it's the best type 
 
 association_exos_quests = Table('quests_exos', db.metadata, Column('quest_id', Integer, ForeignKey('metal_questions.id')), Column('exo_id', Integer, ForeignKey('metal_exercises.id')))   
 
@@ -503,7 +506,7 @@ def new_exo(name, chaps, duration, texts, questsTF, questsFB, questsH, tags):
 
 
 #insert a newly created chapter to the database
-def query_new_chapter(name, levels, exos, notions, summary, tags): #texts, to delete ?
+def query_new_chapter(name, levels, cycle, exos, notions, summary, files, tags):
     chap = MetalChapter()
     chap.name = name
     if levels is not None:
@@ -520,6 +523,17 @@ def query_new_chapter(name, levels, exos, notions, summary, tags): #texts, to de
             q = db.session.query(MetalNotion).get(n)
             chap.notions.append(q)
     
+    #should we create a new table Files to have an object and do that cleanly 
+    if files is not None:
+        for f in files:
+            print(f)
+            file_to_format = str(f+'{}'.format(datetime.datetime.now()))
+            print(file_to_format)
+            chap.files.append(file_to_format)
+            print(chap.files)
+    
+    chap.cycle = cycle
+    chap.files = files
     chap.slug = summary
     chap.summary = summary
     chap.tags = tags
@@ -692,6 +706,7 @@ def edit_assignment(assignName, newName, groups, exos):
 
     #lire la doc sur les update avec many many 
         return True
+    lg.warning('Modified assignment !')
 
 #query to edit a chapter infos TODO
 def edit_chapter(chapName, newName, groups, txts, exos, notions, summary, tags):
@@ -750,12 +765,9 @@ def query_delete_session(sessionId):
         db.session.commit()
         lg.warning('Deleted session !')
 
-    #if sessionId is not None:
-        #db.session.delete(MetalAssignment).where(MetalAssignment.id == sessionId)
-        #db.session.commit()
-        #lg.warning('Deleted session !')
+    
 
-#query to delete a chapter TODO TO TEST
+#query to delete a chapter
 
 def query_delete_chapter(chapId):
     chap = MetalChapter.query.get(chapId)
@@ -765,7 +777,7 @@ def query_delete_chapter(chapId):
         lg.warning('Deleted chapter !')
     
 
-#query to delete an exercise TODO TO TEST
+#query to delete an exercise
 
 def query_delete_exercise(exoId):
     exo = MetalExercise.query.get(exoId)
@@ -774,13 +786,7 @@ def query_delete_exercise(exoId):
         db.session.commit()
         lg.warning('Deleted exercise !')
 
-    """
-    if exoName is not None:
-        delete(MetalExercise).where(MetalExercise.name == exoName) 
-        #attention les dépendances !!!! 
-        db.session.commit()
-        lg.warning('Deleted exercise !')
-    """
+
 #query the exercises assignments done by one group 
 def query_groups_sessions(group_id):
     sess = db.session.query(MetalAssignment).filter(MetalAssignment.group_id==group_id).all()
