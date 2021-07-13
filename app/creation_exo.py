@@ -17,7 +17,7 @@ class TimeLimted():
 class CreaExo(FlaskForm):
     #form to create an exercise
 
-    exoName = StringField(
+    name = StringField( #exoName
         "Nom de l'exercice :",
         validators=[DataRequired(message="please type a name"),
             Length(min=1, message='the name should be longer')]

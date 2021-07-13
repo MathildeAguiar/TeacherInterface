@@ -189,9 +189,6 @@ class MetalNotionItem(db.Model): #equivalent to grammatical marker
     notion_id = Column(INTEGER, ForeignKey('metal_notions.id'),  nullable=False)
 
 
-
-########################### MANY TO MANY AND SO ON TO DEFINE FROM HERE
-
 class MetalQuestionHighlight(db.Model):
     __tablename__ = 'metal_question_highlights'
 

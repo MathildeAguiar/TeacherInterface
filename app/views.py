@@ -36,7 +36,7 @@ csrf = CSRFProtect(app)
 ckeditor = CKEditor(app)
 
 #imports from models (must stay here)
-from app.models import MetalAnswerUser, MetalChapter, MetalExercise, MetalGroup, MetalAssignment, MetalUser, edit_assignment, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_groups_sessions, query_groups_students, query_new_assignment, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, query_new_chapter, query_answers_user
+from app.models import MetalAnswerUser, MetalChapter, MetalExercise, MetalGroup, MetalAssignment, MetalUser, edit_assignment, edit_chapter, edit_exo, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_groups_sessions, query_groups_students, query_new_assignment, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, query_new_chapter, query_answers_user
 
 
 #routes 
@@ -129,9 +129,8 @@ def creation_exo():
     )
 
 #result page from the exercice creation, displaying all the avaiable exercices
-#@app.route('/list_exo/<chap_name>/', methods=["GET", "POST"])
 @app.route('/list_exo/', methods=["GET", "POST"])
-def list_exo(): #chap_name=None
+def list_exo(): 
     
     chap_name = request.args.get("chapName")
     print("request args",request.args)
@@ -150,19 +149,16 @@ def list_exo(): #chap_name=None
         #case where we display all the exercices avaiable in the db 
         #we get the infos filled in the form 
         form = CreaExo()
-        name = form.exoName.data
-        #lvl = form.level.data #level.data[0] ! ici on aura potentiellement une liste et pas juste une valeur
-        chaps = form.chap.data #chap.data[0] ! ici on aura potentiellement une liste et pas juste une valeur
+        name = form.name.data 
+        chaps = form.chap.data
         duration = form.tps.data
-        text = form.txt.data #txt.data[0] !! ici on aura potentiellement une liste et pas juste une valeur
+        text = form.txt.data 
         questTF = form.questTF.data
         questFB = form.questFill.data
         questH = form.questHighlight.data
         tags = form.tags.data
         #addition to the db
         new_exo(name, chaps, duration, text, questTF, questFB, questH, tags)
-        #print check 
-        print(new_exo)
 
         exos = query_all_exos()
 
@@ -192,13 +188,38 @@ def delete_exo(exo_id):
     )
 
 
-@app.route('/list_exo/<exo_id>/modify_exo', methods=['GET', 'POST']) #TODO
+@app.route('/list_exo/<exo_id>/modify_exo', methods=['GET', 'POST']) #correct the query 
 def modify_exo(exo_id):
-    exo_id = request.args.get('exo_id')
+
     if exo_id:
-        return True
+        exo = MetalExercise.query.get(exo_id)
+        prefilled_form = CreaExo(obj=exo)
+
+        chaps = query_all_chaps()
+        prefilled_form.chap.choices = [(c.id,c.name) for c in chaps] 
+
+        txts = query_all_corpuses()
+        prefilled_form.txt.choices = [(t.id, t.name) for t in txts]
+
+        questsTF= query_all_qTF() 
+        prefilled_form.questTF.choices = [(q.id, q.instructions) for q in questsTF]
+
+        questsFill= query_all_qFB()
+        prefilled_form.questFill.choices = [(q.id, q.instructions) for q in questsFill]
+
+        questsHigh= query_all_qH()
+        prefilled_form.questHighlight.choices = [(q.id, q.instructions) for q in questsHigh]
+
+
+        if prefilled_form.validate_on_submit():
+            edit_exo(exo_id)
+            return redirect(url_for('list_exo')) 
     
-    return True
+    return render_template(
+        "creation_exo.html",
+        form = prefilled_form,
+        modify_status = True # not used ? 
+    )
 
 
 #page to create a new chapter
@@ -225,9 +246,9 @@ def chapter_creation():
 
     if form.validate_on_submit():      
         return redirect(url_for('new_chapter', submitted_status='True')) 
-    else:
-        print("Validation Failed for creation chapter")
-        print(form.errors)
+    #else:
+    #    print("Validation Failed for creation chapter")
+    #    print(form.errors)
 
     return render_template(
         'chapter_creation.html',
@@ -269,7 +290,7 @@ def new_chapter(submitted_status):
     if submitted_status == 'True' :
     
         form = CreaChapter()
-        name = form.chapName.data
+        name = form.name.data   #chapName
         levels = form.level.data
         exos = form.exos.data
         summary = form.summary.data
@@ -310,13 +331,37 @@ def delete_chapter(chapter_id):
     )
 
 
-@app.route('/list_chapters/<chapter_id>/modify_chapter', methods=['GET', 'POST']) #TODO
+@app.route('/list_chapters/<chapter_id>/modify_chapter', methods=['GET', 'POST']) #modify the template with modify _status and correct the query
 def modify_chapter(chapter_id):
-    chapter_id = request.args.get('chapter_id')
+
     if chapter_id:
-        return True
-    
-    return True
+        #we query the corresponding object to the id 
+        chapter = MetalChapter.query.get(chapter_id)
+        prefilled_form = CreaChapter(obj=chapter)
+
+        lvls = query_all_groups()
+        prefilled_form.level.choices = [(l.id, l.level) for l in lvls]
+
+        ex = query_all_exos()
+        prefilled_form.exos.choices = [(e.id, e.name) for e in ex]
+
+        notions = query_all_gram()
+        prefilled_form.notion.choices = [(n.id, n.name) for n in notions]
+
+        txts = query_all_corpuses()
+        prefilled_form.txt.choices = [(t.id, t.name) for t in txts]
+        
+
+        if prefilled_form.validate_on_submit():
+            edit_chapter(chapter_id)
+            return redirect(url_for('list_chapters'))
+
+    return render_template(
+        "chapter_creation.html",
+        form = prefilled_form,
+        modify_status = True #variable to pass to the template to know if we are modifying or creating (see in action of <form> tag)
+    )
+
 
 
 #page where you have to confirm notions found by the analyser
@@ -578,6 +623,7 @@ def new_assignment(submitted_status):
         
         query_new_assignment(name,exos,groups, code)
 
+    
 
     page = request.args.get('page', 1, type=int)
     pagination = MetalAssignment.query.paginate(page, per_page=20)
@@ -616,7 +662,7 @@ def modify_session(session_id):
     if session_id:
         #we query the corresponding object to the id 
         assignment = MetalAssignment.query.get(session_id)
-        prefilled_form = SessionExo(obj=assignment)
+        prefilled_form = SessionExo(request.form, obj=assignment)
 
         #get all the levels available
         grps = query_all_groups()
@@ -628,9 +674,12 @@ def modify_session(session_id):
         
         sessCode = assignment.code
 
-        if prefilled_form.validate_on_submit():
-            edit_assignment(session_id)
-            return redirect(url_for('list_sessions'))
+        if request.method == 'POST' and prefilled_form.validate(): #prefilled_form.validate_on_submit()
+            #res = prefilled_form.populate_obj(assignment) #be careful !! it might break some objects with the same name 
+            #print(res)
+            #assignment.save()
+            #edit_assignment(session_id)
+            return redirect(url_for('list_sessions')) #il va falloir utiliser une nouvelle URL parce qu'on ne passe là que pendant le init 
 
 
     return render_template(

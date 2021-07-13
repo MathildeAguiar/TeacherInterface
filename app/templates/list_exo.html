@@ -15,7 +15,7 @@
 
 
 
-{{ render_table(exos, show_actions=True, edit_url=url_for('modify_exo', exo_id=":primary_key"), delete_url= url_for('delete_exo', exo_id=':primary_key')) }}
+{{ render_table(exos, titles=[('name', 'Nom'), ('limited_time', 'Temps imparti (en minutes)'), ('sessions', "Sessions d'exercices"), ('chaps', 'Chapitres'), ('corpuses', 'Textes associés'), ('tags', 'Tags')], show_actions=True, edit_url=url_for('modify_exo', exo_id=":primary_key"), delete_url= url_for('delete_exo', exo_id=':primary_key')) }}
 
 {{ render_pagination(pagination) }}
 

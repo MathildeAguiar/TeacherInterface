@@ -13,7 +13,7 @@
     </a>
 </div>
 
-{{ render_table(chaps, show_actions=True, edit_url=url_for('modify_chapter', chapter_id=":primary_key"), delete_url= url_for('delete_chapter', chapter_id=':primary_key')) }}
+{{ render_table(chaps, titles=[('name', 'Nom'), ('summary', 'Résumé'), ('cycle', 'Cycle'), ('groups', 'Groupes'), ('exos', 'Exercices'), ('notions', 'Notions grammaticiales'), ('tags', 'Tags')], show_actions=True, edit_url=url_for('modify_chapter', chapter_id=":primary_key"), delete_url= url_for('delete_chapter', chapter_id=':primary_key')) }}
 
     <div class="mx-4 my-4">
         {{ render_pagination(pagination) }}

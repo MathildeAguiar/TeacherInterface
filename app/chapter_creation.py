@@ -8,7 +8,7 @@ from flask_ckeditor import CKEditorField
 class CreaChapter(FlaskForm):
     #form to create a chapter
 
-    chapName = StringField(
+    name = StringField( #chapName
         "Nom du chapitre :",
         validators = [DataRequired(message="please type a name"),
             Length(min=1, message='the name should be longer')]
