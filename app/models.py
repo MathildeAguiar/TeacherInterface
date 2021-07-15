@@ -470,7 +470,6 @@ def new_exo(name, chaps, duration, texts, questsTF, questsFB, questsH, tags):
 
         for c in chaps: 
             q = db.session.query(MetalChapter).get(c)
-            print(q)
             if q:
                 exo.chaps.append(q)
         
@@ -695,19 +694,26 @@ def query_delete_notion(notionId):
 ################# Modifications/deletions of chapters/exos/assignments ########################
 
 #query to modify an exercice assignment  TODO 
-def edit_assignment(assignName, newName, groups, exos):
+def edit_assignment(assignId, newName, groups, exos):
     #on récupère l'objet à modifier et ensuite seulement on modifie ses params 
-    if newName:
-        update(MetalAssignment).where(MetalAssignment.name == assignName).values(name=newName) #???
-    
-    if groups:
-        update(MetalAssignment).where(MetalAssignment.name== assignName).values(group_id = groups) #???
+    assign = db.session.query(MetalAssignment).get(assignId)
 
-    #lire la doc sur les update avec many many 
-        return True
+    if newName:
+        #update(MetalAssignment).where(MetalAssignment.name == assignName).values(name=newName) #???
+        assign.name = newName
+    if groups:
+        for g in groups:
+            q = db.session.query(MetalGroup).get(g)
+            assign.group_id = q.id #hmmm ? 
+    if exos:
+        for e in exos:
+            q = db.session.query(MetalExercise).get(e)
+            assign.exos.append(q)
+
+    db.session.commit()
     lg.warning('Modified assignment !')
 
-#query to edit a chapter infos TODO
+#query to edit a chapter infos TODO change the files part 
 def edit_chapter(chapId, newName, groups, cycle, exos, notions, summary, files, tags): #txts?? 
     #on récupère l'objet correspondant
     chap = db.session.query(MetalChapter).filter(MetalChapter.id==chapId).first()
@@ -732,7 +738,7 @@ def edit_chapter(chapId, newName, groups, cycle, exos, notions, summary, files, 
             chap.notions.append(q)    
   
     if files:
-        chap.files = files[0] #WTF 
+        chap.files = files[0] #WTF  CHANGE THAT ADD A CLASS OR SOMETHING
 
     if tags:
         chap.tags = tags
@@ -743,9 +749,9 @@ def edit_chapter(chapId, newName, groups, cycle, exos, notions, summary, files, 
     lg.warning('Modified chapter !')
 
 #query to edit an exo infos TODO 
-def edit_exo(exoName, newName, chaps, duration, txts, qTF, qH, qFB, tags):
+def edit_exo(exoId, newName, chaps, duration, txts, qTF, qH, qFB, tags):
     #on récupère l'exercice correspondant
-    exo = db.session.query(MetalExercise).filter(MetalExercise.name==exoName).first()
+    exo = db.session.query(MetalExercise).filter(MetalExercise.id==exoId).first()
     print(exo)
     if newName:
         exo.name = newName
@@ -753,19 +759,33 @@ def edit_exo(exoName, newName, chaps, duration, txts, qTF, qH, qFB, tags):
         exo.tags = tags
     if duration:
         exo.limited_time = duration
-    if chaps: #pas opti du tout on traite pas ceux qui changent pas et qui restent 
-        for c1 in exo.chaps:
-            exo.chaps.remove(c1)
-        for c in chaps:
-            exo.chaps.append(c)
-    if txts: #est ce que c'est déjà une liste ou non ? sinon on peut simplement faire comme suit 
-        exo.corpuses = txts
-    if qTF: #HORRIBLE
-        exo.quests = qTF
-    if qH:
-        exo.quests.append(qH)
+    if chaps:
+        for c in chaps: 
+                q = db.session.query(MetalChapter).get(c)
+                exo.chaps.append(q)
+    if txts: 
+        for t in txts:
+            q = db.session.query(MetalCorpus).get(t)
+            exo.corpuses.append(q)
+        
+    if qTF:
+        for q1 in qTF:
+            questTF = db.session.query(MetalQuestionTrueFalse).get(q1)
+            q = db.session.query(MetalQuestion).get(questTF.question_id)
+            exo.quests.append(q)
+
     if qFB:
-        exo.quests.append(qFB)
+        for q2 in qFB:
+            questFB = db.session.query(MetalQuestionFillBlank).get(q2)
+            q = db.session.query(MetalQuestion).get(questFB.question_id)
+            exo.quests.append(q)
+
+    if qH:
+        for q3 in qH:
+            questH = db.session.query(MetalQuestionHighlight).get(q3)
+            q = db.session.query(MetalQuestion).get(questH.question_id)
+            exo.quests.append(q)
+
 
     db.session.commit()
     lg.warning('Modified chapter')

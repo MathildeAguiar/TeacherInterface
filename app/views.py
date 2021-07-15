@@ -132,20 +132,38 @@ def creation_exo():
 @app.route('/list_exo/', methods=["GET", "POST"])
 def list_exo(): 
     
-    chap_name = request.args.get("chapName")
-    print("request args",request.args)
-    print("chap name extraction", chap_name)
+
     page = request.args.get('page', 1, type=int)
     pagination = MetalExercise.query.paginate(page, per_page=20)
 
+    #if the list of exos are displayed after a modification 
+    modified = request.args.get('modified')
+
+    if modified:
+        modif_form= CreaExo()
+        name = modif_form.name.data 
+        chaps = modif_form.chap.data
+        duration = modif_form.tps.data
+        text = modif_form.txt.data 
+        questTF = modif_form.questTF.data
+        questFB = modif_form.questFill.data
+        questH = modif_form.questHighlight.data
+        tags = modif_form.tags.data
+        edit_exo(modified, name, chaps, duration, text, questTF, questH, questFB, tags)
+
+        exos = query_all_exos()
+
+
+
     #case where we get only the exercices related to a specific chapter 
+    chap_name = request.args.get("chapName")
 
     if chap_name is not None: 
         
         exos = query_exo_related_chaps(chap_name)
         print("liste des exos returned : ", exos)
 
-    elif chap_name is None :
+    elif chap_name is None and modified is None:
         #case where we display all the exercices avaiable in the db 
         #we get the infos filled in the form 
         form = CreaExo()
@@ -213,11 +231,12 @@ def modify_exo(exo_id):
 
         if prefilled_form.validate_on_submit():
             edit_exo(exo_id)
-            return redirect(url_for('list_exo')) 
+            return redirect(url_for('list_exo', modified=exo_id)) 
     
     return render_template(
         "creation_exo.html",
         form = prefilled_form,
+        exo_id = exo_id,
         modify_status = True 
     )
 
@@ -235,7 +254,7 @@ def chapter_creation():
     ex = query_all_exos()
     form.exos.choices = [(e.id, e.name) for e in ex]
 
-    #get all the texts and notions available (for now only notions)
+    #get all the notions available
     notions = query_all_gram()
     form.notion.choices = [(n.id, n.name) for n in notions]
 
@@ -276,19 +295,7 @@ def list_chapters():
         edit_chapter(modified, name, levels, cycle, exos, notionsEx, summary, file, tags) #txt? 
 
 
-    """
-    submitted_status = request.args.get('submitted')
-    if submitted_status == 'True':
-        form = CreaChapter()
-        name = form.chapName.data
-        levels = form.level.data
-        exos = form.exos.data
-        summary = form.summary.data
-        tags = form.tags.data
-        notionsEx = form.notion.data
-        #reste à savoir si on link les textes dans la BD 
-        query_new_chapter(name, levels, exos, notionsEx, summary, tags)
-    """
+    
     page = request.args.get('page', 1, type=int)
     pagination = MetalChapter.query.paginate(page, per_page=20)
     #for now we will display all the chapters
@@ -370,8 +377,7 @@ def modify_chapter(chapter_id):
         
 
         if prefilled_form.validate_on_submit():
-            #edit_chapter(chapter_id)
-            #return redirect(url_for('list_chapters'))
+            
             return redirect(url_for('list_chapters', modified=chapter_id))
 
     return render_template(
@@ -618,6 +624,15 @@ def list_sessions():
 
     page = request.args.get('page', 1, type=int)
     pagination = MetalAssignment.query.paginate(page, per_page=20)
+
+    modified = request.args.get('modified')
+    if modified:
+        form = SessionExo()
+        name = form.name.data
+        groups = form.grps.data
+        exos = form.exos.data
+        edit_assignment(modified, name, groups, exos)
+
    
     sessions = query_all_sessions()
 
@@ -637,7 +652,7 @@ def new_assignment(submitted_status):
         name = form.name.data
         groups = form.grps.data
         exos = form.exos.data
-        code = request.form.get("sessionCode")
+        code = request.form.get("sessionCode") #doesnt work!!!!!!!!
         print(code)
         
         query_new_assignment(name,exos,groups, code)
@@ -693,18 +708,16 @@ def modify_session(session_id):
         
         sessCode = assignment.code
 
-        if request.method == 'POST' and prefilled_form.validate(): #prefilled_form.validate_on_submit()
-            #res = prefilled_form.populate_obj(assignment) #be careful !! it might break some objects with the same name 
-            #print(res)
-            #assignment.save()
-            #edit_assignment(session_id)
-            return redirect(url_for('list_sessions')) #il va falloir utiliser une nouvelle URL parce qu'on ne passe là que pendant le init 
+        if prefilled_form.validate_on_submit(): #request.method == 'POST' and prefilled_form.validate()
+
+            return redirect(url_for('list_sessions', modified=session_id)) 
 
 
     return render_template(
         "creation_session.html",
         form = prefilled_form,
         sessionCode = sessCode, 
+        session_id = session_id,
         modify_status = True #variable to pass to the template to know if we are modifying or creating (see in action of <form> tag)
     )
 
