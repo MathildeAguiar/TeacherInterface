@@ -1,5 +1,6 @@
 # coding: utf-8
 import datetime
+from itertools import cycle
 import random, string
 from re import split
 from sqlalchemy import BigInteger, Column, DECIMAL, DateTime, Float, ForeignKey, Integer, SmallInteger, String, TIMESTAMP, Table, Text, delete
@@ -60,7 +61,7 @@ class MetalChapter(db.Model):
     name = Column(VARCHAR(191), unique=True, nullable=False)
     tags = Column(TEXT)
     slug = Column(VARCHAR(191))
-    cycle = Column(TEXT)  #not in the form 
+    cycle = Column(VARCHAR(191))  
     summary = Column(TEXT)
     #many to many with the table Groups  
     groups = relationship("MetalGroup", secondary=association_groups_chaps, back_populates="chapters")
@@ -234,6 +235,7 @@ class MetalAnswerUser(db.Model):
     user_answer = Column(Text, nullable=False)
     created_at = Column(TIMESTAMP) #should we keep that ?
     updated_at = Column(TIMESTAMP) # "   "  "  "
+    #ajouter un feedback de la part du prof ??? 
 
 
 ####### database initialization ########
@@ -706,29 +708,45 @@ def edit_assignment(assignName, newName, groups, exos):
     lg.warning('Modified assignment !')
 
 #query to edit a chapter infos TODO
-def edit_chapter(chapName, newName, groups, txts, exos, notions, summary, tags):
+def edit_chapter(chapId, newName, groups, cycle, exos, notions, summary, files, tags): #txts?? 
     #on récupère l'objet correspondant
-    chap = db.session.query(MetalChapter).filter(MetalChapter.name==chapName).first()
+    chap = db.session.query(MetalChapter).filter(MetalChapter.id==chapId).first()
     if newName:
         chap.name = newName
-    if tags:
-        chap.tags = tags
     if summary:
         chap.summary = summary
         chap.slug = summary
-    if groups:
-        chap.groups = groups
-    if notions:
-        chap.notions
-    if exos:
-        chap.exos = exos
+
+    if groups is not None:
+        for l in groups:
+            q = db.session.query(MetalGroup).get(l)
+            chap.groups.append(q)
+    if exos is not None:
+        for e in exos:
+            q = db.session.query(MetalExercise).get(e)
+            chap.exos.append(q)
+
+    if notions is not None:
+        for n in notions:
+            q = db.session.query(MetalNotion).get(n)
+            chap.notions.append(q)    
+  
+    if files:
+        chap.files = files[0] #WTF 
+
+    if tags:
+        chap.tags = tags
+    if cycle:
+        chap.cycle = cycle
+    
     db.session.commit()
-    lg.warning('Modified chapter')
+    lg.warning('Modified chapter !')
 
 #query to edit an exo infos TODO 
 def edit_exo(exoName, newName, chaps, duration, txts, qTF, qH, qFB, tags):
     #on récupère l'exercice correspondant
     exo = db.session.query(MetalExercise).filter(MetalExercise.name==exoName).first()
+    print(exo)
     if newName:
         exo.name = newName
     if tags:

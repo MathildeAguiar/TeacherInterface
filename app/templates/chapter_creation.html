@@ -12,7 +12,7 @@
 
     <div class="row g-5">
       <div class="col-md-7 col-lg-8">
-        <form class="needs-validation" method="POST" {% if modify_status: %} action="{{ url_for('list_chapters') }}" {% else %} action="{{ url_for('new_chapter', submitted_status='True') }}" {% endif %} novalidate> 
+        <form class="needs-validation" method="POST" {% if modify_status: %} action="{{ url_for('list_chapters', modified=chapter_id) }}" {% else %} action="{{ url_for('new_chapter', submitted_status='True') }}" {% endif %} novalidate> 
           {{ form.csrf_token }}
           <div class="row g-3">
             <div class="col-12">

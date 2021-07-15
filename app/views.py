@@ -218,7 +218,7 @@ def modify_exo(exo_id):
     return render_template(
         "creation_exo.html",
         form = prefilled_form,
-        modify_status = True # not used ? 
+        modify_status = True 
     )
 
 
@@ -258,6 +258,23 @@ def chapter_creation():
 #page where all the db's chapters are displayed 
 @app.route('/list_chapters/', methods=['GET','POST'])
 def list_chapters():
+    modified = request.args.get('modified')
+    print(modified)
+    if modified:
+        form = CreaChapter()
+        print(form, 'the form obj')
+        name = form.name.data  
+        print(name) 
+        levels = form.level.data
+        exos = form.exos.data
+        #txts = form.txt.data
+        summary = form.summary.data
+        file = form.file.data
+        tags = form.tags.data
+        notionsEx = form.notion.data
+        cycle = form.cycle.data
+        edit_chapter(modified, name, levels, cycle, exos, notionsEx, summary, file, tags) #txt? 
+
 
     """
     submitted_status = request.args.get('submitted')
@@ -353,13 +370,15 @@ def modify_chapter(chapter_id):
         
 
         if prefilled_form.validate_on_submit():
-            edit_chapter(chapter_id)
-            return redirect(url_for('list_chapters'))
+            #edit_chapter(chapter_id)
+            #return redirect(url_for('list_chapters'))
+            return redirect(url_for('list_chapters', modified=chapter_id))
 
     return render_template(
         "chapter_creation.html",
         form = prefilled_form,
-        modify_status = True #variable to pass to the template to know if we are modifying or creating (see in action of <form> tag)
+        modify_status = True, #variable to pass to the template to know if we are modifying or creating (see in action of <form> tag)
+        chapter_id = chapter_id #on donne l'id dans les var de l'url de retour pour pouvoir traiter la requete de la modification 
     )
 
 
