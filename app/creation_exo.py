@@ -4,10 +4,7 @@ from wtforms.fields.core import BooleanField, IntegerField, Label, RadioField, S
 from wtforms.validators import DataRequired, Length
 from wtforms.fields.html5 import IntegerRangeField
 
-#champ dyn pattern
-#     myField3 = SelectField(u'Select Account', choices=[], coerce=int) 
-#acctchoices = [(c.id,c.name) for c in accounts5]             
-        # form.myField3.choices = acctchoices 
+
 
 class TimeLimted():
     label = "Temps limité ?"

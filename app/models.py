@@ -169,8 +169,6 @@ class MetalNotion(db.Model): #equivalent to grammatical element
     name = Column(VARCHAR(191), unique=True, nullable=False)
     #many to many with exos 
     #exos = relationship("MetalExercices", secondary=association_exos_notions, back_populates="notions")
-    #one to many with notion items 
-    notion_item = relationship('MetalNotionItems')
     #many to many with corpus
     corpuses = relationship("MetalCorpus", secondary=association_notions_txts, back_populates="notions")
     #one to many with notion item 
@@ -693,7 +691,7 @@ def query_delete_notion(notionId):
 
 ################# Modifications/deletions of chapters/exos/assignments ########################
 
-#query to modify an exercice assignment  TODO 
+#query to modify an exercice assignment   
 def edit_assignment(assignId, newName, groups, exos):
     #on récupère l'objet à modifier et ensuite seulement on modifie ses params 
     assign = db.session.query(MetalAssignment).get(assignId)
@@ -748,7 +746,7 @@ def edit_chapter(chapId, newName, groups, cycle, exos, notions, summary, files, 
     db.session.commit()
     lg.warning('Modified chapter !')
 
-#query to edit an exo infos TODO 
+#query to edit an exo infos 
 def edit_exo(exoId, newName, chaps, duration, txts, qTF, qH, qFB, tags):
     #on récupère l'exercice correspondant
     exo = db.session.query(MetalExercise).filter(MetalExercise.id==exoId).first()
