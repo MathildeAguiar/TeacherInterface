@@ -2,14 +2,8 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.fields.core import BooleanField, IntegerField, Label, RadioField, SelectMultipleField, SelectField
 from wtforms.validators import DataRequired, Length
-from wtforms.fields.html5 import IntegerRangeField
+from wtforms.fields.html5 import IntegerRangeField, DecimalRangeField
 
-
-
-class TimeLimted():
-    label = "Temps limité ?"
-    oui = BooleanField('oui')
-    non = BooleanField('non')
 
 class CreaExo(FlaskForm):
     #form to create an exercise
@@ -30,26 +24,9 @@ class CreaExo(FlaskForm):
         "Sélectionner un ou des chapitres"
     )
 
-    """
-    tps = RadioField(
-        "Temps limité ?",
-        choices= [(True, 'oui'), (False, 'non')], #changer le 'y' et faire qq chose pour permettre de choisir la durée
-        validators= [DataRequired(message="Veuillez choisir une option")]
-    )
-
-    tps = BooleanField(
-
-        "Temps limité ?", 
-        validators=[DataRequired(message="Veuillez choisir une option")]
-    )
-    
-    
-    tps = IntegerField(
-        "Temps limité ? Entrez une valeur en minutes"
-    )
-    """
 
     tps = IntegerRangeField('Temps imparti (en minutes)', default=0)
+        #IntegerRangeField('Temps imparti (en minutes)', default=0, step='5')
    
     txt = SelectMultipleField(
         "Sélectionner un ou des textes à inclure",

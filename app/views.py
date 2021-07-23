@@ -1,9 +1,10 @@
+from app.modify_notion import ModifyNotion
 from re import template
 from app.session_exo import SessionExo
 from app.chapter_creation import CreaChapter
 import os
 import random, string
-from flask_wtf import CSRFProtect, form
+from flask_wtf import CSRFProtect
 from flask_bootstrap import Bootstrap
 from flask_ckeditor import CKEditor
 #from flask_babel import Babel #test Babel
@@ -12,6 +13,11 @@ from flask import Flask, render_template, url_for, redirect, request
 from .forms import ResearchForm
 from .creation_exo import CreaExo
 from .validation import TxtBrowser
+from bokeh.plotting import figure, show, save
+from bokeh.plotting import figure
+from bokeh.resources import CDN
+from bokeh.embed import file_html
+
 
 
 app = Flask(__name__)
@@ -36,7 +42,7 @@ csrf = CSRFProtect(app)
 ckeditor = CKEditor(app)
 
 #imports from models (must stay here)
-from app.models import MetalAnswerUser, MetalChapter, MetalExercise, MetalGroup, MetalAssignment, MetalUser, edit_assignment, edit_chapter, edit_exo, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_groups_sessions, query_groups_students, query_new_assignment, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, query_new_chapter, query_answers_user
+from app.models import MetalAnswerUser, MetalChapter, MetalExercise, MetalGroup, MetalAssignment, MetalUser, edit_assignment, edit_chapter, edit_exo, edit_notion, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_groups_sessions, query_groups_students, query_new_assignment, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, query_new_chapter, query_answers_user
 
 
 #routes 
@@ -281,9 +287,9 @@ def list_chapters():
     print(modified)
     if modified:
         form = CreaChapter()
-        print(form, 'the form obj')
+        #print(form, 'the form obj')
         name = form.name.data  
-        print(name) 
+        #print(name) 
         levels = form.level.data
         exos = form.exos.data
         #txts = form.txt.data
@@ -432,19 +438,27 @@ def validation():
     )
 
 #??????????????????????????????????????????
-@app.route('/validation/<txt_name>/analyzed/', methods=["GET", "POST"])  #<submitted_status>
-def validation_analyzed(txt_name): #, submitted_status
+@app.route('/validation/<txt_name>/analyzed/', methods=["GET", "POST"])  
+def validation_analyzed(txt_name): 
 
     form = TxtBrowser()
     form_field = form.txt.data
     print(form_field)
 
+    modified = request.args.get('modified')
+
     if txt_name:
-        #txtNameReq = request.args.get('txtName')
         page = request.args.get('page', 1, type=int)
         pagination = MetalNotion.query.paginate(page, per_page=10)
         notions = query_validation(txt_name)
         print("this is notions in the if ", notions)
+
+        if modified:
+            modified_notion_form = ModifyNotion()
+            newName = modified_notion_form.name.data
+            notionIt = modified_notion_form.notion_item.data
+            edit_notion(modified, newName, notionIt)
+
   
     if form.validate_on_submit and form_field:
         return redirect(url_for('validation_analyzed', txt_name = form_field))
@@ -462,16 +476,30 @@ def validation_analyzed(txt_name): #, submitted_status
 #if we delete one notion/question from the analysis
 @app.route('/validation/<notion_id>/delete_notion/', methods=["GET", "POST"]) 
 def delete_validation(notion_id):
+   
+    #query to delete the notion related to the text
+    txt_name = request.args.get('txt_name')
+    print(txt_name)
+    query_delete_notion(notion_id, txt_name)
+    print('before if', query_validation(txt_name))
 
-    query_delete_notion(notion_id)
+    form = TxtBrowser()
+
+
+    if txt_name:
+        page = request.args.get('page', 1, type=int)
+        pagination = MetalNotion.query.paginate(page, per_page=10)
+        notions = query_validation(txt_name)
+        print("this is notions in the if ", notions)
+  
+    if form.validate_on_submit and txt_name:
+        return redirect(url_for('validation_analyzed', txt_name = txt_name))
+
     
-    url_parent = request.referrer #####""???????
-    print(url_parent)
-    txtName = url_parent.get("txt_name")
-    #print(txtName)
-    #print(txtName)
+    #url_parent = request.referrer #####""???????
+    #txtName = url_parent.get("txt_name")
 
-    """
+    
     return render_template(
         'validation.html',
         notions = notions, 
@@ -480,15 +508,28 @@ def delete_validation(notion_id):
         txtName = txt_name,
         submit ='True'
     )
-    """
-    
-    return redirect(url_for('validation_analyzed', txt_name=txtName))   
-
+  
 
 #if we modify a notion on the validation page
 @app.route('/validation/<notion_id>/modify_notion/', methods=["GET", "POST"]) 
-def modify_validation():
-    return True
+def modify_validation(notion_id):
+
+    txt_name = request.args.get('txt_name')
+    print(txt_name)
+
+    n = MetalNotion.query.get(notion_id)
+    form = ModifyNotion(obj=n)
+
+    if form.validate_on_submit():
+        return redirect(url_for('validation_analyzed', txt_name=txt_name, modified=notion_id))
+
+
+    return render_template(
+        "modify_notion.html",
+        form = form,
+        txt_name = txt_name,
+        notion_id = notion_id
+    )
 
 #connexion page 
 @app.route('/connexion/', methods=["GET", "POST"])
@@ -580,7 +621,29 @@ def student(user_id, group_id):
 
     page = request.args.get('page', 1, type=int)
     pagination = MetalAnswerUser.query.paginate(page, per_page=20) 
-   
+
+
+    ###### test bokeh 
+
+    # prepare some data
+    x = [1, 2, 3, 4, 5]
+    y = [6, 7, 2, 4, 5]
+
+    # create a new plot with a title and axis labels
+    p = figure(title="Simple line example", x_axis_label="x", y_axis_label="y")
+
+    # add a line renderer with legend and line thickness
+    p.line(x, y, legend_label="Temp.", line_width=2)
+
+    # show the results
+    save(p)
+
+    
+
+    plot = figure()
+    plot.circle([1,2], [3,4])
+
+    html = file_html(plot, CDN, "my plot")
     
     
     return render_template(
@@ -588,7 +651,8 @@ def student(user_id, group_id):
         pagination = pagination,
         studentLastName = studentLastName,
         studentFirstName = studentFirstName,
-        answers = answers
+        answers = answers,
+        html = html
     )
 
 
@@ -607,6 +671,8 @@ def creation_session():
 
     #session code 
     sessionCode = "".join([random.choice(string.ascii_uppercase + string.digits) for _ in range(10)])
+    form.code.description = "Entrez un code personnalisé. Ou nous vous suggerons celui-ci : " + sessionCode
+    form.code.default = sessionCode
 
 
     if form.validate_on_submit():      
@@ -652,8 +718,7 @@ def new_assignment(submitted_status):
         name = form.name.data
         groups = form.grps.data
         exos = form.exos.data
-        code = request.form.get("sessionCode") #doesnt work!!!!!!!!
-        print(code)
+        code = form.code.data 
         
         query_new_assignment(name,exos,groups, code)
 
@@ -697,10 +762,12 @@ def modify_session(session_id):
         #we query the corresponding object to the id 
         assignment = MetalAssignment.query.get(session_id)
         prefilled_form = SessionExo(request.form, obj=assignment)
+        
 
         #get all the levels available
         grps = query_all_groups()
         prefilled_form.grps.choices = [(g.id, g.level) for g in grps]
+        #prefilled_form.grps.data = [s.level for s in assignment.group]
 
         #get all the exercises available 
         ex = query_all_exos()

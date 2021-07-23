@@ -50,6 +50,10 @@ class MetalGroup(db.Model):
     #many to many with chapter table 
     chapters = relationship("MetalChapter", secondary= association_groups_chaps, back_populates="groups")
 
+    def __repr__(self) -> str:
+        return repr(self.level) 
+
+
 association_chap_exos= Table('chaps_exos', db.metadata, Column('chap_id', Integer, ForeignKey('metal_chapters.id')), Column('exo_id', Integer, ForeignKey('metal_exercises.id')))
 
 association_chaps_notions = Table('exos_notions', db.metadata, Column('notion_id', Integer, ForeignKey('metal_notions.id')), Column('chap_id', Integer, ForeignKey('metal_chapters.id')))
@@ -70,7 +74,22 @@ class MetalChapter(db.Model):
     #many to many with notions 
     notions = relationship("MetalNotion", secondary=association_chaps_notions, back_populates='chaps')
     #to handle files paths 
-    files = Column(VARCHAR(512)) #not sure if it's the best type 
+    files = relationship("MetalFile", back_populates='chapter')
+
+    def __repr__(self) -> str:
+        return repr(self.name) 
+    
+
+class MetalFile(db.Model):
+    __tablename__ = 'metal_files'
+
+    id = Column(Integer, primary_key=True) 
+    name = Column(VARCHAR(512), unique=True, nullable=False) #change to the format we want 
+    chapter_id = Column(Integer, ForeignKey('metal_chapters.id'))
+    chapter = relationship("MetalChapter", back_populates='files')
+
+    def __repr__(self) -> str: #change to the format we want 
+        return repr(self.name)
 
 association_exos_quests = Table('quests_exos', db.metadata, Column('quest_id', Integer, ForeignKey('metal_questions.id')), Column('exo_id', Integer, ForeignKey('metal_exercises.id')))   
 
@@ -100,7 +119,11 @@ class MetalExercise(db.Model):
     #many to may with notions --> simplify
     #notions = relationship("MetalNotion", secondary=association_exos_notions, back_populates="exos")
     #question déjà liée à la notion et au texte donc pas besoin de redondance 
-    #text_related = Column(ForeignKey('metal_corpuses.name')) 
+    #text_related = Column(ForeignKey('metal_corpuses.name'))
+    # 
+    # test Repr()
+    def __repr__(self) -> str:
+        return repr(self.name) 
 
 
 #add question type et metal question aswers ? 
@@ -124,7 +147,9 @@ class MetalQuestion(db.Model):
     questFillBlank = relationship("MetalQuestionFillBlank", back_populates="questions")
     questHighlight = relationship("MetalQuestionHighlight", bake_queries="questions")
 
-    #do we need to add a type ? since we already have the link with question id in QUestion Highlight etc I don't think so but idk 
+    def __repr__(self) -> str:
+        return repr(self.slug) 
+
 
 
 class MetalAssignment(db.Model): #exercices session 
@@ -145,6 +170,10 @@ class MetalAssignment(db.Model): #exercices session
     created_at = Column(TIMESTAMP)
     updated_at = Column(TIMESTAMP)
 
+    def __repr__(self) -> str:
+        return repr(self.name) 
+
+
  
 
 association_notions_txts = Table('notions_txts', db.metadata, Column('notion_id', Integer, ForeignKey('metal_notions.id')), Column('txt_id', Integer, ForeignKey('metal_corpuses.id')))
@@ -160,6 +189,10 @@ class MetalCorpus(db.Model):
     exos = relationship("MetalExercise", secondary=association_exos_txts, back_populates="corpuses")
     #many to many with notions
     notions = relationship("MetalNotion", secondary=association_notions_txts, back_populates="corpuses")
+
+    def __repr__(self) -> str:
+        return repr(self.name) 
+
 
 
 class MetalNotion(db.Model): #equivalent to grammatical element 
@@ -179,6 +212,10 @@ class MetalNotion(db.Model): #equivalent to grammatical element
     #many to many with chapters
     chaps = relationship("MetalChapter", secondary=association_chaps_notions, back_populates="notions")
 
+    def __repr__(self) -> str:
+        return repr(self.name) 
+
+
 
 class MetalNotionItem(db.Model): #equivalent to grammatical marker 
     __tablename__ = 'metal_notion_items'
@@ -186,6 +223,9 @@ class MetalNotionItem(db.Model): #equivalent to grammatical marker
     id = Column(INTEGER, primary_key=True)
     name = Column(VARCHAR(191), nullable=False)
     notion_id = Column(INTEGER, ForeignKey('metal_notions.id'),  nullable=False)
+
+    def __repr__(self) -> str:
+        return repr(self.name) 
 
 
 class MetalQuestionHighlight(db.Model):
@@ -197,6 +237,9 @@ class MetalQuestionHighlight(db.Model):
     word_position = Column(INTEGER, nullable=False)
     instructions = Column(TEXT, nullable=False)
 
+    def __repr__(self) -> str:
+        return repr(self.instructions) 
+
 class MetalQuestionFillBlank(db.Model):
     __tablename__ = 'metal_question_fill_blanks'
 
@@ -206,6 +249,9 @@ class MetalQuestionFillBlank(db.Model):
     word_position = Column(INTEGER, nullable=False)
     instructions = Column(TEXT, nullable=False)
 
+    def __repr__(self) -> str:
+        return repr(self.instructions) 
+
 class MetalQuestionTrueFalse(db.Model):
     __tablename__ = 'metal_question_true_falses'
 
@@ -214,6 +260,9 @@ class MetalQuestionTrueFalse(db.Model):
     questions = relationship("MetalQuestion", back_populates="questTF")
     instructions = Column(TEXT, nullable=False)
     #do we need to add the available choices (Vrai, faux) ???? 
+
+    def __repr__(self) -> str:
+        return repr(self.instructions) 
 
 
 
@@ -234,6 +283,9 @@ class MetalAnswerUser(db.Model):
     created_at = Column(TIMESTAMP) #should we keep that ?
     updated_at = Column(TIMESTAMP) # "   "  "  "
     #ajouter un feedback de la part du prof ??? 
+
+    def __repr__(self) -> str:
+        return repr(self.user_answer) 
 
 
 ####### database initialization ########
@@ -523,10 +575,11 @@ def query_new_chapter(name, levels, cycle, exos, notions, summary, files, tags):
     if files is not None:
         for f in files:
             print(f)
-            file_to_format = str(f+'{}'.format(datetime.datetime.now()))
-            print(file_to_format)
-            chap.files.append(file_to_format)
-            print(chap.files)
+            if f is not None:
+                file_to_format = str(f+'{}'.format(datetime.datetime.now()))
+                print(file_to_format)
+                chap.files.append(file_to_format)
+                print(chap.files)
     
     chap.cycle = cycle
     chap.files = files
@@ -555,7 +608,7 @@ def query_new_assignment(name, choosenExos, groups, code):
     if groups is not None:
         for g in groups:
             q = db.session.query(MetalGroup).get(g)
-            assignment.group = q #??????????????????? la relationship ne va pas 
+            assignment.group = q #??????????????????? la relationship ne va pas? 
     
     #the query itself 
     db.session.add(assignment)
@@ -589,7 +642,7 @@ def general_query2(query, category):
 
 
         if tmp_chap!=[]:
-            res.append(tmp_chap) #might have to change the data form here 
+            res.append(tmp_chap) 
         
         if tmp_exo !=[]:
             res.append(tmp_exo)
@@ -633,8 +686,6 @@ def general_query2(query, category):
             res.append(tmp_questFB)
         if tmp_questTF !=[]:
             res.append(tmp_questTF)
-        #tmp_quest = MetalQuestion.query.filter(MetalQuestion.instructions.like(search)).all()  #instructions !! à changer
-        #res.append(tmp_quest)
     if category == 'Textes':
         tmp_txt = MetalCorpus.query.filter(MetalCorpus.name.like(search)).all()
         res.append(tmp_txt)
@@ -662,18 +713,50 @@ def query_validation(txtName):
 
 
 #query to edit a notion find by the analyser 
-def edit_notion(notionName, name): #TODO we can't change much with only those fields missing the sentence examined 
-    if notionName is not None:
-        #notionObject = db.session.query(MetalNotion).filter(MetalNotion.name==notionName)
-        #notionObject.name = name
+def edit_notion(notionId, name, notionItem): #TODO we can't change much with only those fields missing the sentence examined 
+    notion = db.session.query(MetalNotion).get(notionId)
+    if notion :
+        notion.name = name
+        for i in notionItem:
+            q = db.session.query(MetalNotionItem).get(i)
+            if q:
+                notion.notion_item.append(q)
+    
+        db.session.commit()
+        lg.warning('Modified notion !')
+
+        """
         update(MetalNotion).where(MetalNotion.name == notionName).values(name=name)
         db.session.commit()
         lg.warning('Modifications done !')
+        """
 
 
 # DANS TOUS LES DELETE ATTENTION AUX DÉPENDANCES !!!!!!
 #query to delete a notion "forever" TODO TO TEST --> problem with dependancies 
-def query_delete_notion(notionId):
+def query_delete_notion(notionId, txt_name):
+
+    notion = db.session.query(MetalNotion).get(notionId)
+    text = db.session.query(MetalCorpus).get(txt_name) #:!! on utilise le nom est pas l'id 
+    if notion and text:
+        #remove the corpus, notion side
+        for t in notion.corpuses:
+            if t == text :
+                notion.corpuses.remove(t)
+                print(notion.corpuses)
+                db.session.commit()
+
+        #remove the notion, corpus side
+        for n in text.notions:
+            if n == notion:
+                text.notions.remove(n)
+                print(text.notions)
+                db.session.commit()
+
+    lg.warning('Deleted notion !')
+
+
+    """
     if notionId is not None:
         #db.session.delete(MetalNotion).where(MetalNotion.name == notionName) #doit plutot delete la question associée à la notion non ? 
         #attention on doit supprimer une notion liée à une phrase en particulier là on va juste suppr toutes les notions de ce nom!!!!
@@ -686,7 +769,7 @@ def query_delete_notion(notionId):
             #db.session.delete(MetalQuestion).join(MetalNotion ,MetalQuestion.notion).where(MetalNotion.id == notionId) 
             db.session.commit()
             lg.warning('Deleted notion !')
-
+    """
 
 
 ################# Modifications/deletions of chapters/exos/assignments ########################
@@ -736,7 +819,15 @@ def edit_chapter(chapId, newName, groups, cycle, exos, notions, summary, files, 
             chap.notions.append(q)    
   
     if files:
-        chap.files = files[0] #WTF  CHANGE THAT ADD A CLASS OR SOMETHING
+        for f in files:
+            #creating a new obj File with a unique name 
+            tmp_file = MetalFile()
+            tmp_file.name = "{}".format(datetime.datetime.now()) + "_" + str(f)  #ajouter le login
+            print(tmp_file.name)
+            tmp_file.chapter_id = chapId
+            db.session.add(tmp_file)
+            #q = db.session.query(MetalFile).get(f) #on ne peut pas get si ce n'est pas encore créé
+            chap.files.append(tmp_file)
 
     if tags:
         chap.tags = tags

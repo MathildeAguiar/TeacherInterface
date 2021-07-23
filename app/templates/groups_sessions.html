@@ -16,7 +16,7 @@
         {{ sessions }}
     </div>
     {% else %}
-    {{ render_table(sessions, titles=[('name', 'Nom'), ('code', 'Code'), ('exos', 'Exercices'), ('updated_at', 'Mise à jour')], show_actions=True)}} 
+    {{ render_table(sessions, titles=[('name', 'Nom'), ('code', 'Code'), ('exos', 'Exercices'), ('updated_at', 'Mise à jour')])}} 
     {{ render_pagination(pagination) }}
     {% endif %}
 </main>

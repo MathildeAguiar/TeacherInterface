@@ -6,9 +6,17 @@
 
 <main>
     <div class="container">
-        <h4 class="row g-5">
+        <h3 class="row g-5">
             {{ studentFirstName }} {{ studentLastName}}
-        </h4>
+        </h3>
+    </div>
+
+    <div class="container"> 
+        <h5>
+          Tableau de bord :
+        </h5>
+
+        {{ html }}
     </div>
 
     {% if answers == 'Aucun résultat !' %} 
@@ -19,6 +27,24 @@
     {{ render_table(answers)}}
     {{ render_pagination(pagination) }}
     {% endif %}
+
+    <div class="col-12 my-3">
+        <h5>
+           Sessions d'exercices réalisées :
+        </h5> 
+    </div>
+
+    <div class="col-12 my-3">
+        <h5>
+            Commentaires à l'élève :
+        </h5>
+    </div>
+
+    <div class="col-12 my-3">
+        <h5>
+            Commentaires personnels (non visible par l'élève) :
+        </h5>
+    </div>
 </main>
 
 {% endblock %}

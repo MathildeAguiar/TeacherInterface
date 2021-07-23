@@ -16,7 +16,7 @@
         {{ students }}
     </div>
     {% else %}
-    {{ render_table(students, titles=[('lastName', 'Nom'), ('firstName', 'Prénom'), ('group_id', 'Groupes')], show_actions=True, actions_title='Détails élève', view_url=url_for('student', user_id=':primary_key', group_id=':primary_key'))}} 
+    {{ render_table(students, titles=[('lastName', 'Nom'), ('firstName', 'Prénom'), ('group_id', 'Groupes')], show_actions=True, actions_title='Détails élève', custom_actions=[('Élève', 'file-earmark-person', url_for('student', user_id=':id', group_id=':id'))])}} 
     {{ render_pagination(pagination) }}
     {% endif %}
 </main>
