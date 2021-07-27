@@ -1,20 +1,19 @@
 # coding: utf-8
 import datetime
-from itertools import cycle
 import random, string
-from re import split
-from sqlalchemy import BigInteger, Column, DECIMAL, DateTime, Float, ForeignKey, Integer, SmallInteger, String, TIMESTAMP, Table, Text, delete
-from sqlalchemy.dialects.mysql import INTEGER, LONGTEXT, SMALLINT, TEXT, TINYINT, VARCHAR
-from sqlalchemy.sql.expression import update
+from sqlalchemy import Column, ForeignKey, Integer, TIMESTAMP, Table, Text
+from sqlalchemy.dialects.mysql import INTEGER, TEXT, VARCHAR
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.functions import user
-#rom sqlalchemy.sql.expression import delete, null
-from sqlalchemy.sql.sqltypes import BOOLEAN, Boolean, TIME
 from .views import app
 import logging as lg
 from flask_sqlalchemy import SQLAlchemy, request
 from random import choices, randint, randrange
+from sqlalchemy import exc
+#from flask.ext.sqlalchemy import exc
 
+
+#exceptions = exc.sa_exc
 
 
 
@@ -35,6 +34,10 @@ class MetalUser(db.Model):
     group_id = Column(Integer, ForeignKey('metal_groups.id'))
     group = relationship("MetalGroup", back_populates="users")
     type = Column(VARCHAR(191)) #role 
+    #comment from the teacher avaiable for the student
+    comment_student = Column(VARCHAR(512))
+    #comment from the teacher but only viewable by the teacher
+    comment_teacher = Column(VARCHAR(512))
 
 association_groups_chaps = Table('groups_chaps', db.metadata, Column('group_id', Integer, ForeignKey('metal_groups.id')), Column("chapter_id", Integer, ForeignKey('metal_chapters.id')))
 
@@ -157,7 +160,7 @@ class MetalAssignment(db.Model): #exercices session
 
     id = Column(INTEGER, primary_key=True)
     user_id = Column(INTEGER, ForeignKey('metal_users.id'))  #? keep??? , nullable=False
-    name = Column(VARCHAR(191), nullable=False)
+    name = Column(VARCHAR(191), nullable=False, unique=True)
     code = Column(INTEGER) #some have codes (mandatory groups of exercices) and some don't (non mandatory ones)
     #mark = Column(Integer, nullable=False) --> doit être par rapport à un élève 
     #many to one with Groups 
@@ -611,9 +614,16 @@ def query_new_assignment(name, choosenExos, groups, code):
             assignment.group = q #??????????????????? la relationship ne va pas? 
     
     #the query itself 
-    db.session.add(assignment)
-    db.session.commit()
-    lg.warning('Addition done !')
+    
+    try:
+        db.session.add(assignment)
+        db.session.commit()
+        lg.warning('Addition done !')
+    except exc.SQLAlchemyError as e:
+        print("catched error AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", e)
+        pass
+        
+    
 
 
 
@@ -933,3 +943,11 @@ def query_answers_user(user_id):
     if answers:
         return answers
     else :  return "Aucun résultat !"
+
+#query all the assignments done by one user 
+def query_assignments_by_user(user_id):
+    user = db.session.query(MetalUser).get(user_id)
+    if user:
+        assignments = db.session.query(MetalAssignment).filter(user.group_id == MetalAssignment.group_id).all()
+        return assignments
+    else : return 'Aucun résultat !'

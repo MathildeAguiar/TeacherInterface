@@ -1,3 +1,4 @@
+from app.student_dashboard import CommentsForTeacher, CommentsToStudent
 from app.modify_notion import ModifyNotion
 from re import template
 from app.session_exo import SessionExo
@@ -16,7 +17,8 @@ from .validation import TxtBrowser
 from bokeh.plotting import figure, show, save
 from bokeh.plotting import figure
 from bokeh.resources import CDN
-from bokeh.embed import file_html
+from bokeh.embed import file_html, components
+import numpy as np
 
 
 
@@ -42,7 +44,7 @@ csrf = CSRFProtect(app)
 ckeditor = CKEditor(app)
 
 #imports from models (must stay here)
-from app.models import MetalAnswerUser, MetalChapter, MetalExercise, MetalGroup, MetalAssignment, MetalUser, edit_assignment, edit_chapter, edit_exo, edit_notion, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_groups_sessions, query_groups_students, query_new_assignment, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, query_new_chapter, query_answers_user
+from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment, MetalUser, edit_assignment, edit_chapter, edit_exo, edit_notion, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_assignments_by_user, query_groups_sessions, query_groups_students, query_new_assignment, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, query_new_chapter, query_answers_user
 
 
 #routes 
@@ -194,7 +196,7 @@ def list_exo():
         exos = exos
     )
 
-@app.route('/list_exo/<exo_id>/delete_exo', methods=['POST', 'GET'])
+@app.route('/list_exo/<exo_id>/delete_exo/', methods=['POST', 'GET'])
 def delete_exo(exo_id):
 
     query_delete_exercise(exo_id)
@@ -212,7 +214,7 @@ def delete_exo(exo_id):
     )
 
 
-@app.route('/list_exo/<exo_id>/modify_exo', methods=['GET', 'POST']) #correct the query 
+@app.route('/list_exo/<exo_id>/modify_exo/', methods=['GET', 'POST']) #correct the query 
 def modify_exo(exo_id):
 
     if exo_id:
@@ -314,7 +316,7 @@ def list_chapters():
         chaps = chaps
     )
 
-@app.route('/list_chapters/<submitted_status>/new_chapter', methods=['GET','POST'])
+@app.route('/list_chapters/<submitted_status>/new_chapter/', methods=['GET','POST'])
 def new_chapter(submitted_status):
 
     if submitted_status == 'True' :
@@ -343,7 +345,7 @@ def new_chapter(submitted_status):
         chaps = chaps
     )
 
-@app.route('/list_chapters/<chapter_id>/delete_chapter', methods=['POST', 'GET'])
+@app.route('/list_chapters/<chapter_id>/delete_chapter/', methods=['POST', 'GET'])
 def delete_chapter(chapter_id):
 
     query_delete_chapter(chapter_id)
@@ -361,7 +363,7 @@ def delete_chapter(chapter_id):
     )
 
 
-@app.route('/list_chapters/<chapter_id>/modify_chapter', methods=['GET', 'POST']) #modify the template with modify _status and correct the query
+@app.route('/list_chapters/<chapter_id>/modify_chapter/', methods=['GET', 'POST']) #modify the template with modify _status and correct the query
 def modify_chapter(chapter_id):
 
     if chapter_id:
@@ -564,7 +566,7 @@ def groups():
     )
 
 #where we can see which sessions are related to a choosen group
-@app.route('/groups/<group_id>/groups_sessions', methods=['POST', 'GET'])
+@app.route('/groups/<group_id>/groups_sessions/', methods=['POST', 'GET'])
 def groups_sessions(group_id):
 
     sessions = query_groups_sessions(group_id) 
@@ -588,7 +590,7 @@ def groups_sessions(group_id):
 
 
 #where we can see which students are related to a choosen group
-@app.route('/groups/<group_id>/groups_students', methods=['POST', 'GET'])
+@app.route('/groups/<group_id>/groups_students/', methods=['POST', 'GET'])
 def groups_students(group_id):
 
     students = query_groups_students(group_id) 
@@ -610,21 +612,59 @@ def groups_students(group_id):
 
 
 #where we can see which students are related to a choosen group
-@app.route('/groups/<group_id>/groups_students/<user_id>/student', methods=['POST', 'GET'])
+@app.route('/groups/<group_id>/groups_students/<user_id>/student/', methods=['POST', 'GET'])
 def student(user_id, group_id):
 
     student = MetalUser.query.get(user_id)
     studentFirstName = student.firstName  
     studentLastName = student.lastName
+    comment_student = student.comment_student
+    comment_teacher = student.comment_teacher
+    comment_teacher =  "hello this is a test I'm tired I wanna lay in bed"
+    print(comment_teacher, comment_student, "comments")
 
-    answers = query_answers_user(user_id)  
+    assignments = query_assignments_by_user(user_id)  
+    #answers = query_answers_user(user_id)  
 
+    """
     page = request.args.get('page', 1, type=int)
-    pagination = MetalAnswerUser.query.paginate(page, per_page=20) 
+    pagination = MetalAnswerUser.query.paginate(page, per_page=20)
+    """ 
+
+    form_com_student = None
+    form_com_teacher = None
+    comment_zone =  None
+
+    #to display the typing zone for the student comment
+    if request.args.get("comment") == 'zone1':
+        comment = student  #.comment_student
+        form_com_student = CommentsToStudent(request.form, obj = comment)
+        comment_zone = 'zone1'
+    
+    #to display the typing zone for the teacher comment 
+    elif request.args.get("comment") == 'zone2':
+        comment = student   #.comment_teacher
+        form_com_teacher = CommentsForTeacher(request.form, obj=comment)
+        comment_zone = 'zone2'
+
+    if request.args.get('submitted') == 'submitted_zone2':
+        form_filled_teacher = CommentsForTeacher()
+        #real fct todo
+        student.comment_teacher = form_filled_teacher.comment_teacher.data
+        print(comment_teacher, "comments jj")
+
+    elif request.args.get('submitted')=='submitted_zone1':
+        form_filled_student = CommentsToStudent()
+        #must create a real fct 
+        student.comment_student = form_filled_student.comment_student.data
+        print(comment_student, "comments kk")
+
+
+
 
 
     ###### test bokeh 
-
+    """
     # prepare some data
     x = [1, 2, 3, 4, 5]
     y = [6, 7, 2, 4, 5]
@@ -637,24 +677,67 @@ def student(user_id, group_id):
 
     # show the results
     save(p)
+    """
+
+    x = np.arange(2, 50, step=.5)
+    y = np.sqrt(x) + np.random.randint(2,50)
+    plot = figure(title="Résultats", toolbar_location="above",
+           plot_width=1200, plot_height=500)
+        #plot_width=400, plot_height=400,title=None, toolbar_location="below")
+    plot.line(x,y)
+
+    script, div = components(plot)
+    #kwargs = {'script': script, 'div': div}
+    #kwargs['title'] = 'bokeh-with-flask'    
+    #return render_template('index.html', **kwargs)
 
     
 
-    plot = figure()
-    plot.circle([1,2], [3,4])
-
-    html = file_html(plot, CDN, "my plot")
+    #plot = figure()
+    #plot.circle([1,2], [3,4])
+    #html = file_html(plot, CDN, "my plot")
     
     
     return render_template(
         "student.html",  
-        pagination = pagination,
+        #pagination = pagination,
         studentLastName = studentLastName,
         studentFirstName = studentFirstName,
-        answers = answers,
-        html = html
+        form_com_student = form_com_student,
+        form_com_teacher = form_com_teacher,
+        assignments = assignments,
+        group_id = group_id,
+        user_id = user_id,
+        comment_zone = comment_zone,
+        comment_student = comment_student,
+        comment_teacher = comment_teacher,
+        script= script,
+        div = div 
     )
 
+"""
+#when you want to enable a comment zone :
+@app.route('/groups/<group_id>/groups_students/<user_id>/student/<comment>/comment_student/', methods=['POST', 'GET'])
+def comment_student(user_id, group_id, comment):
+
+    student = MetalUser.query.get(user_id)
+    studentFirstName = student.firstName  
+    studentLastName = student.lastName
+
+    assignments = query_assignments_by_user(user_id)  
+    #answers = query_answers_user(user_id)  
+
+    page = request.args.get('page', 1, type=int)
+    pagination = MetalAnswerUser.query.paginate(page, per_page=20) 
+
+    if comment == 'zone1':
+        return True
+    elif comment == 'zone2':
+        return True
+    return True
+"""
+
+########## Assignments pages #########
 
 #exercises sessions' page
 @app.route('/creation_session/',  methods=['GET', 'POST'])
@@ -709,7 +792,7 @@ def list_sessions():
     )
 
 #after a new sessions has been created
-@app.route('/list_sessions/<submitted_status>/new_assignment', methods=['GET','POST'])
+@app.route('/list_sessions/<submitted_status>/new_assignment/', methods=['GET','POST'])
 def new_assignment(submitted_status):
 
     if submitted_status == 'True' :
@@ -736,7 +819,7 @@ def new_assignment(submitted_status):
     )
 
 
-@app.route('/list_sessions/<session_id>/delete', methods=['POST', 'GET'])
+@app.route('/list_sessions/<session_id>/delete/', methods=['POST', 'GET'])
 def delete_session(session_id):
 
     query_delete_session(session_id)
@@ -755,7 +838,7 @@ def delete_session(session_id):
     )
 
 
-@app.route('/list_sessions/<session_id>/modify_session', methods=['GET', 'POST'])
+@app.route('/list_sessions/<session_id>/modify_session/', methods=['GET', 'POST'])
 def modify_session(session_id):
 
     if session_id:
@@ -763,7 +846,6 @@ def modify_session(session_id):
         assignment = MetalAssignment.query.get(session_id)
         prefilled_form = SessionExo(request.form, obj=assignment)
         
-
         #get all the levels available
         grps = query_all_groups()
         prefilled_form.grps.choices = [(g.id, g.level) for g in grps]
