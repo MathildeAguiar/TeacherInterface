@@ -1,6 +1,7 @@
 # coding: utf-8
 import datetime
 import random, string
+from re import escape
 from sqlalchemy import Column, ForeignKey, Integer, TIMESTAMP, Table, Text
 from sqlalchemy.dialects.mysql import INTEGER, TEXT, VARCHAR
 from sqlalchemy.orm import relationship
@@ -450,6 +451,10 @@ def init_db():
 #get all the chapters and order them by their names 
 def query_all_chaps():
     chaps = MetalChapter.query.order_by(MetalChapter.name).all()
+    """" test for escaping html
+    for c in chaps:
+        c.summary = escape(c.summary)
+    """
     return chaps
 
 #get all the exercises and order them by their names 
@@ -951,3 +956,17 @@ def query_assignments_by_user(user_id):
         assignments = db.session.query(MetalAssignment).filter(user.group_id == MetalAssignment.group_id).all()
         return assignments
     else : return 'Aucun résultat !'
+
+#query to update a comment for the student/for the teacher him.herself
+def query_update_comment(user_id, zone, comment):
+    user = db.session.query(MetalUser).get(user_id)
+
+    if zone == 'submitted_zone1':
+        user.comment_student = comment
+    elif zone == 'submitted_zone2':
+        user.comment_teacher = comment
+    
+    db.session.commit()
+    lg.warning('Modified comment !')
+
+

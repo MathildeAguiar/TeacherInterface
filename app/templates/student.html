@@ -56,7 +56,7 @@
         <div class="h-100 p-5 my-4 shadow bg-light border rounded-4">
             <h2>Add borders</h2>
             <p> Render the HTML comment here
-                {{comment_student}}
+                {{comment_student | safe}}
             </p>
             
             <a  class="btn btn-primary text-white" href="{{ url_for('student', comment='zone1', group_id = group_id, user_id = user_id) }}">  <!-- href="{# { url_for('student', comment='zone1') } #}" -->
@@ -84,7 +84,7 @@
         <div class="h-100 p-5 my-4 shadow bg-light border rounded-4">
             <h2>Add borders</h2>
             <p> Render the HTML comment here (juste une balise html est ce que ça marcherait ? ) 
-                {{comment_teacher}}
+                {{comment_teacher | safe }}
             </p>
                 
             <a  class="btn btn-primary text-white" href="{{ url_for('student', comment='zone2', group_id = group_id, user_id = user_id) }}">  <!-- href="{# { url_for('student', comment='zone2') } #}" -->

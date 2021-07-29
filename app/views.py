@@ -1,6 +1,5 @@
 from app.student_dashboard import CommentsForTeacher, CommentsToStudent
 from app.modify_notion import ModifyNotion
-from re import template
 from app.session_exo import SessionExo
 from app.chapter_creation import CreaChapter
 import os
@@ -14,12 +13,10 @@ from flask import Flask, render_template, url_for, redirect, request
 from .forms import ResearchForm
 from .creation_exo import CreaExo
 from .validation import TxtBrowser
-from bokeh.plotting import figure, show, save
 from bokeh.plotting import figure
-from bokeh.resources import CDN
-from bokeh.embed import file_html, components
+from bokeh.embed import components
 import numpy as np
-
+from bokeh.models import HoverTool
 
 
 app = Flask(__name__)
@@ -44,7 +41,7 @@ csrf = CSRFProtect(app)
 ckeditor = CKEditor(app)
 
 #imports from models (must stay here)
-from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment, MetalUser, edit_assignment, edit_chapter, edit_exo, edit_notion, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_assignments_by_user, query_groups_sessions, query_groups_students, query_new_assignment, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, query_new_chapter, query_answers_user
+from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment, MetalUser, edit_assignment, edit_chapter, edit_exo, edit_notion, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_assignments_by_user, query_groups_sessions, query_groups_students, query_new_assignment, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, query_new_chapter, query_update_comment
 
 
 #routes 
@@ -52,6 +49,7 @@ from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment,
 #before the first request we init our db
 @app.before_first_request
 def before_first_request_func():
+    """🐕"""
     init_db()
 
 #test to pass the list of chapters at all templates 
@@ -647,17 +645,21 @@ def student(user_id, group_id):
         form_com_teacher = CommentsForTeacher(request.form, obj=comment)
         comment_zone = 'zone2'
 
+    #to sned the modifications of the comment zone 
     if request.args.get('submitted') == 'submitted_zone2':
         form_filled_teacher = CommentsForTeacher()
-        #real fct todo
-        student.comment_teacher = form_filled_teacher.comment_teacher.data
-        print(comment_teacher, "comments jj")
+        comm = form_filled_teacher.comment_teacher.data
+        print(comm, "comments jj")
+        query_update_comment(user_id, 'submitted_zone2', comm)
+        comment_teacher = student.comment_teacher
+
 
     elif request.args.get('submitted')=='submitted_zone1':
         form_filled_student = CommentsToStudent()
-        #must create a real fct 
-        student.comment_student = form_filled_student.comment_student.data
-        print(comment_student, "comments kk")
+        comm = form_filled_student.comment_student.data
+        print(comm, "comments kk")
+        query_update_comment(user_id, 'submitted_zone1', comm)
+        comment_student = student.comment_student
 
 
 
@@ -679,23 +681,21 @@ def student(user_id, group_id):
     save(p)
     """
 
-    x = np.arange(2, 50, step=.5)
+    x = np.arange(0, 20, step=.5)
     y = np.sqrt(x) + np.random.randint(2,50)
-    plot = figure(title="Résultats", toolbar_location="above",
-           plot_width=1200, plot_height=500)
-        #plot_width=400, plot_height=400,title=None, toolbar_location="below")
-    plot.line(x,y)
+    TOOLTIPS = [
+    ("index", "$index"),
+    ("(x,y)", "($x, $y)")
+    ]
+    plot = figure(title="Résultats",x_axis_label="Date", x_axis_type='datetime', y_axis_label="Note", toolbar_location="above",
+           plot_width=1200, plot_height=500, sizing_mode="stretch_width", tooltips = TOOLTIPS)
+    plot.line(x,y, line_width= 2)
+    #plot.add_tools(HoverTool(tooltips=None, renderers=[cr], mode='hline'))
 
     script, div = components(plot)
     #kwargs = {'script': script, 'div': div}
     #kwargs['title'] = 'bokeh-with-flask'    
     #return render_template('index.html', **kwargs)
-
-    
-
-    #plot = figure()
-    #plot.circle([1,2], [3,4])
-    #html = file_html(plot, CDN, "my plot")
     
     
     return render_template(
