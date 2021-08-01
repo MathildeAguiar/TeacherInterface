@@ -4,6 +4,7 @@ from wtforms.fields.core import SelectMultipleField
 from wtforms.validators import DataRequired, Length
 
 class SessionExo(FlaskForm):
+    """Form to create an assignment"""
 
     name = StringField( 
         "Nom de la session d'exercices :",

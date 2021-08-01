@@ -25,6 +25,7 @@ db = SQLAlchemy(app)
 #classes of our tables 
 
 class MetalUser(db.Model):
+    """User table"""
     __tablename__ = 'metal_users'
 
     id = Column(INTEGER, primary_key=True)
@@ -43,6 +44,7 @@ class MetalUser(db.Model):
 association_groups_chaps = Table('groups_chaps', db.metadata, Column('group_id', Integer, ForeignKey('metal_groups.id')), Column("chapter_id", Integer, ForeignKey('metal_chapters.id')))
 
 class MetalGroup(db.Model):
+    """Groups of students table"""
     __tablename__ = 'metal_groups'
 
     id = Column(INTEGER, primary_key=True)
@@ -63,6 +65,7 @@ association_chap_exos= Table('chaps_exos', db.metadata, Column('chap_id', Intege
 association_chaps_notions = Table('exos_notions', db.metadata, Column('notion_id', Integer, ForeignKey('metal_notions.id')), Column('chap_id', Integer, ForeignKey('metal_chapters.id')))
 
 class MetalChapter(db.Model):
+    """Chapter table"""
     __tablename__ = 'metal_chapters'
 
     id = Column(Integer, primary_key=True)
@@ -85,6 +88,7 @@ class MetalChapter(db.Model):
     
 
 class MetalFile(db.Model):
+    """File from a chapter table"""
     __tablename__ = 'metal_files'
 
     id = Column(Integer, primary_key=True) 
@@ -104,6 +108,7 @@ association_exos_txts = Table('exos_txts', db.metadata, Column('txt_id', Integer
 #association_exos_notions = Table('exos_notions', db.metadata, Column('notion_id', Integer, ForeignKey('metal_notions.id')), Column('exo_id', Integer, ForeignKey('metal_exercices.id')))
 
 class MetalExercise(db.Model):
+    """Exercise table"""
     __tablename__ = 'metal_exercises'
 
     id = Column(INTEGER, primary_key=True)
@@ -132,6 +137,7 @@ class MetalExercise(db.Model):
 
 #add question type et metal question aswers ? 
 class MetalQuestion(db.Model):
+    """Question table"""
     __tablename__ = 'metal_questions'
 
     id = Column(INTEGER, primary_key=True)
@@ -156,7 +162,8 @@ class MetalQuestion(db.Model):
 
 
 
-class MetalAssignment(db.Model): #exercices session 
+class MetalAssignment(db.Model): #exercices session
+    """Assignment table""" 
     __tablename__ = 'metal_assignments'
 
     id = Column(INTEGER, primary_key=True)
@@ -183,6 +190,7 @@ class MetalAssignment(db.Model): #exercices session
 association_notions_txts = Table('notions_txts', db.metadata, Column('notion_id', Integer, ForeignKey('metal_notions.id')), Column('txt_id', Integer, ForeignKey('metal_corpuses.id')))
 
 class MetalCorpus(db.Model):
+    """Corpus table"""
     __tablename__ = 'metal_corpuses'
 
     id = Column(INTEGER, primary_key=True)
@@ -200,6 +208,7 @@ class MetalCorpus(db.Model):
 
 
 class MetalNotion(db.Model): #equivalent to grammatical element 
+    """Grammatical Notion table"""
     __tablename__ = 'metal_notions'
 
     id = Column(INTEGER, primary_key=True)
@@ -222,6 +231,7 @@ class MetalNotion(db.Model): #equivalent to grammatical element
 
 
 class MetalNotionItem(db.Model): #equivalent to grammatical marker 
+    """Grammatical Element table"""
     __tablename__ = 'metal_notion_items'
 
     id = Column(INTEGER, primary_key=True)
@@ -233,6 +243,7 @@ class MetalNotionItem(db.Model): #equivalent to grammatical marker
 
 
 class MetalQuestionHighlight(db.Model):
+    """Question type 'Highlighting' table"""
     __tablename__ = 'metal_question_highlights'
 
     id = Column(INTEGER, primary_key=True)
@@ -245,6 +256,7 @@ class MetalQuestionHighlight(db.Model):
         return repr(self.instructions) 
 
 class MetalQuestionFillBlank(db.Model):
+    """Question type 'FillBlank' table"""
     __tablename__ = 'metal_question_fill_blanks'
 
     id = Column(INTEGER, primary_key=True)
@@ -257,6 +269,7 @@ class MetalQuestionFillBlank(db.Model):
         return repr(self.instructions) 
 
 class MetalQuestionTrueFalse(db.Model):
+    """Question type 'TrueFalse' table"""
     __tablename__ = 'metal_question_true_falses'
 
     id = Column(INTEGER, primary_key=True)
@@ -271,6 +284,7 @@ class MetalQuestionTrueFalse(db.Model):
 
 
 class MetalAnswerUser(db.Model):
+    """User answers to questions table"""
     __tablename__ = 'metal_answer_users'
 
     id = Column(INTEGER, primary_key=True)
@@ -296,7 +310,7 @@ class MetalAnswerUser(db.Model):
 
 
 def init_db():
-    
+    """To init the database with some random data. TO DELETE in the final version."""
     db.drop_all()
     db.create_all()
 
@@ -314,7 +328,6 @@ def init_db():
         db.session.add(grp)
 
     #random users 
-    #groups = ["3ème.1", "3ème.2", "4ème.2", "4ème.1"]
     for i in range(5):
         usr = MetalUser()
         usr.lastName = "Dupont{}".format(i+1)
@@ -338,7 +351,6 @@ def init_db():
     for i in range(9):
         quest = MetalQuestion()
         quest.duration = randint(1, 60)
-        #quest.instructions = "instruction n° {}".format(i) dépend du type de quest 
         quest.grade = randint(0, 20) #keep it ? 
         quest.type = "question type " #keep it ? 
         quest.notion_id = randint(1, 4)
@@ -375,12 +387,10 @@ def init_db():
     #random exo 
     for i in range(5):
         exo = MetalExercise()
-        #exo.limited_time = choices([True, False]).pop(0)
         exo.limited_time = randint(3,20)
         exo.name = "name {}".format(i+1)
         exo.slug = "this is an exo slug"
         exo.tags = "exo's tags"
-        #exo.chapter_id = randint(1, 4)
         db.session.add(exo)
 
 
@@ -389,7 +399,6 @@ def init_db():
     for i in range(4):
         corp = MetalCorpus()
         corp.name = texts[i]
-        #corp.notion_id = randint(1, 3)
         corp.author = "author {}".format(i+1)
         n = MetalNotion()
         n.name = "test corpus/notions {}".format(i)
@@ -405,7 +414,6 @@ def init_db():
     for i in range(5):
         notion = MetalNotion()
         notion.name = n[i]
-        #notion.question_id = randint(1, 3)
         #populate the corpuses field 
         c = MetalCorpus()
         c.name = "test notion {}".format(i)
@@ -423,7 +431,6 @@ def init_db():
     for i in range(4):
         sess = MetalAssignment()
         sess.created_at = datetime.datetime.now() 
-        #sess.mark = randint(0, 20) --> doit être par rapport à un élève 
         sess.code = "".join([random.choice(string.ascii_uppercase + string.digits) for _ in range(10)])
         sess.name = "session n° {}".format(i)
         sess.updated_at = datetime.datetime.now()
@@ -450,6 +457,8 @@ def init_db():
 
 #get all the chapters and order them by their names 
 def query_all_chaps():
+    """Get all the chapters and order them by their names"""
+
     chaps = MetalChapter.query.order_by(MetalChapter.name).all()
     """" test for escaping html
     for c in chaps:
@@ -459,11 +468,13 @@ def query_all_chaps():
 
 #get all the exercises and order them by their names 
 def query_all_exos():
+    """Get all the exercises and order them by their names"""
     exos = MetalExercise.query.order_by(MetalExercise.name).all()
     return exos
 
-#get all the questions and order them by their names  TODO there is no more instructions in here !!! 
+#get all the questions and order them by their names
 def query_all_quests():
+    """Get all the questions (any kind) and order them by their names"""
     quests = MetalQuestion()
     questsTF = MetalQuestionTrueFalse.query.order_by(MetalQuestionTrueFalse.instructions).all()
     questsFB = MetalQuestionFillBlank.query.order_by(MetalQuestionFillBlank.instructions).all()
@@ -472,40 +483,48 @@ def query_all_quests():
 
 #get all the questions True False and order them by their instructions
 def query_all_qTF():
+    """Get all the questions True False and order them by their instructions"""
     questsTF = MetalQuestionTrueFalse.query.order_by(MetalQuestionTrueFalse.instructions).all()
     return questsTF
 
 #get all the questions Fill blank and order them by their instructions
 def query_all_qFB():
+    """Get all the questions Fill blank and order them by their instructions"""
     questsFB = MetalQuestionFillBlank.query.order_by(MetalQuestionFillBlank.instructions).all()
     return questsFB
 
 #get all the questions Highlight and order them by their instructions
 def query_all_qH():
+    """Get all the questions Highlight and order them by their instructions"""
     questsH = MetalQuestionHighlight.query.order_by(MetalQuestionHighlight.instructions).all()
     return questsH
 
 
 #get all the grammatical elements and order them by their names 
 def query_all_gram():
+    """Get all the grammatical notions and order them by their names"""
     gram = MetalNotion.query.order_by(MetalNotion.name).all()
     return gram 
 
 def query_all_groups():
+    """Query all groups avaiable """
     grp = MetalGroup.query.order_by(MetalGroup.level).all()
     return grp
 
 #query all the exercices sessions avaiable 
 def query_all_sessions():
+    """Query all the exercices sessions/assignments avaiable"""
     session = MetalAssignment.query.order_by(MetalAssignment.name).all()
     return session
 
 #query all the texts avaiable 
 def query_all_corpuses():
+    """Query all the texts avaiable"""
     corpuses = MetalCorpus.query.order_by(MetalCorpus.name).all()
     return corpuses
 
-#query to fetch all exercices related to a chapter TODO changer le chapter_id 
+#query to fetch all exercices related to a chapter TODO DELETE
+
 def query_exo_related_chaps(chap_name):
     #list_exo = MetalExercise.query.select_from(MetalExercise.name).join(MetalChapter, MetalChapter.id == MetalExercise.chapter_id).filter(MetalChapter.name == chap_name)
     #list_exo = db.session.query(MetalExercise).join(MetalChapter, MetalChapter.id==MetalExercise.chapter_id).filter(MetalChapter.name==chap_name).all()
@@ -514,10 +533,12 @@ def query_exo_related_chaps(chap_name):
 
 
 
+
 ########### Queries to create a new exercise/chapter/assignment ################
 
 #insert a newly created exercice in the database 
 def new_exo(name, chaps, duration, texts, questsTF, questsFB, questsH, tags): 
+    """Insert a newly created exercice in the database"""
 
     #fct to insert a new exercice in the db after clicking on "create" button
     if name and chaps and texts and (questsFB or questsH or questsTF): #the case where one of a kind of quest is not selected !!!
@@ -563,6 +584,8 @@ def new_exo(name, chaps, duration, texts, questsTF, questsFB, questsH, tags):
 
 #insert a newly created chapter to the database
 def query_new_chapter(name, levels, cycle, exos, notions, summary, files, tags):
+    """Insert a newly created chapter to the database"""
+
     chap = MetalChapter()
     chap.name = name
     if levels is not None:
@@ -600,9 +623,10 @@ def query_new_chapter(name, levels, cycle, exos, notions, summary, files, tags):
     db.session.commit()
     lg.warning('Addition done !')
 
-#query to create a new assignment TODO vérifier la relationship pour groups
 
+#query to create a new assignment
 def query_new_assignment(name, choosenExos, groups, code):
+    """Query to create a new assignment"""
 
     assignment = MetalAssignment()
     assignment.name = name
@@ -634,14 +658,13 @@ def query_new_assignment(name, choosenExos, groups, code):
 
 ######################### Home page query ###########################################
 def general_query2(query, category):
+    """Home page query"""
 
     res = list()
 
     #I changed the format of the input so the query acts like a LIKE and the user gets more results 
     search = "%{}%".format(query)
-    #I replaced all the previous "query" vars by "search" (with the new format)
-    
-    #would like a "switch" Java like 
+ 
 
     if category == 'All':
         #we check all the possibilities 
@@ -714,9 +737,9 @@ def general_query2(query, category):
 
 ############ Validation page's query ################# 
 
-#query for 'validation' page
-
 def query_validation(txtName): 
+    """Validation page's query"""
+
     if txtName is not None: 
         #notions = db.session.query(MetalNotion).join(MetalCorpus, MetalCorpus.notion_id == MetalNotion.id).filter(MetalCorpus.name==txtName).all()       
         notions = db.session.query(MetalNotion).join(MetalCorpus, MetalNotion.corpuses).filter(MetalCorpus.name==txtName).all()   
@@ -729,6 +752,8 @@ def query_validation(txtName):
 
 #query to edit a notion find by the analyser 
 def edit_notion(notionId, name, notionItem): #TODO we can't change much with only those fields missing the sentence examined 
+    """Query to edit a notion found by the analyser"""
+
     notion = db.session.query(MetalNotion).get(notionId)
     if notion :
         notion.name = name
@@ -740,16 +765,12 @@ def edit_notion(notionId, name, notionItem): #TODO we can't change much with onl
         db.session.commit()
         lg.warning('Modified notion !')
 
-        """
-        update(MetalNotion).where(MetalNotion.name == notionName).values(name=name)
-        db.session.commit()
-        lg.warning('Modifications done !')
-        """
 
 
 # DANS TOUS LES DELETE ATTENTION AUX DÉPENDANCES !!!!!!
 #query to delete a notion "forever" TODO TO TEST --> problem with dependancies 
 def query_delete_notion(notionId, txt_name):
+    """Query to delete a notion"""
 
     notion = db.session.query(MetalNotion).get(notionId)
     text = db.session.query(MetalCorpus).get(txt_name) #:!! on utilise le nom est pas l'id 
@@ -789,8 +810,10 @@ def query_delete_notion(notionId, txt_name):
 
 ################# Modifications/deletions of chapters/exos/assignments ########################
 
-#query to modify an exercice assignment   
+#query to modify an exercice assignment
 def edit_assignment(assignId, newName, groups, exos):
+    """Query to modify an exercice assignment"""
+
     #on récupère l'objet à modifier et ensuite seulement on modifie ses params 
     assign = db.session.query(MetalAssignment).get(assignId)
 
@@ -811,6 +834,8 @@ def edit_assignment(assignId, newName, groups, exos):
 
 #query to edit a chapter infos TODO change the files part 
 def edit_chapter(chapId, newName, groups, cycle, exos, notions, summary, files, tags): #txts?? 
+    """Query to edit a chapter infos"""
+
     #on récupère l'objet correspondant
     chap = db.session.query(MetalChapter).filter(MetalChapter.id==chapId).first()
     if newName:
@@ -854,6 +879,8 @@ def edit_chapter(chapId, newName, groups, cycle, exos, notions, summary, files, 
 
 #query to edit an exo infos 
 def edit_exo(exoId, newName, chaps, duration, txts, qTF, qH, qFB, tags):
+    """Query to edit an exercise infos"""
+
     #on récupère l'exercice correspondant
     exo = db.session.query(MetalExercise).filter(MetalExercise.id==exoId).first()
     print(exo)
@@ -898,6 +925,7 @@ def edit_exo(exoId, newName, chaps, duration, txts, qTF, qH, qFB, tags):
 
 #query to delete a session 
 def query_delete_session(sessionId):
+    """Query to delete an assignment"""
     sess = MetalAssignment.query.get(sessionId)
     if sess:
         db.session.delete(sess)
@@ -907,8 +935,8 @@ def query_delete_session(sessionId):
     
 
 #query to delete a chapter
-
 def query_delete_chapter(chapId):
+    """Query to delete a chapter"""
     chap = MetalChapter.query.get(chapId)
     if chap:
         db.session.delete(chap)
@@ -917,8 +945,9 @@ def query_delete_chapter(chapId):
     
 
 #query to delete an exercise
-
 def query_delete_exercise(exoId):
+    """Query to delete an exercise"""
+
     exo = MetalExercise.query.get(exoId)
     if exo:
         db.session.delete(exo)
@@ -928,6 +957,8 @@ def query_delete_exercise(exoId):
 
 #query the exercises assignments done by one group 
 def query_groups_sessions(group_id):
+    """Query the exercises assignments done by one group """
+
     sess = db.session.query(MetalAssignment).filter(MetalAssignment.group_id==group_id).all()
     if sess:
         return sess
@@ -936,6 +967,8 @@ def query_groups_sessions(group_id):
 
 #query the students from one group
 def query_groups_students(group_id):
+    """Query the students from one group"""
+
     stud = db.session.query(MetalUser).filter(MetalUser.group_id==group_id).all()
     if stud:
         return stud 
@@ -944,6 +977,8 @@ def query_groups_students(group_id):
 
 #query to get all the answers from a user 
 def query_answers_user(user_id):
+    """Query to get all the answers from a user"""
+
     answers = db.session.query(MetalAnswerUser).filter(MetalAnswerUser.user_id == user_id).all()
     if answers:
         return answers
@@ -951,6 +986,8 @@ def query_answers_user(user_id):
 
 #query all the assignments done by one user 
 def query_assignments_by_user(user_id):
+    """Query all the assignments done by one user"""
+
     user = db.session.query(MetalUser).get(user_id)
     if user:
         assignments = db.session.query(MetalAssignment).filter(user.group_id == MetalAssignment.group_id).all()
@@ -959,6 +996,8 @@ def query_assignments_by_user(user_id):
 
 #query to update a comment for the student/for the teacher him.herself
 def query_update_comment(user_id, zone, comment):
+    """Query to update a comment for the student/for the teacher him.herself"""
+    
     user = db.session.query(MetalUser).get(user_id)
 
     if zone == 'submitted_zone1':

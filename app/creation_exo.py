@@ -1,14 +1,14 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
-from wtforms.fields.core import BooleanField, IntegerField, Label, RadioField, SelectMultipleField, SelectField
+from wtforms.fields.core import SelectMultipleField
 from wtforms.validators import DataRequired, Length
-from wtforms.fields.html5 import IntegerRangeField, DecimalRangeField
+from wtforms.fields.html5 import IntegerRangeField
 
 
 class CreaExo(FlaskForm):
-    #form to create an exercise
+    """Form to create an exercise"""
 
-    name = StringField( #exoName
+    name = StringField( 
         "Nom de l'exercice :",
         validators=[DataRequired(message="please type a name"),
             Length(min=1, message='the name should be longer')]

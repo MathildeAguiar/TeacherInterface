@@ -6,9 +6,9 @@ from wtforms.validators import DataRequired, Length
 from flask_ckeditor import CKEditorField
 
 class CreaChapter(FlaskForm):
-    #form to create a chapter
+    """Form to create a chapter"""
 
-    name = StringField( #chapName
+    name = StringField( 
         "Nom du chapitre :",
         validators = [DataRequired(message="please type a name"),
             Length(min=1, message='the name should be longer')]
@@ -38,14 +38,8 @@ class CreaChapter(FlaskForm):
         "Sélectionner une ou des notions à inclure",
         validators= [DataRequired(message="Veuillez choisir au moins une notion")]
     )
-
-    """
-    summary = TextAreaField(
-        "Résumé du cours (facultatif)"
-    )
-    """
     
-    summary = CKEditorField('Résumé du cours (facultatif)')  # rich test area 
+    summary = CKEditorField('Résumé du cours (facultatif)')  # rich text area 
 
     file = MultipleFileField("Choisir un fichier")
 

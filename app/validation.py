@@ -4,7 +4,7 @@ from wtforms.fields.core import RadioField, SelectMultipleField
 from wtforms.validators import DataRequired, Length
 
 class TxtBrowser(FlaskForm):
-    #form to analyze a text
+    """form to analyze a text"""
 
     txt = StringField(
         "Texte",

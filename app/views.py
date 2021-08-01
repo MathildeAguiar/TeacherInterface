@@ -49,11 +49,11 @@ from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment,
 #before the first request we init our db
 @app.before_first_request
 def before_first_request_func():
-    """🐕"""
+    """Initialization of the database"""
     init_db()
 
 #test to pass the list of chapters at all templates 
-
+##### DELETE HERE 
 @app.context_processor
 def inject_chapters():
     names = list()
@@ -68,9 +68,7 @@ def inject_chapters():
 
 @app.route('/form/', methods=["GET", "POST"])
 def index():
-    #just a test 
-    #test = query_exo_related_chaps('Pronoms personnels')
-    #print(test)
+    """Index page with the general search bar"""
 
     form = ResearchForm()
     if form.validate_on_submit():
@@ -81,13 +79,13 @@ def index():
     return render_template(
         "form.html",
         form = form,
-        #template="form-template"
     )
 
 
 #the general search bar's result page 
 @app.route('/table/', methods=["GET", "POST"])
 def table():
+    """Results from a search on the index page"""
     form = ResearchForm()
     query = form.formContent.data
     category = form.category.data
@@ -106,6 +104,7 @@ def table():
 #page to create a new exercice 
 @app.route('/creation_exo/', methods=["GET", "POST"])
 def creation_exo():
+    """Index page with the general search bar"""
     form = CreaExo()
     #query to get all the chapters avaiable
     chaps = query_all_chaps()
@@ -137,7 +136,7 @@ def creation_exo():
 #result page from the exercice creation, displaying all the avaiable exercices
 @app.route('/list_exo/', methods=["GET", "POST"])
 def list_exo(): 
-    
+    """Displaying all the avaiable exercices"""
 
     page = request.args.get('page', 1, type=int)
     pagination = MetalExercise.query.paginate(page, per_page=20)
@@ -196,6 +195,8 @@ def list_exo():
 
 @app.route('/list_exo/<exo_id>/delete_exo/', methods=['POST', 'GET'])
 def delete_exo(exo_id):
+    """Displaying all the avaiable exercices, after a deletion"""
+
 
     query_delete_exercise(exo_id)
     
@@ -214,6 +215,7 @@ def delete_exo(exo_id):
 
 @app.route('/list_exo/<exo_id>/modify_exo/', methods=['GET', 'POST']) #correct the query 
 def modify_exo(exo_id):
+    """Displaying all the avaiable exercices, after a modification"""
 
     if exo_id:
         exo = MetalExercise.query.get(exo_id)
@@ -250,6 +252,8 @@ def modify_exo(exo_id):
 #page to create a new chapter
 @app.route('/chapter_creation/', methods=['GET','POST'])
 def chapter_creation():
+    """Page to create a new chapter"""
+
 
     form = CreaChapter()
     #get all the levels available
@@ -283,6 +287,8 @@ def chapter_creation():
 #page where all the db's chapters are displayed 
 @app.route('/list_chapters/', methods=['GET','POST'])
 def list_chapters():
+    """Displaying all the avaiable chapters"""
+
     modified = request.args.get('modified')
     print(modified)
     if modified:
@@ -316,11 +322,12 @@ def list_chapters():
 
 @app.route('/list_chapters/<submitted_status>/new_chapter/', methods=['GET','POST'])
 def new_chapter(submitted_status):
+    """Displaying all the avaiable chapters, after an addition"""
 
     if submitted_status == 'True' :
     
         form = CreaChapter()
-        name = form.name.data   #chapName
+        name = form.name.data  
         levels = form.level.data
         exos = form.exos.data
         summary = form.summary.data
@@ -345,10 +352,10 @@ def new_chapter(submitted_status):
 
 @app.route('/list_chapters/<chapter_id>/delete_chapter/', methods=['POST', 'GET'])
 def delete_chapter(chapter_id):
+    """Displaying all the avaiable chapters, after a deletion"""
 
     query_delete_chapter(chapter_id)
     
-
     page = request.args.get('page', 1, type=int)
     pagination = MetalChapter.query.paginate(page, per_page=20)
    
@@ -361,8 +368,10 @@ def delete_chapter(chapter_id):
     )
 
 
-@app.route('/list_chapters/<chapter_id>/modify_chapter/', methods=['GET', 'POST']) #modify the template with modify _status and correct the query
+@app.route('/list_chapters/<chapter_id>/modify_chapter/', methods=['GET', 'POST']) 
 def modify_chapter(chapter_id):
+    """Displaying all the avaiable chapters, after a modification"""
+
 
     if chapter_id:
         #we query the corresponding object to the id 
@@ -398,6 +407,8 @@ def modify_chapter(chapter_id):
 #page where you have to confirm notions found by the analyser
 @app.route('/validation/', methods=["GET", "POST"]) 
 def validation():
+    """Page where we can analyze a text and validate or not the grammatical notions found by the analyzer"""
+
     #if the submit button have been used 
     #submit_status = request.args.get("submitted")
     #print(submit_status)
@@ -425,7 +436,7 @@ def validation():
   
     if form.validate_on_submit():
         
-        return redirect(url_for('validation_analyzed', txt_name = txtName)) # request.referrer ?    submitted_status = True,
+        return redirect(url_for('validation_analyzed', txt_name = txtName)) # request.referrer ? 
 
 
     return render_template(
@@ -440,6 +451,8 @@ def validation():
 #??????????????????????????????????????????
 @app.route('/validation/<txt_name>/analyzed/', methods=["GET", "POST"])  
 def validation_analyzed(txt_name): 
+    """Page where we can analyze a text and validate or not the grammatical notions found by the analyzer, after an analyzis"""
+
 
     form = TxtBrowser()
     form_field = form.txt.data
@@ -476,6 +489,8 @@ def validation_analyzed(txt_name):
 #if we delete one notion/question from the analysis
 @app.route('/validation/<notion_id>/delete_notion/', methods=["GET", "POST"]) 
 def delete_validation(notion_id):
+    """Page where we can analyze a text and validate or not the grammatical notions found by the analyzer, after a deletion"""
+
    
     #query to delete the notion related to the text
     txt_name = request.args.get('txt_name')
@@ -513,6 +528,7 @@ def delete_validation(notion_id):
 #if we modify a notion on the validation page
 @app.route('/validation/<notion_id>/modify_notion/', methods=["GET", "POST"]) 
 def modify_validation(notion_id):
+    """If we modify a notion on the validation page"""
 
     txt_name = request.args.get('txt_name')
     print(txt_name)
@@ -534,6 +550,7 @@ def modify_validation(notion_id):
 #connexion page 
 @app.route('/connexion/', methods=["GET", "POST"])
 def connexion():
+    """Connexion page"""
    
     return render_template(
         'connexion.html'
@@ -542,6 +559,7 @@ def connexion():
 #help page
 @app.route('/help/', methods=['GET', 'POST'])
 def help():
+    """Help page"""
     return render_template(
         'help.html'
     )
@@ -551,6 +569,7 @@ def help():
 #groups page
 @app.route('/groups/', methods=['GET', 'POST'])
 def groups():
+    """List of all groups page"""
 
     page = request.args.get('page', 1, type=int)
     pagination = MetalGroup.query.paginate(page, per_page=10)
@@ -566,6 +585,7 @@ def groups():
 #where we can see which sessions are related to a choosen group
 @app.route('/groups/<group_id>/groups_sessions/', methods=['POST', 'GET'])
 def groups_sessions(group_id):
+    """List of all assignments done by 1 group"""
 
     sessions = query_groups_sessions(group_id) 
 
@@ -590,6 +610,7 @@ def groups_sessions(group_id):
 #where we can see which students are related to a choosen group
 @app.route('/groups/<group_id>/groups_students/', methods=['POST', 'GET'])
 def groups_students(group_id):
+    """List of all students for 1 group"""
 
     students = query_groups_students(group_id) 
 
@@ -612,6 +633,7 @@ def groups_students(group_id):
 #where we can see which students are related to a choosen group
 @app.route('/groups/<group_id>/groups_students/<user_id>/student/', methods=['POST', 'GET'])
 def student(user_id, group_id):
+    """Profile of 1 student"""
 
     student = MetalUser.query.get(user_id)
     studentFirstName = student.firstName  
@@ -661,25 +683,6 @@ def student(user_id, group_id):
         query_update_comment(user_id, 'submitted_zone1', comm)
         comment_student = student.comment_student
 
-
-
-
-
-    ###### test bokeh 
-    """
-    # prepare some data
-    x = [1, 2, 3, 4, 5]
-    y = [6, 7, 2, 4, 5]
-
-    # create a new plot with a title and axis labels
-    p = figure(title="Simple line example", x_axis_label="x", y_axis_label="y")
-
-    # add a line renderer with legend and line thickness
-    p.line(x, y, legend_label="Temp.", line_width=2)
-
-    # show the results
-    save(p)
-    """
 
     x = np.arange(0, 20, step=.5)
     y = np.sqrt(x) + np.random.randint(2,50)
@@ -742,6 +745,7 @@ def comment_student(user_id, group_id, comment):
 #exercises sessions' page
 @app.route('/creation_session/',  methods=['GET', 'POST'])
 def creation_session():
+    """Page to create a new assignment"""
     
     form = SessionExo()
     #get all the levels available
@@ -770,6 +774,7 @@ def creation_session():
 #list of all sessions created 
 @app.route('/list_sessions/',  methods=['GET', 'POST'])
 def list_sessions():
+    """List of all assignments"""
 
     page = request.args.get('page', 1, type=int)
     pagination = MetalAssignment.query.paginate(page, per_page=20)
@@ -794,6 +799,7 @@ def list_sessions():
 #after a new sessions has been created
 @app.route('/list_sessions/<submitted_status>/new_assignment/', methods=['GET','POST'])
 def new_assignment(submitted_status):
+    """List of all assignments, after addition"""
 
     if submitted_status == 'True' :
     
@@ -821,6 +827,7 @@ def new_assignment(submitted_status):
 
 @app.route('/list_sessions/<session_id>/delete/', methods=['POST', 'GET'])
 def delete_session(session_id):
+    """List of all assignments, after deletion"""
 
     query_delete_session(session_id)
     
@@ -840,6 +847,7 @@ def delete_session(session_id):
 
 @app.route('/list_sessions/<session_id>/modify_session/', methods=['GET', 'POST'])
 def modify_session(session_id):
+    """List of all assignments, after modification"""
 
     if session_id:
         #we query the corresponding object to the id 
@@ -857,7 +865,7 @@ def modify_session(session_id):
         
         sessCode = assignment.code
 
-        if prefilled_form.validate_on_submit(): #request.method == 'POST' and prefilled_form.validate()
+        if prefilled_form.validate_on_submit():
 
             return redirect(url_for('list_sessions', modified=session_id)) 
 
