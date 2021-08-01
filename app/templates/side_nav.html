@@ -41,14 +41,21 @@
                   Accueil
                 </a>
               </li>
-              {% for c in side_nav_chaps %}
-                <li>
-                  <a href="{{ url_for('list_exo', chapName=c) }}" class="nav-link link-dark"> <!-- adapt the href="/list_exo/c" -->
+              {# % for c in side_nav_chaps % #}
+               <!-- <li>
+                  <a href="{{ url_for('list_exo', chapName=c) }}" class="nav-link link-dark"> 
                     <svg class="bi me-2" width="18" height="18"><use xlink:href="#book"/></svg>
                     {{ c }}
                   </a> 
-                </li> 
-              {% endfor %}
+                </li> -->
+              {# % endfor % #}
+
+              <li>
+                <a href="{{ url_for('list_chapters')}}" class="nav-link link-dark"> 
+                  <svg class="bi me-2" width="18" height="18"><use xlink:href="#book"/></svg>
+                  Chapitres
+                </a> 
+              </li>
 
               <li>
                 <a href="{{ url_for('list_sessions')}}" class="nav-link link-dark">

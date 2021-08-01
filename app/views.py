@@ -41,7 +41,7 @@ csrf = CSRFProtect(app)
 ckeditor = CKEditor(app)
 
 #imports from models (must stay here)
-from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment, MetalUser, edit_assignment, edit_chapter, edit_exo, edit_notion, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_assignments_by_user, query_groups_sessions, query_groups_students, query_new_assignment, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_exo_related_chaps, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, query_new_chapter, query_update_comment
+from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment, MetalUser, edit_assignment, edit_chapter, edit_exo, edit_notion, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_assignments_by_user, query_groups_sessions, query_groups_students, query_new_assignment, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, query_new_chapter, query_update_comment
 
 
 #routes 
@@ -161,29 +161,29 @@ def list_exo():
 
 
     #case where we get only the exercices related to a specific chapter 
-    chap_name = request.args.get("chapName")
-
+    #chap_name = request.args.get("chapName")
+    """
     if chap_name is not None: 
         
         exos = query_exo_related_chaps(chap_name)
         print("liste des exos returned : ", exos)
-
-    elif chap_name is None and modified is None:
+    """
+    #elif chap_name is None and modified is None:
         #case where we display all the exercices avaiable in the db 
         #we get the infos filled in the form 
-        form = CreaExo()
-        name = form.name.data 
-        chaps = form.chap.data
-        duration = form.tps.data
-        text = form.txt.data 
-        questTF = form.questTF.data
-        questFB = form.questFill.data
-        questH = form.questHighlight.data
-        tags = form.tags.data
-        #addition to the db
-        new_exo(name, chaps, duration, text, questTF, questFB, questH, tags)
+    form = CreaExo()
+    name = form.name.data 
+    chaps = form.chap.data
+    duration = form.tps.data
+    text = form.txt.data 
+    questTF = form.questTF.data
+    questFB = form.questFill.data
+    questH = form.questHighlight.data
+    tags = form.tags.data
+    #addition to the db
+    new_exo(name, chaps, duration, text, questTF, questFB, questH, tags)
 
-        exos = query_all_exos()
+    exos = query_all_exos()
 
 
     

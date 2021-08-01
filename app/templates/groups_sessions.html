@@ -17,7 +17,9 @@
     </div>
     {% else %}
     {{ render_table(sessions, titles=[('name', 'Nom'), ('code', 'Code'), ('exos', 'Exercices'), ('updated_at', 'Mise à jour')])}} 
-    {{ render_pagination(pagination) }}
+    <div class="col-12">
+        {{ render_pagination(pagination) }}
+    </div>    
     {% endif %}
 </main>
 

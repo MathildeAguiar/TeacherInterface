@@ -524,13 +524,13 @@ def query_all_corpuses():
     return corpuses
 
 #query to fetch all exercices related to a chapter TODO DELETE
-
+"""
 def query_exo_related_chaps(chap_name):
     #list_exo = MetalExercise.query.select_from(MetalExercise.name).join(MetalChapter, MetalChapter.id == MetalExercise.chapter_id).filter(MetalChapter.name == chap_name)
     #list_exo = db.session.query(MetalExercise).join(MetalChapter, MetalChapter.id==MetalExercise.chapter_id).filter(MetalChapter.name==chap_name).all()
     #return list_exo
     return None
-
+"""
 
 
 
