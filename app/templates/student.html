@@ -1,0 +1,111 @@
+{% from 'bootstrap/table.html' import render_table %}
+{% from 'bootstrap/form.html' import render_field, render_form %}
+{% from 'bootstrap/pagination.html' import render_pagination %}
+{% extends 'base.html' %}
+
+{% block content %}
+
+<main>
+    <div class="container">
+        <h3 class="row g-5">
+            {{ studentFirstName }} {{ studentLastName}}
+        </h3>
+    </div>
+
+    <div class="container"> 
+        <h5>
+          Tableau de bord :
+        </h5>
+
+        {{ div|safe }}
+    
+        <script src="https://cdn.bokeh.org/bokeh/release/bokeh-2.3.3.min.js"
+        crossorigin="anonymous"></script>
+        <script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.3.3.min.js"
+        crossorigin="anonymous"></script>
+        <script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.3.3.min.js"
+        crossorigin="anonymous"></script>
+
+        {{ script|safe }}
+    
+        
+    </div>
+    <div class="col-12 my-3">
+        <h5>
+           Sessions d'exercices réalisées :
+        </h5> 
+
+        {% if assignments == 'Aucun résultat !' %} 
+        <div class="container">
+            {{ assignments }}      
+        {% else %}
+            <div class="my-4 shadow-sm border rounded-4">
+                {{ render_table(assignments)}}
+            </div>
+            {# { render_pagination(pagination) } #}    
+        </div>
+        {% endif %}
+ 
+    </div>
+
+    <div class="col-12 my-3">
+        <div class="h-100 p-5 my-4 shadow bg-light border rounded-4">
+            <h4>Commentaires pour l'élève :</h4>
+            <p> 
+                {{comment_student | safe}}
+            </p>
+            
+            <a  class="btn btn-primary text-white" href="{{ url_for('student', comment='zone1', group_id = group_id, user_id = user_id) }}">  <!-- href="{# { url_for('student', comment='zone1') } #}" -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                    <path d="M8 0a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2H9v6a1 1 0 1 1-2 0V9H1a1 1 0 0 1 0-2h6V1a1 1 0 0 1 1-1z"/>
+                  </svg>
+                 Ajouter un commentaire 
+            </a>
+        </div>
+
+        {% if comment_zone == 'zone1': %}
+        <form class="needs-validation" method="POST" action="{{ url_for('student', group_id = group_id, user_id = user_id, submitted='submitted_zone1') }}" novalidate> <!-- need actions action="{# { url_for('student') } #}" -->
+            <div class="col-12">
+            {{ render_form(form_com_student)}}
+            </div>
+        </form>
+        {% endif %}
+    </div>
+
+    <div class="col-12 my-3">
+        <div class="h-100 p-5 my-4 shadow bg-light border rounded-4">
+            <h4>Commentaires personnels sur l'élève (non visibles par ce dernier) :</h4>
+            <p> 
+                {{comment_teacher | safe }}
+            </p>
+                
+            <a  class="btn btn-primary text-white" href="{{ url_for('student', comment='zone2', group_id = group_id, user_id = user_id) }}">  <!-- href="{# { url_for('student', comment='zone2') } #}" -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                    <path d="M8 0a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2H9v6a1 1 0 1 1-2 0V9H1a1 1 0 0 1 0-2h6V1a1 1 0 0 1 1-1z"/>
+                  </svg>
+                 Ajouter un commentaire 
+            </a>
+        </div>
+
+        {% if comment_zone == 'zone2': %}
+
+        <form class="needs-validation" method="POST"  action="{{ url_for('student', group_id = group_id, user_id = user_id, submitted='submitted_zone2') }}" novalidate> <!-- need actions  action="{# { url_for('student') } #}" -->
+            <div class="col-12">
+            {{ render_form(form_com_teacher)}}
+            </div>
+        </form>
+        {% endif %}
+    </div>
+</main>
+
+
+{{ ckeditor.load() }}
+{{ ckeditor.config(name='comments') }}
+{% if comment_zone == zone2: %}
+{{ form_com_teacher.hidden_tag() }}
+{% endif %}
+{% if comment_zone == zone1: %}
+{{ form_com_student.hidden_tag() }}
+{% endif %}
+
+{% endblock %}

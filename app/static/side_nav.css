@@ -3,7 +3,7 @@
   height: 100%; /* 100% Full-height */
   width: 0; /* 0 width - change this with JavaScript */
   position: fixed; /* Stay in place */
-  z-index: 1; /* Stay on top */
+  z-index: 2; /* Stay on top */
   top: 0; /* Stay at the top */
   left: 0;
   background-color: rgb(228, 247, 248); /* Black*/
@@ -120,4 +120,35 @@
   
 .fw-semibold { font-weight: 600; }
 .lh-tight { line-height: 1.25; }
+
+/* for the ? mark near some selection multiple fields */
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  /*border-bottom: 1px dotted black;*/
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: rgb(199, 21, 21);
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -60px;
   
+  /* Fade in tooltip - takes 1 second to go from 0% to 100% opac: */
+  opacity: 0;
+  transition: opacity 1s;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}

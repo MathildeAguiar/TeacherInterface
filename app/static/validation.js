@@ -1,5 +1,6 @@
+var count = 1;
 function button_click(btn){
-    var count = 1;
+
     var property = document.getElementById(btn);
     if (count == 0) {
         property.style.backgroundColor = "#FFFFFF"

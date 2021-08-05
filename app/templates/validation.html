@@ -11,7 +11,7 @@
     <main> 
       <div class="row g-5">
         <div class="col-md-7 col-lg-8">
-          <form class="needs-validation" method="POST" action="{{ url_for('validation') }}" novalidate> <!--change by the result -->
+          <form class="needs-validation" method="POST" novalidate> <!--change by the result  , submitted_status = 'True'       action="{{ url_for('validation', txt_name = form.txt  ) }}"-->
             {{ form.csrf_token }}
             <div class="row g-3">
                 <div class="py-5 mx-3"> <!--text-center-->
@@ -28,7 +28,7 @@
         </div>
       </div>
 
- <!-- {# if analyzed == True #} -->
+  {% if submit == 'True' %}
      
     <!-- si on a sélectionné le texte alors on voit ça apparaitre -->
     
@@ -38,52 +38,48 @@
           Texte analysé :
         </h5>
         <!--   here we will have the displayed text and infos after analysis-->
-        {% if txtName is not none %}
-          <h6 class="font-weight-bold font-italic mx-3 my-1" id="text-analysed">
+        {% if txtName is not none  %} <!--- is not none -->
+          <h5 class="font-weight-bold font-italic mx-3 mb-2" id="text-analysed">
             {{ txtName }}
-          </h6>
-        {% endif %}
-           
+          </h5>
+        {% endif %}         
       </div>
+
       <div class="row g-5"> <!-- Notions extraites -->
         <h5 id="extracted-notions">
           Notions extraites :
         </h5>
-        <!--plutot que de faire une liste on utilise div d-inline
-        <div class="d-inline">
-          <a class="btn btn-success text-white">COI</a>
-  
-        </div> mouai bof -->
-
+        {% if notions is not none %}
         <ul class="list-inline"> 
+          {% for n in notions %}
           <li class="list-inline-item">
               <div class="container pb-2">
                 <!-- where the notion pods should be -->
                 {#  if display== True  class=qq chose endif      #}
-                <a class="btn btn-success text-white">COI</a> <!-- border radius plz -->
-  
+                <a class="btn btn-success text-white"> {{ n.name }} </a> 
               </div>
           </li>
-
-          <li class="list-inline-item">
-            <div class="container pb-2">
+          {% endfor %}
+        {% endif %}
+          <!-- fake buttons just to test them -->
+          <!-- <li class="list-inline-item">
+            <div class="container pb-2"> -->
               <!-- where the notion pods should be -->
-             <!-- <a class="btn btn-danger text-white">COD</a> --> <!-- border radius plz -->
-             <button class="btn btn-danger text-white" id="notion2" type="button">
-
+             <!-- <a class="btn btn-danger text-white">COD</a> --> 
+             <!--<button class="btn btn-danger text-white" id="notion2" type="button">
               <span onclick="button_click(notion2)"> COD </span>
              </button> 
 
             </div>
-          </li>
+          </li> -->
 
-          <li class="list-inline-item">
-            <div class="container pb-2">
+         <!-- <li class="list-inline-item">
+            <div class="container pb-2"> -->
               <!-- where the notion pods should be -->
-              <a class="btn btn-danger text-white">Pronoms</a> <!-- border radius plz -->
+             <!-- <a class="btn btn-danger text-white">Pronoms</a> 
 
             </div>
-          </li>
+          </li> -->
         </ul> 
 
         <div class="container row g-5">
@@ -100,17 +96,14 @@
 
     <!-- table for validation of notions found  -->
     <!-- we want to paginate the table -->
-    <div class="container">
+    <div class="container my-4 shadow-sm border rounded-4">
       {% if notions is not none %}
-      {{ render_table(notions, show_actions=True, edit_url= url_for('table', message_id=':primary_key') , delete_url= url_for('connexion', message_id=':primary_key') ) }}
+      {{ render_table(notions, titles=[('name', 'Intitulé'), ('questions', 'Questions'),('notion_item', 'Élément grammatical'), ('corpuses', "Textes d'apparition")], show_actions=True, edit_url= url_for('modify_validation', notion_id=':id', txt_name=txtName) , delete_url= url_for('delete_validation', notion_id=':id', txt_name=txtName) ) }}
       {{ render_pagination(pagination) }}
       {% endif %}
     </div>
 
-
-    <!-- {# endif #} -->
-
-
+  {% endif %}
 
 
     </main>

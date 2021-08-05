@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!-- SQL XML created by WWW SQL Designer, https://github.com/ondras/wwwsqldesigner/ -->
-<!-- Active URL: https://ondras.zarovi.cz/sql/demo/?keyword=default -->
+<!-- Active URL: https://ondras.zarovi.cz/sql/demo/ -->
 <sql>
 <datatypes db="mysql">
 
@@ -76,10 +76,6 @@
 <row name="id" null="0" autoincrement="1">
 <datatype>INTEGER</datatype>
 </row>
-<row name="grade_id" null="0" autoincrement="0">
-<datatype>INTEGER</datatype>
-<relation table="metal_grades" row="id" />
-</row>
 <row name="name" null="0" autoincrement="0">
 <datatype>VARCHAR(191)</datatype>
 </row>
@@ -89,41 +85,15 @@
 <row name="course" null="1" autoincrement="0">
 <datatype>MEDIUMTEXT</datatype>
 <default>NULL</default></row>
-<row name="request" null="1" autoincrement="0">
-<datatype>MEDIUMTEXT</datatype>
-<default>NULL</default></row>
-<row name="rank_chapter" null="1" autoincrement="0">
-<datatype>INT</datatype>
-<default>NULL</default></row>
-<row name="corpus_id" null="0" autoincrement="0">
+<row name="(corpus_id)" null="0" autoincrement="0">
 <datatype>INTEGER</datatype>
 <relation table="Corpus" row="id" />
 </row>
-<row name="created_at" null="1" autoincrement="0">
-<datatype>TIMESTAMP</datatype>
+<row name="summary" null="1" autoincrement="0">
+<datatype>MEDIUMTEXT</datatype>
 <default>NULL</default></row>
-<row name="updated_at" null="1" autoincrement="0">
-<datatype>TIMESTAMP</datatype>
-<default>NULL</default></row>
-<key type="PRIMARY" name="PRIMARY">
-<part>id</part>
-</key>
-</table>
-<table x="24" y="251" name="metal_cycles">
-<row name="id" null="0" autoincrement="1">
-<datatype>INTEGER</datatype>
-</row>
-<row name="slug" null="0" autoincrement="0">
-<datatype>VARCHAR(191)</datatype>
-</row>
-<row name="name" null="0" autoincrement="0">
-<datatype>VARCHAR(191)</datatype>
-</row>
-<row name="created_at" null="1" autoincrement="0">
-<datatype>TIMESTAMP</datatype>
-<default>NULL</default></row>
-<row name="updated_at" null="1" autoincrement="0">
-<datatype>TIMESTAMP</datatype>
+<row name="tags" null="1" autoincrement="0">
+<datatype>MEDIUMTEXT</datatype>
 <default>NULL</default></row>
 <key type="PRIMARY" name="PRIMARY">
 <part>id</part>
@@ -185,59 +155,17 @@
 <part>id</part>
 </key>
 </table>
-<table x="69" y="44" name="metal_grades">
+<table x="799" y="422" name="metal_notion (nom à changer)">
 <row name="id" null="0" autoincrement="1">
 <datatype>INTEGER</datatype>
-</row>
-<row name="cycle_id" null="0" autoincrement="0">
-<datatype>INTEGER</datatype>
-<relation table="metal_cycles" row="id" />
-</row>
-<row name="slug" null="0" autoincrement="0">
-<datatype>VARCHAR(191)</datatype>
 </row>
 <row name="name" null="0" autoincrement="0">
 <datatype>VARCHAR(191)</datatype>
 </row>
-<row name="created_at" null="1" autoincrement="0">
-<datatype>TIMESTAMP</datatype>
-<default>NULL</default></row>
-<row name="updated_at" null="1" autoincrement="0">
-<datatype>TIMESTAMP</datatype>
-<default>NULL</default></row>
-<key type="PRIMARY" name="PRIMARY">
-<part>id</part>
-</key>
-</table>
-<table x="799" y="422" name="metal_grammatical_elements">
-<row name="id" null="0" autoincrement="1">
-<datatype>INTEGER</datatype>
-</row>
-<row name="slug" null="0" autoincrement="0">
-<datatype>VARCHAR(191)</datatype>
-</row>
-<row name="name" null="0" autoincrement="0">
-<datatype>VARCHAR(191)</datatype>
-</row>
-<row name="type" null="0" autoincrement="0">
-<datatype>VARCHAR(191)</datatype>
-</row>
-<row name="query" null="0" autoincrement="0">
-<datatype>MEDIUMTEXT</datatype>
-</row>
-<row name="take_children" null="0" autoincrement="0">
-<datatype>TINYINT(1)</datatype>
-<default>0</default></row>
 <row name="corpus_id" null="0" autoincrement="0">
 <datatype>INTEGER</datatype>
 <relation table="Corpus" row="id" />
 </row>
-<row name="created_at" null="1" autoincrement="0">
-<datatype>TIMESTAMP</datatype>
-<default>NULL</default></row>
-<row name="updated_at" null="1" autoincrement="0">
-<datatype>TIMESTAMP</datatype>
-<default>NULL</default></row>
 <key type="PRIMARY" name="PRIMARY">
 <part>id</part>
 </key>
@@ -253,9 +181,6 @@
 <row name="answer" null="0" autoincrement="0">
 <datatype>MEDIUMTEXT</datatype>
 </row>
-<row name="is_correct" null="0" autoincrement="0">
-<datatype>TINYINT(1)</datatype>
-</row>
 <row name="feedback" null="0" autoincrement="0">
 <datatype>MEDIUMTEXT</datatype>
 </row>
@@ -264,12 +189,6 @@
 <default>NULL</default></row>
 <row name="group" null="1" autoincrement="0">
 <datatype>INT</datatype>
-<default>NULL</default></row>
-<row name="created_at" null="1" autoincrement="0">
-<datatype>TIMESTAMP</datatype>
-<default>NULL</default></row>
-<row name="updated_at" null="1" autoincrement="0">
-<datatype>TIMESTAMP</datatype>
 <default>NULL</default></row>
 <key type="PRIMARY" name="PRIMARY">
 <part>id</part>
@@ -326,18 +245,9 @@
 </row>
 <row name="grammatical_element_id" null="0" autoincrement="0">
 <datatype>INTEGER</datatype>
-<relation table="metal_grammatical_elements" row="id" />
+<relation table="metal_notion (nom à changer)" row="id" />
 </row>
-<row name="sentence_id" null="0" autoincrement="0">
-<datatype>INTEGER</datatype>
-</row>
-<row name="points" null="0" autoincrement="0">
-<datatype>INTEGER</datatype>
-<default>1</default></row>
 <row name="instructions" null="0" autoincrement="0">
-<datatype>MEDIUMTEXT</datatype>
-</row>
-<row name="text" null="0" autoincrement="0">
 <datatype>MEDIUMTEXT</datatype>
 </row>
 <row name="feedback" null="1" autoincrement="0">
@@ -347,12 +257,6 @@
 <datatype>INTEGER</datatype>
 <relation table="metal_question_types" row="id" />
 </row>
-<row name="created_at" null="1" autoincrement="0">
-<datatype>TIMESTAMP</datatype>
-<default>NULL</default></row>
-<row name="updated_at" null="1" autoincrement="0">
-<datatype>TIMESTAMP</datatype>
-<default>NULL</default></row>
 <key type="PRIMARY" name="PRIMARY">
 <part>id</part>
 </key>
@@ -361,18 +265,53 @@
 <row name="id" null="1" autoincrement="1">
 <datatype>INTEGER</datatype>
 <default>NULL</default></row>
-<row name="(user_id)" null="1" autoincrement="0">
-<datatype>INTEGER</datatype>
-<default>NULL</default></row>
 <row name="name" null="0" autoincrement="0">
 <datatype>VARCHAR(191)</datatype>
 </row>
-<row name="created_at" null="0" autoincrement="0">
-<datatype>TIMESTAMP</datatype>
+<row name="(chapter_id)" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="author" null="1" autoincrement="0">
+<datatype>VARCHAR</datatype>
+<default>NULL</default></row>
+<row name="notion_id" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<key type="PRIMARY" name="">
+<part>id</part>
+</key>
+</table>
+<table x="57" y="36" name="metal_user">
+<row name="id" null="1" autoincrement="1">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="last_name" null="1" autoincrement="0">
+<datatype>VARCHAR</datatype>
+<default>NULL</default></row>
+<row name="first_name" null="1" autoincrement="0">
+<datatype>VARCHAR</datatype>
+<default>NULL</default></row>
+<row name="password" null="1" autoincrement="0">
+<datatype>MEDIUMTEXT</datatype>
+<default>NULL</default></row>
+<row name="group_id" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default><relation table="metal_group" row="id" />
 </row>
-<row name="updated_at" null="0" autoincrement="0">
-<datatype>TIMESTAMP</datatype>
-</row>
+<row name="type" null="1" autoincrement="0">
+<datatype>VARCHAR</datatype>
+<default>NULL</default></row>
+<key type="PRIMARY" name="">
+<part>id</part>
+</key>
+</table>
+<table x="69" y="256" name="metal_group">
+<row name="id" null="1" autoincrement="1">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="level" null="1" autoincrement="0">
+<datatype>VARCHAR</datatype>
+<default>NULL</default></row>
 <key type="PRIMARY" name="">
 <part>id</part>
 </key>

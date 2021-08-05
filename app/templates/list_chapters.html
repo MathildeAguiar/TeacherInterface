@@ -5,22 +5,22 @@
 {% block content %}
 
 <div class="float-right my-3 mx-4">
-    <a href="{{ url_for('creation_exo') }}" class="btn btn-primary text-white"> 
+    <a href="{{ url_for('chapter_creation') }}" class="btn btn-primary text-white"> 
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
             <path d="M8 0a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2H9v6a1 1 0 1 1-2 0V9H1a1 1 0 0 1 0-2h6V1a1 1 0 0 1 1-1z"/>
           </svg>
-         Nouvel exercice
+         Nouveau Chapitre 
     </a>
 </div>
 
-
 <div class="my-4 shadow-sm">
-    {{ render_table(exos, titles=[('name', 'Nom'), ('limited_time', 'Temps imparti (en minutes)'), ('sessions', "Sessions d'exercices"), ('chaps', 'Chapitres'), ('corpuses', 'Textes associés'), ('tags', 'Tags')], show_actions=True, edit_url=url_for('modify_exo', exo_id=":id"), delete_url= url_for('delete_exo', exo_id=':id')) }}
+    {{ render_table(chaps, titles=[('name', 'Nom'), ('summary', 'Résumé'), ('cycle', 'Cycle'), ('groups', 'Groupes'), ('exos', 'Exercices'), ('notions', 'Notions grammaticiales'), ('tags', 'Tags')], show_actions=True, edit_url=url_for('modify_chapter', chapter_id=":id"), delete_url= url_for('delete_chapter', chapter_id=':id')) }}
 </div>
 
-<div class="col-12">
-    {{ render_pagination(pagination) }}
-</div>
+    <div class="mx-4 my-4">
+        {{ render_pagination(pagination) }}
+    </div>
+
 
 
 {% endblock %}

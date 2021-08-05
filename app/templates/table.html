@@ -3,16 +3,17 @@
 {% extends 'base.html' %}
 
 {% block content %}
-{# pour l'instant ça affiche la liste des chapitres et non des exos #}
-{# renvoie sur index au lieu de suppr etc. #}
+
 <div class="m-3"> <!-- add something to deal with the footer position-->
     <main> 
-        {% if chaps == 'Aucun résultat !' %} <!-- should be using an id in case we have different languages -->
+        {% if res == 'Aucun résultat !' %} <!-- should be using an id in case we have different languages -->
         <div class="container text-center">
-            {{ chaps }}
+            {{ res }}
         </div>
         {% else %}
-        {{ render_table(chaps) }}
+        <div class="container my-4 shadow-sm border rounded-4">
+            {{ render_table(res) }}
+        </div>
         {{ render_pagination(pagination) }}
         {% endif %}
     </main>

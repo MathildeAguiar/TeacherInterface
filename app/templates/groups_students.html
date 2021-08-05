@@ -1,0 +1,28 @@
+{% from 'bootstrap/table.html' import render_table %}
+{% from 'bootstrap/pagination.html' import render_pagination %}
+{% extends 'base.html' %}
+
+{% block content %}
+
+<main>
+    <div class="container">
+        <h4 class="row g-5">
+            Étudiants du groupe {{ grpName }}  
+        </h4>
+    </div>
+
+    {% if students == 'Aucun résultat !' %} 
+    <div class="container text-center">
+        {{ students }}
+    </div>
+    {% else %}
+    <div class="my-4 shadow-sm border rounded-4">
+        {{ render_table(students, titles=[('lastName', 'Nom'), ('firstName', 'Prénom'), ('group_id', 'Groupes')], show_actions=True, actions_title='Détails élève', custom_actions=[('Élève', 'file-earmark-person', url_for('student', user_id=':id', group_id=':id'))])}} 
+    </div>
+        <div class="col-12">
+        {{ render_pagination(pagination) }}
+    </div>
+    {% endif %}
+</main>
+
+{% endblock %}

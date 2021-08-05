@@ -1,0 +1,28 @@
+{% from 'bootstrap/table.html' import render_table %}
+{% from 'bootstrap/pagination.html' import render_pagination %}
+{% extends 'base.html' %}
+
+{% block content %}
+
+<main>
+    <div class="container">
+        <h4 class="row g-5">
+            Sessions d'exercices réalisées par le groupe {{ grpName }}  
+        </h4>
+    </div>
+
+    {% if sessions == 'Aucun résultat !' %} 
+    <div class="container text-center">
+        {{ sessions }}
+    </div>
+    {% else %}
+    <div class="my-4 shadow-sm border rounded-4">
+        {{ render_table(sessions, titles=[('name', 'Nom'), ('code', 'Code'), ('exos', 'Exercices'), ('updated_at', 'Mise à jour')])}} 
+    </div>
+    <div class="col-12">
+        {{ render_pagination(pagination) }}
+    </div>    
+    {% endif %}
+</main>
+
+{% endblock %}

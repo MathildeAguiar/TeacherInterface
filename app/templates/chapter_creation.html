@@ -3,82 +3,69 @@
 
 {% block content %}
 
-<script>
-  function outputUpdate(tps) {
-      document.querySelector('#selected-duration').value = tps;
-  }
-</script>
 
 <div class="container">
   <main>
     <div class="py-5"> <!--text-center-->
-      <h2>Création d'exercice :</h2>
+      <h2>Création de chapitre :</h2>
     </div>
 
     <div class="row g-5">
       <div class="col-md-7 col-lg-8">
-        <form class="needs-validation" method="POST" {% if modify_status: %} action="{{ url_for('list_exo', modified=exo_id) }}" {% else %} action="{{ url_for('list_exo') }}" {% endif %} novalidate> <!--change by the result -->
+        <form class="needs-validation" method="POST" {% if modify_status: %} action="{{ url_for('list_chapters', modified=chapter_id) }}" {% else %} action="{{ url_for('new_chapter', submitted_status='True') }}" {% endif %} novalidate> 
           {{ form.csrf_token }}
           <div class="row g-3">
             <div class="col-12">
-                {{ render_field(form.name) }} <!-- exoName -->
+                  {{ render_field(form.name) }} <!-- chapName-->
             </div> 
-
+         
+            
               <div class="col-12 my-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 20 20">
                   <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
                 </svg>
                 <small> Pour sélectionner plusieurs options, appuyez sur ctrl et cliquez sur un champ. </small>               
               </div>
-              <!--
+
             <div class="col-12">
-                {# { render_field(form.level) } #}
+                {{ render_field(form.level) }}
             </div>
-          -->
+
             <div class="col-12">
-                {{ render_field(form.chap) }}
+              {{ render_field(form.cycle) }}
+            </div>
+
+            <div class="col-12">              
+              {{ render_field(form.exos) }}
             </div> 
-
-            <div class="col-12">
-                {{ form.tps.label }}
-            </div>
-            <div class="col-12">
-              {{ form.tps(min=0, max=120, step=5, oninput="outputUpdate(value)") }}
-     
-                <output for="tps" id="selected-duration" class="mx-2 py-2">{{ form.tps.data }}</output> 
-    
-            </div>
-            
-
+           
             <div class="col-12">
                 {{ render_field(form.txt) }}
             </div>
 
             <div class="col-12">
-                {{ render_field(form.questTF) }}
-               
+              {{ render_field(form.notion) }}
             </div>
 
             <div class="col-12">
-              {{ render_field(form.questFill) }}
-             
-            </div>
-
-            <div class="col-12">
-              {{ render_field(form.questHighlight) }}
-             
-            </div>
-
-            <div class="col-12">
-                {{ render_field(form.tags) }}
+                {{ render_field(form.summary) }}
                 
             </div>
 
+            <div class="col-12">
+              {{ render_field(form.file) }}
+              
+            </div>
+
+            <div class="col-12">
+              {{ render_field(form.tags) }}              
+            </div>
 
             <div class="col-12">
               {{ render_field(form.submit) }}
             </div>
-            
+
+           
           </div>
         </form>
       </div>
@@ -87,6 +74,8 @@
 
  
 </div>
-
+{{ ckeditor.load() }}
+{{ ckeditor.config(name='summary') }}
+{{ form.hidden_tag() }}
 
 {% endblock %}
