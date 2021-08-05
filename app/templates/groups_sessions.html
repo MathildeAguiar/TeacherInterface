@@ -16,7 +16,9 @@
         {{ sessions }}
     </div>
     {% else %}
-    {{ render_table(sessions, titles=[('name', 'Nom'), ('code', 'Code'), ('exos', 'Exercices'), ('updated_at', 'Mise à jour')])}} 
+    <div class="my-4 shadow-sm border rounded-4">
+        {{ render_table(sessions, titles=[('name', 'Nom'), ('code', 'Code'), ('exos', 'Exercices'), ('updated_at', 'Mise à jour')])}} 
+    </div>
     <div class="col-12">
         {{ render_pagination(pagination) }}
     </div>    

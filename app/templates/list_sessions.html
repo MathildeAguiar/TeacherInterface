@@ -14,8 +14,9 @@
 </div>
 
 
-
-{{ render_table(sessions, titles=[('id', '#'), ('name', 'Nom'), ('code', 'Code'), ('group_id','Groupe'), ('exos', 'Exercices'), ('updated_at', 'Mise à jour')], show_actions=True, edit_url=url_for('modify_session', session_id=":id"), delete_url= url_for('delete_session', session_id=':id') ) }}
+<div class="my-4 shadow-sm">
+    {{ render_table(sessions, titles=[('id', '#'), ('name', 'Nom'), ('code', 'Code'), ('group_id','Groupe'), ('exos', 'Exercices'), ('updated_at', 'Mise à jour')], show_actions=True, edit_url=url_for('modify_session', session_id=":id"), delete_url= url_for('delete_session', session_id=':id') ) }}
+</div>
 
 <div class="col-12">
     {{ render_pagination(pagination) }}

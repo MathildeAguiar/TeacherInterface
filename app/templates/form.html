@@ -55,8 +55,9 @@
 
     <div class="container"> <!-- container with all the little cards -->
       <div class="row">
-        <div class="col">  <!-- card for the chapters --> 
-            <div class="card">
+        <div class="row my-3">
+        <div class="col my-2">  <!-- card for the chapters --> 
+            <div class="card" style="width: 18rem;">
               <div class="card-body">
                 <h5 class="card-title">
                   <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" class="bi bi-book" viewBox="0 0 16 16">
@@ -64,13 +65,13 @@
                   </svg>
                   Chapitres
                 </h5>      
-                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                <p class="card-text">Les chapitres sont une collection d'exercices auquels vous pouvez adjoindre des explications, commentaires supplémentaires ainsi que des supports de cours.</p>
                 <a href="{{url_for('list_chapters')}}" class="btn btn-primary"> Chapitres disponibles</a>
               </div>
             </div>
         </div>
-        <div class="col">    <!-- card for the exercices -->
-          <div class="card">
+        <div class="col my-2">    <!-- card for the exercices -->
+          <div class="card" style="width: 18rem;"> <!-- I changed all the sizing-->
             <div class="card-body">
               <h5 class="card-title">
                 <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" class="bi bi-file-earmark-text" viewBox="0 0 16 16">
@@ -79,14 +80,33 @@
                 </svg>
                 Exercices
               </h5>
-              <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+              <p class="card-text">Les exercices sont fait à partir de questions auto-générées par notre Exerciseur. Vous pouvez choisir d'étudier une ou plusieurs notions de grammaire.</p>
               <a href="{{url_for('list_exo')}}" class="btn btn-primary">Exercices disponibles</a>
             </div>
           </div>
         </div>
 
-        <div class="col">    <!-- card for the sessions -->
-          <div class="card">
+        <div class="col my-2">  <!-- card for the analyser -->
+          <div class="card" style="width: 18rem;">
+            <div class="card-body">
+              <h5 class="card-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" class="bi bi-card-checklist" viewBox="0 0 16 16">
+                  <path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/>
+                  <path d="M7 5.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm-1.496-.854a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0l-.5-.5a.5.5 0 1 1 .708-.708l.146.147 1.146-1.147a.5.5 0 0 1 .708 0zM7 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm-1.496-.854a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0l-.5-.5a.5.5 0 0 1 .708-.708l.146.147 1.146-1.147a.5.5 0 0 1 .708 0z"/>
+                </svg>
+                Analyseur
+              </h5>
+              <p class="card-text">Vous pouvez fournir des textes à notre analyseur et il auto-générera des questions tirés des notions grammaticales présentes dans le texte.</p>
+              <a href="{{url_for('validation')}}" class="btn btn-primary">Analyseur</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    
+      <div class="row my-3">
+        <div class="col my-2">    <!-- card for the sessions -->
+          <div class="card" style="width: 18rem;">
             <div class="card-body">
               <h5 class="card-title">
                 <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" class="bi bi-easel" viewBox="0 0 16 16">
@@ -94,31 +114,14 @@
                 </svg>
                 Sessions d'exercices 
               </h5>
-              <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-              <a href="{{url_for('list_sessions')}}" class="btn btn-primary">Sessions</a>
+              <p class="card-text">Les sessions d'exercices vous permettent d'attribuer à certains élèves une liste d'exercices à réaliser.</p>
+              <a href="{{url_for('list_sessions')}}" class="btn btn-primary">Sessions disponibles</a>
             </div>
           </div>
         </div>
-    
-      
-      <div class="row my-3">
-          <div class="col">  <!-- card for the analyser -->
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" class="bi bi-card-checklist" viewBox="0 0 16 16">
-                      <path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/>
-                      <path d="M7 5.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm-1.496-.854a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0l-.5-.5a.5.5 0 1 1 .708-.708l.146.147 1.146-1.147a.5.5 0 0 1 .708 0zM7 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm-1.496-.854a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0l-.5-.5a.5.5 0 0 1 .708-.708l.146.147 1.146-1.147a.5.5 0 0 1 .708 0z"/>
-                    </svg>
-                    Analyseur
-                  </h5>
-                  <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                  <a href="{{url_for('validation')}}" class="btn btn-primary">Analyseur</a>
-                </div>
-              </div>
-          </div>
-          <div class="col">     <!-- card for the groups -->
-            <div class="card">
+
+        <div class="col my-2">     <!-- card for the groups -->
+            <div class="card" style="width: 18rem;">
               <div class="card-body">
                 <h5 class="card-title">
                   <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16">
@@ -128,14 +131,14 @@
                   </svg>
                   Groupes
                 </h5>
-                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                <p class="card-text">Consultez les groupes d'élèves, leurs profils, leurs résultats ainsi que les sessions d'exercices qui leur sont attribuées.</p>
                 <a href="{{url_for('groups')}}" class="btn btn-primary">Groupes disponibles</a>
               </div>
             </div>
           </div>
   
-          <div class="col">     <!-- card for the help page -->
-            <div class="card">
+          <div class="col my-2">     <!-- card for the help page -->
+            <div class="card" style="width: 18rem;">
               <div class="card-body">
                 <h5 class="card-title">
                   <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" class="bi bi-info-circle-fill" viewBox="0 0 16 16">
@@ -147,7 +150,7 @@
                 <a href="{{url_for('help')}}" class="btn btn-primary">Aide</a>
               </div>
             </div>
-        </div>
+          </div>
   
       </div>
     

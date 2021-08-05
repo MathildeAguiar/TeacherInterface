@@ -406,6 +406,9 @@ def init_db():
         n1 = MetalNotion()
         n1.name = "Test 2 {}".format(i)
         corp.notions.append(n1)
+        n2 = MetalNotion()
+        n2.name = "Test 3 {}".format(i)
+        corp.notions.append(n2)
         db.session.add(corp)
 
 
@@ -606,14 +609,26 @@ def query_new_chapter(name, levels, cycle, exos, notions, summary, files, tags):
     if files is not None:
         for f in files:
             print(f)
-            if f is not None:
+            new_file = MetalFile()
+            date = datetime.datetime.now() #datetime.today().strftime('%Y-%m-%d')
+            print(date.day + date.month)
+            new_file.name = str('{}'.format(str(date.day)+"_"+str(date.month)+"_"+str(date.year)+"_"+ str(date.hour)+"_"+str(date.minute)+"_")+f)
+            print(new_file.name)
+            new_file.chapter_id = chap.id
+            chap.files.append(new_file)
+            print(chap.files)
+            
+            """
+                        if f is not None:
                 file_to_format = str(f+'{}'.format(datetime.datetime.now()))
                 print(file_to_format)
                 chap.files.append(file_to_format)
                 print(chap.files)
     
+            """
+
     chap.cycle = cycle
-    chap.files = files
+    #chap.files = files
     chap.slug = summary
     chap.summary = summary
     chap.tags = tags

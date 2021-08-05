@@ -462,7 +462,7 @@ def validation_analyzed(txt_name):
 
     if txt_name:
         page = request.args.get('page', 1, type=int)
-        pagination = MetalNotion.query.paginate(page, per_page=10)
+        pagination = MetalNotion.query.paginate(page, per_page=30)
         notions = query_validation(txt_name)
         print("this is notions in the if ", notions)
 
@@ -640,8 +640,6 @@ def student(user_id, group_id):
     studentLastName = student.lastName
     comment_student = student.comment_student
     comment_teacher = student.comment_teacher
-    comment_teacher =  "hello this is a test I'm tired I wanna lay in bed"
-    print(comment_teacher, comment_student, "comments")
 
     assignments = query_assignments_by_user(user_id)  
     #answers = query_answers_user(user_id)  
@@ -685,7 +683,7 @@ def student(user_id, group_id):
 
 
     x = np.arange(0, 20, step=.5)
-    y = np.sqrt(x) + np.random.randint(2,50)
+    y = np.random.randint(2,20)    #np.sqrt(x) + np.random.randint(2,50)
     TOOLTIPS = [
     ("index", "$index"),
     ("(x,y)", "($x, $y)")

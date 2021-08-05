@@ -16,7 +16,9 @@
         {{ groups }}
     </div>
     {% else %}
-    {{ render_table(groups, titles=[('id', '#'), ('level', 'Niveau'), ('chapters', 'Chapitres')], show_actions=True, actions_title="Élèves/Sessions d'exercices", custom_actions=[('Élèves', 'people-fill', url_for('groups_students', group_id=':id')), ('Devoirs', 'easel',url_for('groups_sessions', group_id=':id'))])}}
+    <div class="text-center my-3 shadow-sm border rounded-4">
+        {{ render_table(groups, titles=[('id', '#'), ('level', 'Niveau'), ('chapters', 'Chapitres')], show_actions=True, actions_title="Élèves/Sessions d'exercices", custom_actions=[('Élèves', 'people-fill', url_for('groups_students', group_id=':id')), ('Devoirs', 'easel',url_for('groups_sessions', group_id=':id'))])}}
+    </div>
     <div class="col-12">
         {{ render_pagination(pagination) }}
     </div>

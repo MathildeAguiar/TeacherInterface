@@ -16,8 +16,10 @@
         {{ students }}
     </div>
     {% else %}
-    {{ render_table(students, titles=[('lastName', 'Nom'), ('firstName', 'Prénom'), ('group_id', 'Groupes')], show_actions=True, actions_title='Détails élève', custom_actions=[('Élève', 'file-earmark-person', url_for('student', user_id=':id', group_id=':id'))])}} 
-    <div class="col-12">
+    <div class="my-4 shadow-sm border rounded-4">
+        {{ render_table(students, titles=[('lastName', 'Nom'), ('firstName', 'Prénom'), ('group_id', 'Groupes')], show_actions=True, actions_title='Détails élève', custom_actions=[('Élève', 'file-earmark-person', url_for('student', user_id=':id', group_id=':id'))])}} 
+    </div>
+        <div class="col-12">
         {{ render_pagination(pagination) }}
     </div>
     {% endif %}
