@@ -5,9 +5,9 @@
 {% block content %}
 <main>
     <div class="container">
-        <h2 class="row g-5">
+        <!--<h2 class="row g-5">
             Présentation :  
-        </h2>
+        </h2>-->
         
         <h2 class="row g-5">
             Comment utiliser cette application ?  
@@ -20,24 +20,47 @@
 
                 <h5>
                     L'analyseur Métal est à votre disposition pour vous aider à générer des questions. Pour l'utiliser vous devez tout d'abord fournir un texte à l'analyseur. 
-                    Celui-ci va vous 
+                    Celui-ci va vous donner en retour des questions spécifiques à chaque notion qu'il aura détecté dans le texte donné en entrée. Vous devrez alors valider ou non les questions trouvées par l'analyseur.
+                    Vous avez la possibilité de modifier (en utilisant l'icône <i class="bi bi-pencil-fill"></i>) ou de supprimer une notion trouvée (en utilisant l'icône <i class="bi bi-trash-fill"></i>).
                 </h5>
             </h4>
 
             <h4>
-                Les Chapitres :
+                Les chapitres :
+                <h5>
+                    Les chapitres permettent d'aborder une ou plusieurs notions, de regrouper des exercices d'y associer des fichiers etc.
+                    Pour créer un nouveau chapitre vous avez accès à un formulaire. Vous allez attribuer un nom, un ou des groupes d'élèves, un cycle d'apprentissage (cycle 1, cycle 2, etc.; facultatif), un ou plusieurs exercices (à choisir parmi les exercices déjà disponibles), des textes (déjà analysés en amont), des notions grammaticales, un résumé de cours, et des fichiers (facultatif).  
+                    La liste des chapitres permet de consulter les chapitres disponibles, de les modifier (en utilisant l'icône <i class="bi bi-pencil-fill"></i>) ou de les supprimer (en utilisant l'icône <i class="bi bi-trash-fill"></i>).
+                </h5>
             </h4>
 
             <h4>
-                Les Sessions d'exercices :
+                Les sessions d'exercices :
+                <h5>
+                    Les sessions d'exercices sont une collection d'exercices auquel un groupe d'élèves, que vous aurez préalablement créé, peut participer. 
+                    Pour créer une nouvelle session d'exercices vous avez accès à un formulaire. Vous allez attribuer un nom, un ou des groupes d'élèves, un ou plusieurs exercices (à choisir parmi les exercices déjà disponibles) et enfin vous devrez assigner un <b> code </b> à cette session. Ce code sera à communiquer aux élèves pour que ceux-ci puissent s'inscrire à la session d'exercices.
+                    La liste des sessions permet de consulter les sessions disponibles, de les modifier (en utilisant l'icône <i class="bi bi-pencil-fill"></i>) ou de les supprimer (en utilisant l'icône <i class="bi bi-trash-fill"></i>).
+                </h5>
             </h4>
 
             <h4>
                 La création d'exercices :
+                <h5>
+                    À l'aide des questions générées par l'analyseur vous pouvez constituer des exercices. Il y a à votre disposition 3 types de questions différentes : les questions Vrai/Faux, les textes à trous et les questions où l'on surligne le bon élément. 
+                    Pour créer un nouvel exercice vous avez accès à un formulaire. Vous allez attribuer un nom, un ou des chapitres, un ou plusieurs questions de différents types (à choisir parmi les questions déjà disponibles générées par l'analyseur), un temps imparti pour réaliser l'exercice (facultatif) et un ou plusieurs textes.
+                    La liste des exercices permet de consulter les exercices disponibles, de les modifier (en utilisant l'icône <i class="bi bi-pencil-fill"></i>) ou de les supprimer (en utilisant l'icône <i class="bi bi-trash-fill"></i>).
+
+                </h5>
             </h4>
 
             <h4>
                 Les groupes d'élèves :
+                <h5>
+                    Vous pouvez consulter les résultats obtenus par vos élèves et les groupes disponibles. 
+                    Vous pouvez consulter la liste de sessions d'exercices réalisées par un groupe grâce à l'icône <i class="bi bi-easel"></i>.
+                    Vous pouvez également consulter le liste des élèves d'un groupe via cette icône <i class="bi bi-people-fill"></i>. Vous avez ensuite accès au profil d'un élève en cliquant sur <i class="bi bi-file-earmark-person"></i>. Sur cette page vous y trouverez les résultats obtenus par l'élève, les sessions d'exercices auquel il a participé et vous pourrez y laisser des commentaires.
+                    En ce qui concerne les commentaires, il existe 2 types de commentaires à insérer sur une page d'élève. Une première zone de commentaire qui est visible par l'enseignant et par l'élève, puis une deuxième zone de commentaire visible uniquement par l'enseignant. 
+                </h5>
             </h4>
     
         </h3>
@@ -45,6 +68,8 @@
         
         <h3>
             Vous êtes élève :
+
+            TODO
         </h3>
     </div>
 </main>
