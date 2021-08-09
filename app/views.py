@@ -41,7 +41,7 @@ csrf = CSRFProtect(app)
 ckeditor = CKEditor(app)
 
 #imports from models (must stay here)
-from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment, MetalUser, edit_assignment, edit_chapter, edit_exo, edit_notion, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_assignments_by_user, query_groups_sessions, query_groups_students, query_new_assignment, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, query_new_chapter, query_update_comment
+from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment, MetalUser, edit_assignment, edit_chapter, edit_exo, edit_notion, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_assignments_by_user, query_groups_sessions, query_groups_students, query_new_assignment, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, query_new_chapter, query_update_comment, query_validate_notion
 
 
 #routes 
@@ -56,11 +56,16 @@ def before_first_request_func():
 ##### DELETE HERE 
 @app.context_processor
 def inject_chapters():
+   
+    #app.config['BOOTSTRAP_BOOTSWATCH_THEME'] = 'darkly'
+   
     names = list()
     side_nav_chaps = query_all_chaps()
     for c in side_nav_chaps:
         names.append(c.name)
     return dict(side_nav_chaps = names) 
+    
+
 
 
 #index page with the general search bar
@@ -73,9 +78,7 @@ def index():
     form = ResearchForm()
     if form.validate_on_submit():
         return redirect(url_for('table'))
-    else:
-        print("Validation Failed")
-        print(form.errors)
+   
     return render_template(
         "form.html",
         form = form,
@@ -128,6 +131,7 @@ def creation_exo():
 
     if form.validate_on_submit():
         return redirect(url_for('list_exo')) 
+
     return render_template(
         'creation_exo.html',
         form = form
@@ -185,8 +189,6 @@ def list_exo():
 
     exos = query_all_exos()
 
-
-    
     return render_template(
         'list_exo.html',
         pagination = pagination,
@@ -473,7 +475,29 @@ def validation_analyzed(txt_name):
             edit_notion(modified, newName, notionIt)
 
   
-    if form.validate_on_submit and form_field:
+    if form.validate_on_submit() and form_field:
+        return redirect(url_for('validation_analyzed', txt_name = form_field))
+
+    return render_template(
+        'validation.html',
+        notions = notions, 
+        pagination = pagination,
+        form = form,
+        txtName = txt_name,
+        submit ='True'
+    )
+
+@app.route('/validation/<txt_name>/analyzed/<notion_id>/validated', methods=["GET", "POST"])  
+def validate_validation(txt_name, notion_id):
+    query_validate_notion(notion_id, txt_name)
+
+    page = request.args.get('page', 1, type=int)
+    pagination = MetalNotion.query.paginate(page, per_page=30)
+    notions = query_validation(txt_name)
+    form = TxtBrowser()
+    form_field = form.txt.data
+
+    if form.validate_on_submit() and form_field:
         return redirect(url_for('validation_analyzed', txt_name = form_field))
 
     return render_template(
@@ -486,35 +510,26 @@ def validation_analyzed(txt_name):
     )
 
 
-#if we delete one notion/question from the analysis
-@app.route('/validation/<notion_id>/delete_notion/', methods=["GET", "POST"]) 
-def delete_validation(notion_id):
+
+@app.route('/validation/<txt_name>/analyzed/<notion_id>/deleted', methods=["GET", "POST"])  
+def delete_validation(notion_id, txt_name):
     """Page where we can analyze a text and validate or not the grammatical notions found by the analyzer, after a deletion"""
-
-   
+    
     #query to delete the notion related to the text
-    txt_name = request.args.get('txt_name')
-    print(txt_name)
     query_delete_notion(notion_id, txt_name)
-    print('before if', query_validation(txt_name))
+    
 
+    #usual elements and notions
+    page = request.args.get('page', 1, type=int)
+    pagination = MetalNotion.query.paginate(page, per_page=30)
+    notions = query_validation(txt_name)
+    #search bar
     form = TxtBrowser()
+    form_field = form.txt.data
 
+    if form.validate_on_submit() and form_field:
+        return redirect(url_for('validation_analyzed', txt_name = form_field))
 
-    if txt_name:
-        page = request.args.get('page', 1, type=int)
-        pagination = MetalNotion.query.paginate(page, per_page=10)
-        notions = query_validation(txt_name)
-        print("this is notions in the if ", notions)
-  
-    if form.validate_on_submit and txt_name:
-        return redirect(url_for('validation_analyzed', txt_name = txt_name))
-
-    
-    #url_parent = request.referrer #####""???????
-    #txtName = url_parent.get("txt_name")
-
-    
     return render_template(
         'validation.html',
         notions = notions, 
@@ -523,20 +538,29 @@ def delete_validation(notion_id):
         txtName = txt_name,
         submit ='True'
     )
-  
+
+"""
+@app.route('/validation/<txt_name>/analyzed/<notion_id>/modified', methods=["GET", "POST"])  
+def modify_validation(notion_id, txt_name):
+    #If we modify a notion on the validation page
+    
+
+   
+    return True
+"""
 
 #if we modify a notion on the validation page
 @app.route('/validation/<notion_id>/modify_notion/', methods=["GET", "POST"]) 
 def modify_validation(notion_id):
-    """If we modify a notion on the validation page"""
+    #If we modify a notion on the validation page
 
     txt_name = request.args.get('txt_name')
     print(txt_name)
 
     n = MetalNotion.query.get(notion_id)
     form = ModifyNotion(obj=n)
-
-    if form.validate_on_submit():
+   
+    if form.validate_on_submit:
         return redirect(url_for('validation_analyzed', txt_name=txt_name, modified=notion_id))
 
 
@@ -546,6 +570,7 @@ def modify_validation(notion_id):
         txt_name = txt_name,
         notion_id = notion_id
     )
+
 
 #connexion page 
 @app.route('/connexion/', methods=["GET", "POST"])

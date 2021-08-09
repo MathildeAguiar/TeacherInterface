@@ -1,11 +1,12 @@
 # coding: utf-8
 import datetime
 import random, string
-from re import escape
+from re import L, escape
 from sqlalchemy import Column, ForeignKey, Integer, TIMESTAMP, Table, Text
 from sqlalchemy.dialects.mysql import INTEGER, TEXT, VARCHAR
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.functions import user
+from sqlalchemy.sql.sqltypes import Boolean
 from .views import app
 import logging as lg
 from flask_sqlalchemy import SQLAlchemy, request
@@ -224,6 +225,8 @@ class MetalNotion(db.Model): #equivalent to grammatical element
     #question_id = Column(INTEGER, ForeignKey('metal_questions.id')) 
     #many to many with chapters
     chaps = relationship("MetalChapter", secondary=association_chaps_notions, back_populates="notions")
+    #status if this notion has been verified by a human or not 
+    checked_status = Column(Boolean)
 
     def __repr__(self) -> str:
         return repr(self.name) 
@@ -788,23 +791,25 @@ def query_delete_notion(notionId, txt_name):
     """Query to delete a notion"""
 
     notion = db.session.query(MetalNotion).get(notionId)
-    text = db.session.query(MetalCorpus).get(txt_name) #:!! on utilise le nom est pas l'id 
+    print(notion)
+    text = db.session.query(MetalCorpus).filter(MetalCorpus.name == txt_name).first() #:!! on utilise le nom est pas l'id 
+    print(text)
     if notion and text:
         #remove the corpus, notion side
         for t in notion.corpuses:
             if t == text :
                 notion.corpuses.remove(t)
-                print(notion.corpuses)
+                print("textes associés à cette notion", notion.corpuses)
                 db.session.commit()
 
         #remove the notion, corpus side
         for n in text.notions:
             if n == notion:
                 text.notions.remove(n)
-                print(text.notions)
+                print("notions associées à ce txt", text.notions)
                 db.session.commit()
 
-    lg.warning('Deleted notion !')
+        lg.warning('Deleted notion !')
 
 
     """
@@ -821,6 +826,17 @@ def query_delete_notion(notionId, txt_name):
             db.session.commit()
             lg.warning('Deleted notion !')
     """
+
+def query_validate_notion(notionId, txt_name):
+    notion = db.session.query(MetalNotion).get(notionId)
+    #text = db.session.query(MetalCorpus).get(txt_name)
+
+    if notion: #and text:
+        #n = text.notions.get(notion)
+        notion.checked_status = True
+        db.session.commit()
+        lg.warning("validated notion by a human!")
+
 
 
 ################# Modifications/deletions of chapters/exos/assignments ########################
