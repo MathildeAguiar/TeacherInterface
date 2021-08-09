@@ -1,3 +1,4 @@
+from flask.helpers import flash
 from app.student_dashboard import CommentsForTeacher, CommentsToStudent
 from app.modify_notion import ModifyNotion
 from app.session_exo import SessionExo
@@ -794,6 +795,7 @@ def comment_student(user_id, group_id, comment):
 def creation_session():
     """Page to create a new assignment"""
     
+    flash('this is a test', 'danger')
     form = SessionExo()
     #get all the levels available
     grps = query_all_groups()
@@ -857,6 +859,7 @@ def new_assignment(submitted_status):
         code = form.code.data 
         
         query_new_assignment(name,exos,groups, code)
+    
 
     
 
