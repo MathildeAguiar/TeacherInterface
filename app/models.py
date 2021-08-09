@@ -775,10 +775,11 @@ def edit_notion(notionId, name, notionItem): #TODO we can't change much with onl
     notion = db.session.query(MetalNotion).get(notionId)
     if notion :
         notion.name = name
-        for i in notionItem:
-            q = db.session.query(MetalNotionItem).get(i)
-            if q:
-                notion.notion_item.append(q)
+        if notionItem:
+            for i in notionItem:
+                q = db.session.query(MetalNotionItem).get(i)
+                if q:
+                    notion.notion_item.append(q)
     
         db.session.commit()
         lg.warning('Modified notion !')

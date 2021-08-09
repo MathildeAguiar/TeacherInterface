@@ -467,12 +467,14 @@ def validation_analyzed(txt_name):
         pagination = MetalNotion.query.paginate(page, per_page=30)
         notions = query_validation(txt_name)
         print("this is notions in the if ", notions)
-
+    
+        """
         if modified:
             modified_notion_form = ModifyNotion()
             newName = modified_notion_form.name.data
             notionIt = modified_notion_form.notion_item.data
             edit_notion(modified, newName, notionIt)
+            """
 
   
     if form.validate_on_submit() and form_field:
@@ -539,15 +541,37 @@ def delete_validation(notion_id, txt_name):
         submit ='True'
     )
 
-"""
+
 @app.route('/validation/<txt_name>/analyzed/<notion_id>/modified', methods=["GET", "POST"])  
-def modify_validation(notion_id, txt_name):
+def modified_validation(notion_id, txt_name):
     #If we modify a notion on the validation page
+
+    modified_notion_form = ModifyNotion()
+    newName = modified_notion_form.name.data
+    notionIt = modified_notion_form.notion_item.data
+    edit_notion(notion_id, newName, notionIt)
     
+    #usual elements and notions
+    page = request.args.get('page', 1, type=int)
+    pagination = MetalNotion.query.paginate(page, per_page=30)
+    notions = query_validation(txt_name)
+    #search bar
+    form = TxtBrowser()
+    form_field = form.txt.data
+
+    if form.validate_on_submit() and form_field:
+        return redirect(url_for('validation_analyzed', txt_name = form_field))
 
    
-    return True
-"""
+    return render_template(
+        'validation.html',
+        notions = notions, 
+        pagination = pagination,
+        form = form,
+        txtName = txt_name,
+        submit ='True'
+    )
+
 
 #if we modify a notion on the validation page
 @app.route('/validation/<notion_id>/modify_notion/', methods=["GET", "POST"]) 
@@ -560,8 +584,8 @@ def modify_validation(notion_id):
     n = MetalNotion.query.get(notion_id)
     form = ModifyNotion(obj=n)
    
-    if form.validate_on_submit:
-        return redirect(url_for('validation_analyzed', txt_name=txt_name, modified=notion_id))
+    if form.validate_on_submit():
+        return redirect(url_for('modified_validation', txt_name=txt_name, notion_id=notion_id))
 
 
     return render_template(
