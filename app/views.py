@@ -795,7 +795,7 @@ def comment_student(user_id, group_id, comment):
 def creation_session():
     """Page to create a new assignment"""
     
-    flash('this is a test', 'danger')
+    #flash('this is a test', 'danger')
     form = SessionExo()
     #get all the levels available
     grps = query_all_groups()
