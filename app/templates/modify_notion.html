@@ -10,7 +10,7 @@
   
       <div class="row g-5">
         <div class="col-md-7 col-lg-8">
-          <form class="needs-validation" method="POST" action="{{ url_for('validation_analyzed', txt_name=txt_name, modified=notion_id) }}" novalidate> <!-- txtName passed from views-->
+          <form class="needs-validation" method="POST" action="{{ url_for('modified_validation', txt_name=txt_name, notion_id=notion_id) }}" novalidate> <!-- txtName passed from views-->
             {{ form.csrf_token }}
             <div class="row g-3">
 

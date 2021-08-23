@@ -1,4 +1,5 @@
 {% from 'bootstrap/pagination.html' import render_pagination %}
+{% from 'bootstrap/utils.html' import render_messages %}
 {% from 'bootstrap/table.html' import render_table %}
 {% extends 'base.html' %}
 
@@ -13,7 +14,9 @@
     </a>
 </div>
 
-
+<div class="float-left mx-4 width-25">
+    {{ render_messages() }}
+</div>
 <div class="my-4 shadow-sm">
     {{ render_table(sessions, titles=[('id', '#'), ('name', 'Nom'), ('code', 'Code'), ('group_id','Groupe'), ('exos', 'Exercices'), ('updated_at', 'Mise à jour')], show_actions=True, edit_url=url_for('modify_session', session_id=":id"), delete_url= url_for('delete_session', session_id=':id') ) }}
 </div>

@@ -1,3 +1,4 @@
+from flask.helpers import flash
 from app.student_dashboard import CommentsForTeacher, CommentsToStudent
 from app.modify_notion import ModifyNotion
 from app.session_exo import SessionExo
@@ -16,7 +17,6 @@ from .validation import TxtBrowser
 from bokeh.plotting import figure
 from bokeh.embed import components
 import numpy as np
-from bokeh.models import HoverTool
 
 
 app = Flask(__name__)
@@ -24,7 +24,7 @@ app = Flask(__name__)
 #link config
 app.config.from_object('config')
 
-#more configuration for the db
+#more configuration for the db, here we use sqlite as database system
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'app.db')
 
@@ -41,7 +41,7 @@ csrf = CSRFProtect(app)
 ckeditor = CKEditor(app)
 
 #imports from models (must stay here)
-from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment, MetalUser, edit_assignment, edit_chapter, edit_exo, edit_notion, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_assignments_by_user, query_groups_sessions, query_groups_students, query_new_assignment, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, query_new_chapter, query_update_comment
+from app.models import MetalChapter, MetalExercise, MetalGroup, MetalAssignment, MetalUser, edit_assignment, edit_chapter, edit_exo, edit_notion, general_query2, init_db, new_exo, query_all_chaps, query_all_corpuses, query_all_sessions, query_all_exos, query_all_gram, query_all_groups, query_assignments_by_user, query_groups_sessions, query_groups_students, query_new_assignment, MetalNotion, query_delete_chapter, query_delete_notion, query_validation, query_all_qFB, query_all_qH, query_all_qTF, query_delete_session, query_delete_exercise, query_new_chapter, query_update_comment, query_validate_notion
 
 
 #routes 
@@ -54,13 +54,19 @@ def before_first_request_func():
 
 #test to pass the list of chapters at all templates 
 ##### DELETE HERE 
-@app.context_processor
+"""@app.context_processor
 def inject_chapters():
+   
+    #app.config['BOOTSTRAP_BOOTSWATCH_THEME'] = 'darkly'
+   
     names = list()
     side_nav_chaps = query_all_chaps()
     for c in side_nav_chaps:
         names.append(c.name)
     return dict(side_nav_chaps = names) 
+"""
+
+
 
 
 #index page with the general search bar
@@ -73,9 +79,7 @@ def index():
     form = ResearchForm()
     if form.validate_on_submit():
         return redirect(url_for('table'))
-    else:
-        print("Validation Failed")
-        print(form.errors)
+   
     return render_template(
         "form.html",
         form = form,
@@ -104,7 +108,7 @@ def table():
 #page to create a new exercice 
 @app.route('/creation_exo/', methods=["GET", "POST"])
 def creation_exo():
-    """Index page with the general search bar"""
+    """Form to create a new exercise"""
     form = CreaExo()
     #query to get all the chapters avaiable
     chaps = query_all_chaps()
@@ -112,9 +116,6 @@ def creation_exo():
 
     txts = query_all_corpuses()
     form.txt.choices = [(t.id, t.name) for t in txts]
-
-    #lvls = query_all_groups()
-    #form.level.choices = [(l.id, l.level) for l in lvls]
 
     questsTF= query_all_qTF() 
     form.questTF.choices = [(q.id, q.instructions) for q in questsTF]
@@ -128,6 +129,7 @@ def creation_exo():
 
     if form.validate_on_submit():
         return redirect(url_for('list_exo')) 
+
     return render_template(
         'creation_exo.html',
         form = form
@@ -159,18 +161,8 @@ def list_exo():
         exos = query_all_exos()
 
 
-
-    #case where we get only the exercices related to a specific chapter 
-    #chap_name = request.args.get("chapName")
-    """
-    if chap_name is not None: 
-        
-        exos = query_exo_related_chaps(chap_name)
-        print("liste des exos returned : ", exos)
-    """
-    #elif chap_name is None and modified is None:
-        #case where we display all the exercices avaiable in the db 
-        #we get the infos filled in the form 
+    #creation of a new chapter (not modification)
+    #we get the infos filled in the form 
     form = CreaExo()
     name = form.name.data 
     chaps = form.chap.data
@@ -185,8 +177,6 @@ def list_exo():
 
     exos = query_all_exos()
 
-
-    
     return render_template(
         'list_exo.html',
         pagination = pagination,
@@ -249,7 +239,6 @@ def modify_exo(exo_id):
     )
 
 
-#page to create a new chapter
 @app.route('/chapter_creation/', methods=['GET','POST'])
 def chapter_creation():
     """Page to create a new chapter"""
@@ -275,27 +264,22 @@ def chapter_creation():
 
     if form.validate_on_submit():      
         return redirect(url_for('new_chapter', submitted_status='True')) 
-    #else:
-    #    print("Validation Failed for creation chapter")
-    #    print(form.errors)
+
 
     return render_template(
         'chapter_creation.html',
         form = form
     )
 
-#page where all the db's chapters are displayed 
+
 @app.route('/list_chapters/', methods=['GET','POST'])
 def list_chapters():
     """Displaying all the avaiable chapters"""
 
     modified = request.args.get('modified')
-    print(modified)
     if modified:
         form = CreaChapter()
-        #print(form, 'the form obj')
         name = form.name.data  
-        #print(name) 
         levels = form.level.data
         exos = form.exos.data
         #txts = form.txt.data
@@ -304,14 +288,13 @@ def list_chapters():
         tags = form.tags.data
         notionsEx = form.notion.data
         cycle = form.cycle.data
-        edit_chapter(modified, name, levels, cycle, exos, notionsEx, summary, file, tags) #txt? 
+        edit_chapter(modified, name, levels, cycle, exos, notionsEx, summary, file, tags) 
 
 
     
     page = request.args.get('page', 1, type=int)
     pagination = MetalChapter.query.paginate(page, per_page=20)
-    #for now we will display all the chapters
-    chaps = query_all_chaps() # we need a new query where we add the new created chapter 
+    chaps = query_all_chaps() 
 
 
     return render_template(
@@ -335,7 +318,6 @@ def new_chapter(submitted_status):
         tags = form.tags.data
         notionsEx = form.notion.data
         cycle = form.cycle.data
-        #reste à savoir si on link les textes dans la BD 
         query_new_chapter(name, levels, cycle, exos, notionsEx, summary, file, tags)
 
 
@@ -404,39 +386,19 @@ def modify_chapter(chapter_id):
 
 
 
-#page where you have to confirm notions found by the analyser
 @app.route('/validation/', methods=["GET", "POST"]) 
 def validation():
     """Page where we can analyze a text and validate or not the grammatical notions found by the analyzer"""
 
-    #if the submit button have been used 
-    #submit_status = request.args.get("submitted")
-    #print(submit_status)
-    #getting the url arguments to check the vars of the query 
-
     notions = None
     pagination = None
 
-    #pour éviter d'appeller des mêmes bouts de code plusieurs fois pour rien on va juste placer une condition sur le submit 
-    """
-    if submit_status == 'True':
-        txtNameReq = request.args.get('txtName')
-        #CHANGE THAT IT'S UGLY 
-        page = request.args.get('page', 1, type=int)
-        pagination = MetalNotion.query.paginate(page, per_page=10)
-        notions = query_validation(txtNameReq)
-        print("this is notions in the if ", notions)
-    else : txtNameReq = None
-    """
-
     form = TxtBrowser()
     txtName = form.txt.data
-
-   
   
     if form.validate_on_submit():
         
-        return redirect(url_for('validation_analyzed', txt_name = txtName)) # request.referrer ? 
+        return redirect(url_for('validation_analyzed', txt_name = txtName))
 
 
     return render_template(
@@ -448,7 +410,6 @@ def validation():
         submit = True
     )
 
-#??????????????????????????????????????????
 @app.route('/validation/<txt_name>/analyzed/', methods=["GET", "POST"])  
 def validation_analyzed(txt_name): 
     """Page where we can analyze a text and validate or not the grammatical notions found by the analyzer, after an analyzis"""
@@ -456,7 +417,6 @@ def validation_analyzed(txt_name):
 
     form = TxtBrowser()
     form_field = form.txt.data
-    print(form_field)
 
     modified = request.args.get('modified')
 
@@ -464,16 +424,31 @@ def validation_analyzed(txt_name):
         page = request.args.get('page', 1, type=int)
         pagination = MetalNotion.query.paginate(page, per_page=30)
         notions = query_validation(txt_name)
-        print("this is notions in the if ", notions)
-
-        if modified:
-            modified_notion_form = ModifyNotion()
-            newName = modified_notion_form.name.data
-            notionIt = modified_notion_form.notion_item.data
-            edit_notion(modified, newName, notionIt)
 
   
-    if form.validate_on_submit and form_field:
+    if form.validate_on_submit() and form_field:
+        return redirect(url_for('validation_analyzed', txt_name = form_field))
+
+    return render_template(
+        'validation.html',
+        notions = notions, 
+        pagination = pagination,
+        form = form,
+        txtName = txt_name,
+        submit ='True'
+    )
+
+@app.route('/validation/<txt_name>/analyzed/<notion_id>/validated', methods=["GET", "POST"])  
+def validate_validation(txt_name, notion_id):
+    query_validate_notion(notion_id, txt_name)
+
+    page = request.args.get('page', 1, type=int)
+    pagination = MetalNotion.query.paginate(page, per_page=30)
+    notions = query_validation(txt_name)
+    form = TxtBrowser()
+    form_field = form.txt.data
+
+    if form.validate_on_submit() and form_field:
         return redirect(url_for('validation_analyzed', txt_name = form_field))
 
     return render_template(
@@ -486,35 +461,26 @@ def validation_analyzed(txt_name):
     )
 
 
-#if we delete one notion/question from the analysis
-@app.route('/validation/<notion_id>/delete_notion/', methods=["GET", "POST"]) 
-def delete_validation(notion_id):
+
+@app.route('/validation/<txt_name>/analyzed/<notion_id>/deleted', methods=["GET", "POST"])  
+def delete_validation(notion_id, txt_name):
     """Page where we can analyze a text and validate or not the grammatical notions found by the analyzer, after a deletion"""
-
-   
+    
     #query to delete the notion related to the text
-    txt_name = request.args.get('txt_name')
-    print(txt_name)
     query_delete_notion(notion_id, txt_name)
-    print('before if', query_validation(txt_name))
+    
 
+    #usual elements and notions
+    page = request.args.get('page', 1, type=int)
+    pagination = MetalNotion.query.paginate(page, per_page=30)
+    notions = query_validation(txt_name)
+    #search bar
     form = TxtBrowser()
+    form_field = form.txt.data
 
+    if form.validate_on_submit() and form_field:
+        return redirect(url_for('validation_analyzed', txt_name = form_field))
 
-    if txt_name:
-        page = request.args.get('page', 1, type=int)
-        pagination = MetalNotion.query.paginate(page, per_page=10)
-        notions = query_validation(txt_name)
-        print("this is notions in the if ", notions)
-  
-    if form.validate_on_submit and txt_name:
-        return redirect(url_for('validation_analyzed', txt_name = txt_name))
-
-    
-    #url_parent = request.referrer #####""???????
-    #txtName = url_parent.get("txt_name")
-
-    
     return render_template(
         'validation.html',
         notions = notions, 
@@ -523,21 +489,51 @@ def delete_validation(notion_id):
         txtName = txt_name,
         submit ='True'
     )
-  
+
+
+@app.route('/validation/<txt_name>/analyzed/<notion_id>/modified', methods=["GET", "POST"])  
+def modified_validation(notion_id, txt_name):
+    #If we modify a notion on the validation page
+
+    modified_notion_form = ModifyNotion()
+    newName = modified_notion_form.name.data
+    notionIt = modified_notion_form.notion_item.data
+    edit_notion(notion_id, newName, notionIt)
+    
+    #usual elements and notions
+    page = request.args.get('page', 1, type=int)
+    pagination = MetalNotion.query.paginate(page, per_page=30)
+    notions = query_validation(txt_name)
+    #search bar
+    form = TxtBrowser()
+    form_field = form.txt.data
+
+    if form.validate_on_submit() and form_field:
+        return redirect(url_for('validation_analyzed', txt_name = form_field))
+
+   
+    return render_template(
+        'validation.html',
+        notions = notions, 
+        pagination = pagination,
+        form = form,
+        txtName = txt_name,
+        submit ='True'
+    )
+
 
 #if we modify a notion on the validation page
 @app.route('/validation/<notion_id>/modify_notion/', methods=["GET", "POST"]) 
 def modify_validation(notion_id):
-    """If we modify a notion on the validation page"""
+    #If we modify a notion on the validation page
 
     txt_name = request.args.get('txt_name')
-    print(txt_name)
 
     n = MetalNotion.query.get(notion_id)
     form = ModifyNotion(obj=n)
-
+   
     if form.validate_on_submit():
-        return redirect(url_for('validation_analyzed', txt_name=txt_name, modified=notion_id))
+        return redirect(url_for('modified_validation', txt_name=txt_name, notion_id=notion_id))
 
 
     return render_template(
@@ -546,6 +542,7 @@ def modify_validation(notion_id):
         txt_name = txt_name,
         notion_id = notion_id
     )
+
 
 #connexion page 
 @app.route('/connexion/', methods=["GET", "POST"])
@@ -642,12 +639,6 @@ def student(user_id, group_id):
     comment_teacher = student.comment_teacher
 
     assignments = query_assignments_by_user(user_id)  
-    #answers = query_answers_user(user_id)  
-
-    """
-    page = request.args.get('page', 1, type=int)
-    pagination = MetalAnswerUser.query.paginate(page, per_page=20)
-    """ 
 
     form_com_student = None
     form_com_teacher = None
@@ -669,7 +660,6 @@ def student(user_id, group_id):
     if request.args.get('submitted') == 'submitted_zone2':
         form_filled_teacher = CommentsForTeacher()
         comm = form_filled_teacher.comment_teacher.data
-        print(comm, "comments jj")
         query_update_comment(user_id, 'submitted_zone2', comm)
         comment_teacher = student.comment_teacher
 
@@ -677,12 +667,11 @@ def student(user_id, group_id):
     elif request.args.get('submitted')=='submitted_zone1':
         form_filled_student = CommentsToStudent()
         comm = form_filled_student.comment_student.data
-        print(comm, "comments kk")
         query_update_comment(user_id, 'submitted_zone1', comm)
         comment_student = student.comment_student
 
-
-    x = np.arange(0, 20, step=.5)
+    ##### Change with the grades of the student here #########
+    x = np.arange(0, 20, step=.5) #mock function to display the grades
     y = np.random.randint(2,20)    #np.sqrt(x) + np.random.randint(2,50)
     TOOLTIPS = [
     ("index", "$index"),
@@ -701,7 +690,6 @@ def student(user_id, group_id):
     
     return render_template(
         "student.html",  
-        #pagination = pagination,
         studentLastName = studentLastName,
         studentFirstName = studentFirstName,
         form_com_student = form_com_student,
@@ -716,31 +704,9 @@ def student(user_id, group_id):
         div = div 
     )
 
-"""
-#when you want to enable a comment zone :
-@app.route('/groups/<group_id>/groups_students/<user_id>/student/<comment>/comment_student/', methods=['POST', 'GET'])
-def comment_student(user_id, group_id, comment):
-
-    student = MetalUser.query.get(user_id)
-    studentFirstName = student.firstName  
-    studentLastName = student.lastName
-
-    assignments = query_assignments_by_user(user_id)  
-    #answers = query_answers_user(user_id)  
-
-    page = request.args.get('page', 1, type=int)
-    pagination = MetalAnswerUser.query.paginate(page, per_page=20) 
-
-    if comment == 'zone1':
-        return True
-    elif comment == 'zone2':
-        return True
-    return True
-"""
 
 ########## Assignments pages #########
 
-#exercises sessions' page
 @app.route('/creation_session/',  methods=['GET', 'POST'])
 def creation_session():
     """Page to create a new assignment"""
@@ -808,7 +774,6 @@ def new_assignment(submitted_status):
         code = form.code.data 
         
         query_new_assignment(name,exos,groups, code)
-
     
 
     page = request.args.get('page', 1, type=int)

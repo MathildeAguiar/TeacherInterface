@@ -1,4 +1,5 @@
 {% from 'bootstrap/form.html' import render_field %}
+{% from 'bootstrap/utils.html' import render_messages %}
 {% extends 'base.html' %}
 
 {% block content %}
@@ -17,6 +18,7 @@
 
     <div class="row g-5">
       <div class="col-md-7 col-lg-8">
+        {{ render_messages() }}
         <form class="needs-validation" method="POST" {% if modify_status: %} action="{{ url_for('list_exo', modified=exo_id) }}" {% else %} action="{{ url_for('list_exo') }}" {% endif %} novalidate> <!--change by the result -->
           {{ form.csrf_token }}
           <div class="row g-3">
@@ -43,7 +45,7 @@
                 {{ form.tps.label }}
             </div>
             <div class="col-12">
-              {{ form.tps(min=0, max=120, step=5, oninput="outputUpdate(value)") }}
+              {{ form.tps(min=0, max=180, step=5, oninput="outputUpdate(value)") }}
      
                 <output for="tps" id="selected-duration" class="mx-2 py-2">{{ form.tps.data }}</output> 
     

@@ -1,16 +1,17 @@
 {% from 'bootstrap/form.html' import render_field %}
+{% from 'bootstrap/utils.html' import render_messages %}
 {% extends 'base.html' %}
 
 {% block content %}
 <div class="container">
     <main>
-      <div class="py-5"> <!--text-center-->
+      <div class="py-5"> 
         <h2>Création de session d'exercices :</h2>
       </div>
   
       <div class="row g-5">
         <div class="col-md-7 col-lg-8">
-          <form class="needs-validation" method="POST" {% if modify_status: %} action="{{ url_for('list_sessions', modified=session_id) }}" {% else %} action="{{ url_for('new_assignment', submitted_status=True) }}" {% endif %} novalidate> <!--À VÉRIFIER !!!!  -->
+          <form class="needs-validation" method="POST" {% if modify_status: %} action="{{ url_for('list_sessions', modified=session_id) }}" {% else %} action="{{ url_for('new_assignment', submitted_status=True) }}" {% endif %} novalidate> 
             {{ form.csrf_token }}
             <div class="row g-3">
               <div class="col-12">
@@ -35,12 +36,6 @@
              <div class="col-12">
               {{ render_field(form.code) }}
              </div> 
-
-             <!-- session code 
-             <div class="col-12 my-3">
-                 Code de la session :  
-                 {{ sessionCode }}
-             </div> -->
 
              <div class="col-12">
                 {{ render_field(form.submit) }}

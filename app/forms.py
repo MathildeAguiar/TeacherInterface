@@ -6,7 +6,7 @@ from wtforms.validators import Length, DataRequired
 l = ['All', 'Exercices', 'Chapitres', 'Questions', 'Textes', 'Notions']
 
 class MultiCheckboxField(SelectMultipleField):
-    widget = widgets.TableWidget()           #ListWidget(html_tag='ul', prefix_label=False)
+    widget = widgets.TableWidget()          
     option_widget = widgets.CheckboxInput()
 
 
@@ -20,7 +20,7 @@ class ResearchForm(FlaskForm):
 
     category = SelectField(
         "Rechercher dans :",
-        choices=l #linker ça et changer les noms 
+        choices=l 
     )
     
 

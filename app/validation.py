@@ -1,6 +1,5 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
-from wtforms.fields.core import RadioField, SelectMultipleField
 from wtforms.validators import DataRequired, Length
 
 class TxtBrowser(FlaskForm):
