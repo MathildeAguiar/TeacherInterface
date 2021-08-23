@@ -6,14 +6,12 @@
         {% include 'side_nav.html' %}
     </li>
     <li class="list-inline-item">
-        <nav class="navbar navbar-expand navbar-light bg-light"> <!-- before: navbar-expand-lg -->
+        <nav class="navbar navbar-expand navbar-light bg-light"> 
             <div class="navbar-nav mr-auto">     
            
                  {{ render_nav_item('index', 'Exerciseur') }}
-                 <!-- un ul et un li plutot que de faire un render nav item direct -->
                  {{ render_nav_item('index', 'Français') }}
                  {{ render_nav_item('index', render_icon("moon-fill")) }}
-                 {# render_icon("arrow-down", color='black') #}
                  {{ render_nav_item('connexion', 'Connexion') }}
             
             </div>

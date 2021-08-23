@@ -22,7 +22,7 @@ class SessionExo(FlaskForm):
        validators= [DataRequired()]
     ) 
 
-    code = StringField( #add a placeholder with a suggestion 
+    code = StringField( 
         "Code de la session d'exercices :",
         validators=[DataRequired(message="please type a name"),
             Length(min=1, message='the name should be longer')]

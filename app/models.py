@@ -34,7 +34,7 @@ class MetalUser(db.Model):
     lastName = Column(VARCHAR(191), nullable=False)
     firstName = Column(VARCHAR(191), nullable=False)
     password = Column(VARCHAR(191), nullable=False)
-    #many to one with groups  (many users can be in 1 group) --> might change to many to many 
+    #many to one with groups (many users can be in 1 group) --> might change to many to many 
     group_id = Column(Integer, ForeignKey('metal_groups.id'))
     group = relationship("MetalGroup", back_populates="users")
     type = Column(VARCHAR(191)) #role 
@@ -530,14 +530,6 @@ def query_all_corpuses():
     corpuses = MetalCorpus.query.order_by(MetalCorpus.name).all()
     return corpuses
 
-#query to fetch all exercices related to a chapter TODO DELETE
-"""
-def query_exo_related_chaps(chap_name):
-    #list_exo = MetalExercise.query.select_from(MetalExercise.name).join(MetalChapter, MetalChapter.id == MetalExercise.chapter_id).filter(MetalChapter.name == chap_name)
-    #list_exo = db.session.query(MetalExercise).join(MetalChapter, MetalChapter.id==MetalExercise.chapter_id).filter(MetalChapter.name==chap_name).all()
-    #return list_exo
-    return None
-"""
 
 
 
@@ -615,21 +607,15 @@ def query_new_chapter(name, levels, cycle, exos, notions, summary, files, tags):
                 q = db.session.query(MetalNotion).get(n)
                 chap.notions.append(q)
         
-        #should we create a new table Files to have an object and do that cleanly 
         if files is not None:
             for f in files:
-                print(f)
                 new_file = MetalFile()
-                date = datetime.datetime.now() #datetime.today().strftime('%Y-%m-%d')
-                print(date.day + date.month)
+                date = datetime.datetime.now()
                 new_file.name = str('{}'.format(str(date.day)+"_"+str(date.month)+"_"+str(date.year)+"_"+ str(date.hour)+"_"+str(date.minute)+"_")+f)
-                print(new_file.name)
                 new_file.chapter_id = chap.id
                 chap.files.append(new_file)
-                print(chap.files)
 
         chap.cycle = cycle
-        #chap.files = files
         chap.slug = summary
         chap.summary = summary
         chap.tags = tags
@@ -645,14 +631,13 @@ def query_new_chapter(name, levels, cycle, exos, notions, summary, files, tags):
             return flash("Ce nom est déjà utilisé !", 'danger')
 
 
-#query to create a new assignment
 def query_new_assignment(name, choosenExos, groups, code):
     """Query to create a new assignment"""
   
     try:
         assignment = MetalAssignment()
         assignment.name = name
-        assignment.code = code #like that ? rn it's in views but maybe here with the unique cheking it's better ? 
+        assignment.code = code 
         assignment.created_at = datetime.datetime.now()
         assignment.updated_at = datetime.datetime.now()
         if choosenExos is not None:
@@ -662,10 +647,9 @@ def query_new_assignment(name, choosenExos, groups, code):
         if groups is not None:
             for g in groups:
                 q = db.session.query(MetalGroup).get(g)
-                assignment.group = q #??????????????????? la relationship ne va pas? 
+                assignment.group = q 
         
         #the query itself 
-  
         db.session.add(assignment)
         db.session.commit()
         lg.warning('Addition done !')
@@ -676,10 +660,8 @@ def query_new_assignment(name, choosenExos, groups, code):
             return flash("Veuillez choisir un nouveau code !", 'danger')
         if e.args == ('(sqlite3.IntegrityError) UNIQUE constraint failed: metal_assignments.name',):
             return flash("Ce nom est déjà utilisé !", 'danger')
-        #pass
         
-    
-
+        
 
 
 ######################### Home page query ###########################################
@@ -695,9 +677,7 @@ def general_query2(query, category):
     if category == 'All':
         #we check all the possibilities 
         tmp_chap = MetalChapter.query.filter(MetalChapter.name.like(search)).all()
-        print(tmp_chap)
         tmp_exo = MetalExercise.query.filter(MetalExercise.name.like(search)).all()
-        print(tmp_exo)
         tmp_questTF = MetalQuestionTrueFalse.query.filter(MetalQuestionTrueFalse.instructions.like(search)).all() 
         tmp_questFB = MetalQuestionFillBlank.query.filter(MetalQuestionFillBlank.instructions.like(search)).all() 
         tmp_questH = MetalQuestionHighlight.query.filter(MetalQuestionHighlight.instructions.like(search)).all() 
@@ -730,12 +710,10 @@ def general_query2(query, category):
     
     if category == 'Chapitres':
         tmp_chap = MetalChapter.query.filter(MetalChapter.name.like(search)).all()
-        print(tmp_chap)
         res.append(tmp_chap)
     
     if category=='Exercices':
         tmp_exo = MetalExercise.query.filter(MetalExercise.name.like(search)).all()
-        print(tmp_exo)
         res.append(tmp_exo)
     if category== 'Notions':
         tmp_gramm = MetalNotion.query.filter(MetalNotion.name.like(search)).all()
@@ -767,17 +745,14 @@ def query_validation(txtName):
     """Validation page's query"""
 
     if txtName is not None: 
-        #notions = db.session.query(MetalNotion).join(MetalCorpus, MetalCorpus.notion_id == MetalNotion.id).filter(MetalCorpus.name==txtName).all()       
         notions = db.session.query(MetalNotion).join(MetalCorpus, MetalNotion.corpuses).filter(MetalCorpus.name==txtName).all()   
-        print(notions)
         if notions !=[]: 
             return notions 
-        else: None #return "Aucun texte ne correspond à votre demande !"    
-    else: None #return "Aucun texte ne correspond à votre demande !"
+        else: None    
+    else: None 
 
 
-#query to edit a notion find by the analyser 
-def edit_notion(notionId, name, notionItem): #TODO we can't change much with only those fields missing the sentence examined 
+def edit_notion(notionId, name, notionItem): #we can't change much with only those fields :(
     """Query to edit a notion found by the analyser"""
 
     notion = db.session.query(MetalNotion).get(notionId)
@@ -794,47 +769,26 @@ def edit_notion(notionId, name, notionItem): #TODO we can't change much with onl
 
 
 
-# DANS TOUS LES DELETE ATTENTION AUX DÉPENDANCES !!!!!!
-#query to delete a notion "forever" TODO TO TEST --> problem with dependancies 
 def query_delete_notion(notionId, txt_name):
     """Query to delete a notion"""
 
     notion = db.session.query(MetalNotion).get(notionId)
-    print(notion)
-    text = db.session.query(MetalCorpus).filter(MetalCorpus.name == txt_name).first() #:!! on utilise le nom est pas l'id 
-    print(text)
+    text = db.session.query(MetalCorpus).filter(MetalCorpus.name == txt_name).first() 
     if notion and text:
         #remove the corpus, notion side
         for t in notion.corpuses:
             if t == text :
                 notion.corpuses.remove(t)
-                print("textes associés à cette notion", notion.corpuses)
                 db.session.commit()
 
         #remove the notion, corpus side
         for n in text.notions:
             if n == notion:
                 text.notions.remove(n)
-                print("notions associées à ce txt", text.notions)
                 db.session.commit()
 
         lg.warning('Deleted notion !')
 
-
-    """
-    if notionId is not None:
-        #db.session.delete(MetalNotion).where(MetalNotion.name == notionName) #doit plutot delete la question associée à la notion non ? 
-        #attention on doit supprimer une notion liée à une phrase en particulier là on va juste suppr toutes les notions de ce nom!!!!
-        #db.session.delete(MetalQuestion).join(MetalNotion ,MetalQuestion.notion).where(MetalNotion.name == notionName) #doit plutot delete la question associée à la notion non ? 
-        questNotion = db.session.query(MetalQuestion).join(MetalNotion ,MetalQuestion.notion).where(MetalNotion.id == notionId).first()
-        #MetalNotion.query.get(notionId)
-
-        if questNotion:
-            db.session.delete(questNotion)
-            #db.session.delete(MetalQuestion).join(MetalNotion ,MetalQuestion.notion).where(MetalNotion.id == notionId) 
-            db.session.commit()
-            lg.warning('Deleted notion !')
-    """
 
 def query_validate_notion(notionId, txt_name):
     notion = db.session.query(MetalNotion).get(notionId)
@@ -850,7 +804,6 @@ def query_validate_notion(notionId, txt_name):
 
 ################# Modifications/deletions of chapters/exos/assignments ########################
 
-#query to modify an exercice assignment
 def edit_assignment(assignId, newName, groups, exos):
     """Query to modify an exercice assignment"""
 
@@ -858,12 +811,11 @@ def edit_assignment(assignId, newName, groups, exos):
     assign = db.session.query(MetalAssignment).get(assignId)
 
     if newName:
-        #update(MetalAssignment).where(MetalAssignment.name == assignName).values(name=newName) #???
         assign.name = newName
     if groups:
         for g in groups:
             q = db.session.query(MetalGroup).get(g)
-            assign.group_id = q.id #hmmm ? 
+            assign.group_id = q.id  
     if exos:
         for e in exos:
             q = db.session.query(MetalExercise).get(e)
@@ -872,7 +824,6 @@ def edit_assignment(assignId, newName, groups, exos):
     db.session.commit()
     lg.warning('Modified assignment !')
 
-#query to edit a chapter infos TODO change the files part 
 def edit_chapter(chapId, newName, groups, cycle, exos, notions, summary, files, tags): #txts?? 
     """Query to edit a chapter infos"""
 
@@ -903,10 +854,8 @@ def edit_chapter(chapId, newName, groups, cycle, exos, notions, summary, files, 
             #creating a new obj File with a unique name 
             tmp_file = MetalFile()
             tmp_file.name = "{}".format(datetime.datetime.now()) + "_" + str(f)  #ajouter le login
-            print(tmp_file.name)
             tmp_file.chapter_id = chapId
             db.session.add(tmp_file)
-            #q = db.session.query(MetalFile).get(f) #on ne peut pas get si ce n'est pas encore créé
             chap.files.append(tmp_file)
 
     if tags:
@@ -917,13 +866,11 @@ def edit_chapter(chapId, newName, groups, cycle, exos, notions, summary, files, 
     db.session.commit()
     lg.warning('Modified chapter !')
 
-#query to edit an exo infos 
 def edit_exo(exoId, newName, chaps, duration, txts, qTF, qH, qFB, tags):
     """Query to edit an exercise infos"""
 
     #on récupère l'exercice correspondant
     exo = db.session.query(MetalExercise).filter(MetalExercise.id==exoId).first()
-    print(exo)
     if newName:
         exo.name = newName
     if tags:
@@ -957,13 +904,10 @@ def edit_exo(exoId, newName, chaps, duration, txts, qTF, qH, qFB, tags):
             q = db.session.query(MetalQuestion).get(questH.question_id)
             exo.quests.append(q)
 
-
     db.session.commit()
     lg.warning('Modified chapter')
 
 
-
-#query to delete a session 
 def query_delete_session(sessionId):
     """Query to delete an assignment"""
     sess = MetalAssignment.query.get(sessionId)
@@ -973,8 +917,6 @@ def query_delete_session(sessionId):
         lg.warning('Deleted session !')
 
     
-
-#query to delete a chapter
 def query_delete_chapter(chapId):
     """Query to delete a chapter"""
     chap = MetalChapter.query.get(chapId)
@@ -984,7 +926,6 @@ def query_delete_chapter(chapId):
         lg.warning('Deleted chapter !')
     
 
-#query to delete an exercise
 def query_delete_exercise(exoId):
     """Query to delete an exercise"""
 
@@ -995,7 +936,6 @@ def query_delete_exercise(exoId):
         lg.warning('Deleted exercise !')
 
 
-#query the exercises assignments done by one group 
 def query_groups_sessions(group_id):
     """Query the exercises assignments done by one group """
 
@@ -1005,7 +945,7 @@ def query_groups_sessions(group_id):
     else :
         return "Aucun résultat !"
 
-#query the students from one group
+
 def query_groups_students(group_id):
     """Query the students from one group"""
 
@@ -1015,7 +955,7 @@ def query_groups_students(group_id):
     else :
         return "Aucun résultat !"
 
-#query to get all the answers from a user 
+
 def query_answers_user(user_id):
     """Query to get all the answers from a user"""
 
@@ -1024,7 +964,7 @@ def query_answers_user(user_id):
         return answers
     else :  return "Aucun résultat !"
 
-#query all the assignments done by one user 
+
 def query_assignments_by_user(user_id):
     """Query all the assignments done by one user"""
 
@@ -1034,7 +974,7 @@ def query_assignments_by_user(user_id):
         return assignments
     else : return 'Aucun résultat !'
 
-#query to update a comment for the student/for the teacher him.herself
+
 def query_update_comment(user_id, zone, comment):
     """Query to update a comment for the student/for the teacher him.herself"""
     
